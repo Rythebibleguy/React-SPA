@@ -296,10 +296,34 @@ function QuizView() {
     )
   }
 
+  const isQuizComplete = questions.length === 4 && selectedAnswers.length === 4 && !selectedAnswers.includes(undefined)
+
   return (
-    <div className="quiz-view">
-      <div className="quiz-view__question-area">
-        <div className="quiz-view__cards" ref={containerRef}>
+    <div className="quiz-view">      {/* Difficulty Dots */}
+      <div className="quiz-view__difficulty-dots">
+        {['easy', 'medium', 'hard', 'impossible'].map((difficulty, index) => {
+          const question = questions[index]
+          return (
+            <span
+              key={difficulty}
+              className={`quiz-view__difficulty-dot quiz-view__difficulty-dot--${difficulty} ${index === currentIndex ? 'active' : ''}`}
+              onClick={() => handleDotClick(index)}
+            >
+              <span className="quiz-view__difficulty-dot-text">{difficultyLabels[difficulty]}</span>
+            </span>
+          )
+        })}
+      </div>
+      {isQuizComplete && (
+        <button className="quiz-view__open-results" onClick={() => setShowResultsModal(true)}>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 3h18v18H3V3z"></path>
+            <path d="M9 9h6v6H9V9z"></path>
+          </svg>
+          View Results
+        </button>
+      )}
+      <div className="quiz-view__cards" ref={containerRef}>
           {questions.map((question, qIndex) => {
           const isQuestionLocked = qIndex > 0 && selectedAnswers[qIndex - 1] === undefined
           const isAnswered = selectedAnswers[qIndex] !== undefined
@@ -382,7 +406,6 @@ function QuizView() {
           )
         })}
       </div>
-      </div>
 
       {/* Action Buttons */}
       <div className="quiz-view__actions">
@@ -423,22 +446,6 @@ function QuizView() {
             </button>
           </div>
         </div>
-
-      {/* Difficulty Dots */}
-      <div className="quiz-view__difficulty-dots">
-        {['easy', 'medium', 'hard', 'impossible'].map((difficulty, index) => {
-          const question = questions[index]
-          return (
-            <span
-              key={difficulty}
-              className={`quiz-view__difficulty-dot quiz-view__difficulty-dot--${difficulty} ${index === currentIndex ? 'active' : ''}`}
-              onClick={() => handleDotClick(index)}
-            >
-              <span className="quiz-view__difficulty-dot-text">{difficultyLabels[difficulty]}</span>
-            </span>
-          )
-        })}
-      </div>
 
       {/* Results Modal */}
       {showResultsModal && (
