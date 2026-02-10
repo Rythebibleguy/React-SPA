@@ -303,8 +303,8 @@ function QuizView() {
     const todayDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     
     // Create share text with emoji indicators for score
-    const squares = '🟩'.repeat(score) + '⬜'.repeat(questions.length - score)
-    const shareText = `Daily Bible Quiz ${todayDate}\n${squares} ${score}/${questions.length}\n\nCan you beat my score?\n${window.location.origin}`
+    const squares = '✅'.repeat(score) + '❌'.repeat(questions.length - score)
+    const shareText = `I got ${score}/${questions.length} on the Daily Bible Quiz\n${squares}\n\nCan you beat my score?\n${window.location.origin}`
     
     // Try Web Share API first (mobile/modern browsers)
     if (navigator.share) {
