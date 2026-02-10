@@ -60,6 +60,7 @@
 
 .nav-item.active .nav-label {
   font-weight: 600;
+}
 
 @keyframes slideUp {
   from {
@@ -68,5 +69,4 @@
   to {
     transform: translateY(0);
   }
-}
 }

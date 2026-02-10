@@ -62,7 +62,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  opacity: 1;
 }
 
 .welcome-screen__loading-btn {
@@ -145,11 +144,11 @@
   font-size: calc(2.6 * var(--element-width));
   color: #333;
   opacity: 0;
-  transition: opacity 1.5s ease;
 }
 
 .welcome-screen__credit.visible {
   opacity: 0.7;
+  transition: opacity 1.5s ease;
 }
 
 .welcome-screen__credit a {
@@ -160,6 +159,13 @@
 
 .welcome-screen__credit a:active {
   opacity: 1;
+}
+
+/* Show immediately without animation */
+.show-immediate {
+  opacity: 1 !important;
+  transform: translateY(0) scale(1) !important;
+  animation: none !important;
 }
 
 /* Animations */
