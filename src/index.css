@@ -1,5 +1,5 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Montserrat', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -13,6 +13,10 @@
 
   /* Bottom nav height - single source of truth */
   --bottom-nav-height: calc(16 * var(--element-width));
+}
+
+button, input, select, textarea {
+  font-family: inherit;
 }
 
 *,
@@ -37,9 +41,4 @@ body {
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
-}
-
-h1 {
-  font-size: calc(8 * var(--element-width));
-  line-height: 1.1;
 }

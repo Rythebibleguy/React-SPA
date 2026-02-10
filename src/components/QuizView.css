@@ -434,7 +434,6 @@
   font-size: calc(2.6 * var(--element-width));
   text-transform: uppercase;
   font-weight: bold;
-  font-family: 'Montserrat', sans-serif;
   padding: calc(1.4 * var(--element-width)) calc(2.2 * var(--element-width));
   border-radius: calc(2 * var(--element-width));
   color: white;

@@ -36,7 +36,6 @@
   font-size: calc(9 * var(--element-width));
   color: #2B2B2B;
   margin: 0;
-  font-family: 'Montserrat', sans-serif;
   opacity: 0;
   margin-top: calc(-8 * var(--element-width));
   transform: translateY(calc(1.5 * var(--element-width)));

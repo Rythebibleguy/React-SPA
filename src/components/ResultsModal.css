@@ -124,7 +124,6 @@
   font-size: calc(5.8 * var(--element-width));
   font-weight: 700;
   color: #495057;
-  font-family: 'Montserrat', sans-serif;
   letter-spacing: 0.05em;
 }
 
