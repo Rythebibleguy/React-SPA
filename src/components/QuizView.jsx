@@ -1,57 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import './QuizView.css'
-
-// Mock quiz data for now
-const mockQuestions = [
-  {
-    difficulty: 'easy',
-    question: 'Who was the first man created by God?',
-    answers: [
-      { text: 'Adam', isCorrect: true, id: 0 },
-      { text: 'Noah', isCorrect: false, id: 1 },
-      { text: 'Moses', isCorrect: false, id: 2 },
-      { text: 'Abraham', isCorrect: false, id: 3 }
-    ],
-    referenceCitation: 'Genesis 2:7',
-    referenceVerse: 'Then the Lord God formed a man from the dust of the ground and breathed into his nostrils the breath of life, and the man became a living being.'
-  },
-  {
-    difficulty: 'medium',
-    question: 'How many days and nights did it rain during the flood?',
-    answers: [
-      { text: '40', isCorrect: true, id: 0 },
-      { text: '7', isCorrect: false, id: 1 },
-      { text: '100', isCorrect: false, id: 2 },
-      { text: '30', isCorrect: false, id: 3 }
-    ],
-    referenceCitation: 'Genesis 7:12',
-    referenceVerse: 'And rain fell on the earth forty days and forty nights.'
-  },
-  {
-    difficulty: 'hard',
-    question: 'What did Jacob give to Joseph that sparked jealousy from his siblings?',
-    answers: [
-      { text: 'A coat of many colors', isCorrect: true, id: 0 },
-      { text: 'A flock of sheep', isCorrect: false, id: 1 },
-      { text: 'A gold ring', isCorrect: false, id: 2 },
-      { text: 'A staff', isCorrect: false, id: 3 }
-    ],
-    referenceCitation: 'Genesis 37:3',
-    referenceVerse: 'Now Israel loved Joseph more than any of his other sons, because he had been born to him in his old age; and he made an ornate robe for him.'
-  },
-  {
-    difficulty: 'impossible',
-    question: 'In Ezekiel\'s vision, how many wings did each cherubim have?',
-    answers: [
-      { text: 'Four', isCorrect: true, id: 0 },
-      { text: 'Two', isCorrect: false, id: 1 },
-      { text: 'Six', isCorrect: false, id: 2 },
-      { text: 'Eight', isCorrect: false, id: 3 }
-    ],
-    referenceCitation: 'Ezekiel 1:6',
-    referenceVerse: 'Each of the cherubim had four faces and four wings.'
-  }
-]
+import { useQuizData } from '../hooks/useQuizData'
 
 const difficultyLabels = {
   easy: 'Easy',
@@ -61,6 +10,7 @@ const difficultyLabels = {
 }
 
 function QuizView() {
+  const { questions, loading, error } = useQuizData()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedAnswers, setSelectedAnswers] = useState([])
   const [showReference, setShowReference] = useState(false)
@@ -111,7 +61,7 @@ function QuizView() {
     setSelectedAnswers(newSelectedAnswers)
 
     // Unlock next question if available
-    if (questionIndex < mockQuestions.length - 1) {
+    if (questionIndex < questions.length - 1) {
       // Auto-advance after short delay
       setTimeout(() => {
         navigateToIndex(questionIndex + 1)
@@ -127,7 +77,7 @@ function QuizView() {
   }
 
   const handleNext = () => {
-    if (currentIndex < mockQuestions.length - 1) {
+    if (currentIndex < questions.length - 1) {
       navigateToIndex(currentIndex + 1)
       setShowReference(false)
     }
@@ -145,7 +95,7 @@ function QuizView() {
   return (
     <div className="quiz-view">
       <div className="quiz-view__questions" ref={containerRef}>
-        {mockQuestions.map((question, qIndex) => {
+        {questions.map((question, qIndex) => {
           const isQuestionLocked = qIndex > 0 && selectedAnswers[qIndex - 1] === undefined
           const isAnswered = selectedAnswers[qIndex] !== undefined
 
@@ -254,7 +204,7 @@ function QuizView() {
               </>
             )}
           </button>
-          <button className="quiz-view__next-button" onClick={handleNext} disabled={currentIndex === mockQuestions.length - 1}>
+          <button className="quiz-view__next-button" onClick={handleNext} disabled={currentIndex === questions.length - 1}>
             <span>Next</span>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
@@ -265,15 +215,18 @@ function QuizView() {
 
       {/* Difficulty Dots */}
       <div className="quiz-view__difficulty-dots">
-        {mockQuestions.map((question, index) => (
-          <span
-            key={index}
-            className={`quiz-view__difficulty-dot quiz-view__difficulty-dot--${question.difficulty} ${index === currentIndex ? 'active' : ''}`}
-            onClick={() => handleDotClick(index)}
-          >
-            <span className="quiz-view__difficulty-dot-text">{difficultyLabels[question.difficulty]}</span>
-          </span>
-        ))}
+        {['easy', 'medium', 'hard', 'impossible'].map((difficulty, index) => {
+          const question = questions[index]
+          return (
+            <span
+              key={difficulty}
+              className={`quiz-view__difficulty-dot quiz-view__difficulty-dot--${difficulty} ${index === currentIndex ? 'active' : ''}`}
+              onClick={() => handleDotClick(index)}
+            >
+              <span className="quiz-view__difficulty-dot-text">{difficultyLabels[difficulty]}</span>
+            </span>
+          )
+        })}
       </div>
     </div>
   )
