@@ -6,9 +6,9 @@ function BottomNav() {
   const [activeTab, setActiveTab] = useState('quiz')
 
   const tabs = [
-    { id: 'quiz', icon: <FileText size={24} />, label: 'Quiz' },
-    { id: 'friends', icon: <Users size={24} />, label: 'Friends' },
-    { id: 'profile', icon: <CircleUser size={24} />, label: 'Profile' }
+    { id: 'quiz', icon: <FileText />, label: 'Quiz' },
+    { id: 'friends', icon: <Users />, label: 'Friends' },
+    { id: 'profile', icon: <CircleUser />, label: 'Profile' }
   ]
 
   return (

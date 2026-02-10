@@ -8,17 +8,17 @@
   align-items: center;
   background: #ffffff;
   border-top: 1px solid #e0e0e0;
-  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  padding: calc(2 * var(--element-width)) 0 max(calc(2 * var(--element-width)), env(safe-area-inset-bottom));
   z-index: 1000;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 calc(-0.5 * var(--element-width)) calc(2 * var(--element-width)) rgba(0, 0, 0, 0.05);
 }
 
 .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 8px 20px;
+  gap: calc(1 * var(--element-width));
+  padding: calc(2 * var(--element-width)) calc(5 * var(--element-width));
   background: none;
   border: none;
   cursor: pointer;
@@ -37,7 +37,7 @@
 }
 
 .nav-icon {
-  font-size: 24px;
+  font-size: calc(6 * var(--element-width));
   transition: transform 0.2s ease;
   color: inherit;
   display: flex;
@@ -50,7 +50,7 @@
 }
 
 .nav-label {
-  font-size: 12px;
+  font-size: calc(3 * var(--element-width));
   font-weight: 400;
   transition: font-weight 0.2s ease;
 }
