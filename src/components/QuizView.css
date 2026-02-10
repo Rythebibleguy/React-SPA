@@ -218,19 +218,56 @@
 .quiz-view__options label.correct {
   border-color: transparent !important;
   color: #155724 !important;
-  background-color: #d4edda !important;
   box-shadow: inset 0 0 calc(1.4 * var(--element-width)) rgba(39, 174, 96, 0.4) !important;
 }
 
 .quiz-view__options label.wrong {
   border-color: transparent !important;
   color: #721c24 !important;
-  background-color: #f8d7da !important;
   box-shadow: inset 0 0 calc(1.4 * var(--element-width)) rgba(192, 57, 43, 0.4) !important;
+}
+
+.quiz-view__options label.answered:not(.correct):not(.wrong) {
+  color: #555;
 }
 
 .quiz-view__options label:active {
   transform: scale(0.98);
+}
+
+.quiz-view__percent-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  z-index: 1;
+  transition: width 0.5s ease-out;
+  background-color: #e9ecef;
+  opacity: 0;
+}
+
+.quiz-view__options label.answered .quiz-view__percent-bar {
+  opacity: 1;
+}
+
+.quiz-view__options label.correct .quiz-view__percent-bar {
+  background-color: #d4edda !important;
+}
+
+.quiz-view__options label.wrong .quiz-view__percent-bar {
+  background-color: #f8d7da !important;
+}
+
+.quiz-view__percent-text {
+  font-size: calc(3.2 * var(--element-width));
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.3s ease-in 0.4s;
+}
+
+.quiz-view__options label.answered .quiz-view__percent-text {
+  opacity: 1;
 }
 
 .quiz-view__answer-text {

@@ -6,6 +6,10 @@
 - Reuse existing code: Search for existing functions, patterns, or utilities before writing new code
 - **Always start dev server**: Run `npm run dev` at the beginning of each chat session
 
+## React Best Practices
+- **No DOM manipulation**: This is a React project - use state and props, not `querySelector`, `getElementById`, `classList`, etc.
+- Keep components declarative and let React handle the DOM
+
 ## Design Reference
 - UI/UX inspired by NY Times Games (Wordle, Connections, etc.)
 

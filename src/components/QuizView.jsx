@@ -13,6 +13,7 @@ function QuizView() {
   const { questions, loading, error } = useQuizData()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedAnswers, setSelectedAnswers] = useState([])
+  const [answerPercentages, setAnswerPercentages] = useState({}) // Store percentages per question
   const [showReference, setShowReference] = useState(false)
   const containerRef = useRef(null)
   const cardsRef = useRef([])
@@ -60,13 +61,45 @@ function QuizView() {
     newSelectedAnswers[questionIndex] = answerIndex
     setSelectedAnswers(newSelectedAnswers)
 
-    // Unlock next question if available
-    if (questionIndex < questions.length - 1) {
-      // Auto-advance after short delay
-      setTimeout(() => {
-        navigateToIndex(questionIndex + 1)
-      }, 600)
+    // Generate mock voting percentages
+    const question = questions[questionIndex]
+    const correctIndex = question.answers.findIndex(a => a.isCorrect)
+    
+    // Generate realistic percentages (correct answer gets 40-60%)
+    const correctPercent = Math.floor(Math.random() * 21) + 40 // 40-60%
+    const remaining = 100 - correctPercent
+    
+    // Distribute remaining among wrong answers randomly
+    let wrongPercentages = []
+    let remainingToDistribute = remaining
+    
+    for (let i = 0; i < question.answers.length - 1; i++) {
+      if (i === question.answers.length - 2) {
+        // Last wrong answer gets whatever is left
+        wrongPercentages.push(remainingToDistribute)
+      } else {
+        // Random portion of remaining (10-25% each)
+        const portion = Math.min(
+          Math.floor(Math.random() * 16) + 10,
+          remainingToDistribute - 10
+        )
+        wrongPercentages.push(portion)
+        remainingToDistribute -= portion
+      }
     }
+    
+    // Assign percentages
+    let wrongIndex = 0
+    const percentages = question.answers.map((answer, idx) => {
+      if (idx === correctIndex) return correctPercent
+      return wrongPercentages[wrongIndex++]
+    })
+    
+    // Store percentages in state
+    setAnswerPercentages(prev => ({
+      ...prev,
+      [questionIndex]: percentages
+    }))
   }
 
   const handlePrev = () => {
@@ -115,6 +148,8 @@ function QuizView() {
                       {question.answers.map((answer, aIndex) => {
                         const isSelected = selectedAnswers[qIndex] === aIndex
                         const showResult = isAnswered
+                        const percentages = answerPercentages[qIndex] || []
+                        const percentage = percentages[aIndex] || 0
 
                         return (
                           <label
@@ -123,6 +158,7 @@ function QuizView() {
                               ${isSelected ? 'selected' : ''}
                               ${showResult && answer.isCorrect ? 'correct' : ''}
                               ${showResult && isSelected && !answer.isCorrect ? 'wrong' : ''}
+                              ${percentages.length > 0 ? 'answered' : ''}
                             `}
                           >
                             <input
@@ -132,8 +168,10 @@ function QuizView() {
                               onChange={() => handleAnswerSelect(qIndex, aIndex)}
                               disabled={isAnswered || isQuestionLocked}
                             />
+                            <div className="quiz-view__percent-bar" style={{ width: `${percentage}%` }}></div>
                             <span className="quiz-view__answer-text">
                               <span>{answer.text}</span>
+                              <span className="quiz-view__percent-text">{percentage}%</span>
                             </span>
                           </label>
                         )
