@@ -242,8 +242,9 @@ function QuizView() {
 
   return (
     <div className="quiz-view">
-      <div className="quiz-view__questions" ref={containerRef}>
-        {questions.map((question, qIndex) => {
+      <div className="quiz-view__question-area">
+        <div className="quiz-view__cards" ref={containerRef}>
+          {questions.map((question, qIndex) => {
           const isQuestionLocked = qIndex > 0 && selectedAnswers[qIndex - 1] === undefined
           const isAnswered = selectedAnswers[qIndex] !== undefined
 
@@ -324,6 +325,7 @@ function QuizView() {
             </div>
           )
         })}
+      </div>
       </div>
 
       {/* Action Buttons */}

@@ -7,21 +7,27 @@
   gap: calc(3 * var(--element-width));
 }
 
-/* Questions Container */
-.quiz-view__questions {
+.quiz-view__question-area {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+}
+
+.quiz-view__cards {
   display: flex;
   width: 100%;
   overflow-x: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
   gap: 0;
+  touch-action: none;
   align-items: center;
-  flex: 1;
-  min-height: 0;
-  touch-action: pan-y pinch-zoom;
+  padding: calc(4 * var(--element-width)) 0; /* Vertical padding for car shadows */
+  margin-top: calc(10 * var(--element-width));
 }
 
-.quiz-view__questions::-webkit-scrollbar {
+.quiz-view__cards::-webkit-scrollbar {
   display: none;
 }
 
@@ -34,7 +40,6 @@
   scroll-snap-align: center;
   flex-shrink: 0;
   height: auto;
-  align-self: center;
 }
 
 /* Flip Container */
