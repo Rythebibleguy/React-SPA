@@ -10,3 +10,6 @@
 - Development: `npm run dev` → localhost:5173 with hot reload
 - Production: `npm run build` → creates `dist/` folder → upload dist contents to WordPress /react directory
 - Base path configured as `/react/` in vite.config.js
+
+## Design Reference
+- UI/UX inspired by NY Times Games (Wordle, Connections, etc.)
