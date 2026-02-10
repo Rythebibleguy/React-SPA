@@ -17,14 +17,43 @@ const difficultyLabels = {
 function QuizView() {
   const { questions, loading, error } = useQuizData()
   const { stats, loading: statsLoading } = useQuizStats()
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [selectedAnswers, setSelectedAnswers] = useState([]) // Store answer IDs
-  const [answerPercentages, setAnswerPercentages] = useState({}) // Store percentages per question {qIndex: {answerId: percentage}}
+  
+  // Load saved state from sessionStorage
+  const loadSavedState = () => {
+    try {
+      const saved = sessionStorage.getItem('quizState')
+      return saved ? JSON.parse(saved) : null
+    } catch (e) {
+      console.error('Error loading saved state:', e)
+      return null
+    }
+  }
+  
+  const savedState = loadSavedState()
+  
+  const [currentIndex, setCurrentIndex] = useState(savedState?.currentIndex ?? 0)
+  const [selectedAnswers, setSelectedAnswers] = useState(savedState?.selectedAnswers ?? [])
+  const [answerPercentages, setAnswerPercentages] = useState(savedState?.answerPercentages ?? {})
   const [showReference, setShowReference] = useState(false)
   const [showResultsModal, setShowResultsModal] = useState(false)
   const containerRef = useRef(null)
   const cardsRef = useRef([])
-  const hasSubmittedRef = useRef(false)
+  const hasSubmittedRef = useRef(savedState?.hasSubmitted ?? false)
+
+  // Save state to sessionStorage whenever it changes
+  useEffect(() => {
+    try {
+      const stateToSave = {
+        currentIndex,
+        selectedAnswers,
+        answerPercentages,
+        hasSubmitted: hasSubmittedRef.current
+      }
+      sessionStorage.setItem('quizState', JSON.stringify(stateToSave))
+    } catch (e) {
+      console.error('Error saving state:', e)
+    }
+  }, [currentIndex, selectedAnswers, answerPercentages])
 
   // Unified scroll animation function
   const scrollToIndex = (index) => {
@@ -188,6 +217,19 @@ function QuizView() {
   useEffect(() => {
     if (questions.length === 4 && selectedAnswers.length === 4 && !selectedAnswers.includes(undefined) && !hasSubmittedRef.current) {
       hasSubmittedRef.current = true
+      
+      // Save updated hasSubmitted status
+      try {
+        const stateToSave = {
+          currentIndex,
+          selectedAnswers,
+          answerPercentages,
+          hasSubmitted: true
+        }
+        sessionStorage.setItem('quizState', JSON.stringify(stateToSave))
+      } catch (e) {
+        console.error('Error saving state:', e)
+      }
       
       // Submit results to Firebase first
       submitQuizResults().then(() => {

@@ -9,7 +9,7 @@
 
 .quiz-view__open-results {
   position: absolute;
-  bottom: calc(16 * var(--element-width));
+  top: calc(2 * var(--element-width));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -371,7 +371,7 @@
 /* Action Buttons */
 .quiz-view__actions {
   position: absolute;
-  bottom: calc(3 * var(--element-width));
+  bottom: calc(12 * var(--element-width));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -458,10 +458,13 @@
 
 /* Difficulty Dots */
 .quiz-view__difficulty-dots {
+  position: absolute;
+  bottom: calc(3 * var(--element-width));
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   justify-content: center;
   gap: calc(1.4 * var(--element-width));
-  margin-top: calc(3 * var(--element-width));
   flex-wrap: nowrap;
   flex-shrink: 0;
 }

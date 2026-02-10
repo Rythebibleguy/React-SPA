@@ -16,6 +16,11 @@ function App() {
   const [animationData, setAnimationData] = useState(null)
   const [lottieInstance, setLottieInstance] = useState(null)
 
+  // Clear quiz state on fresh page load
+  useEffect(() => {
+    sessionStorage.removeItem('quizState')
+  }, [])
+
   // Load Lottie animation once on app mount
   useEffect(() => {
     fetch('/assets/animations/Book with bookmark.json')
