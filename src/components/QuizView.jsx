@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
+import { ref, runTransaction } from 'firebase/database'
+import { db } from '../config/firebase'
 import './QuizView.css'
 import { useQuizData } from '../hooks/useQuizData'
+import { useQuizStats } from '../hooks/useQuizStats'
+import { getTodayString } from '../utils/csvParser'
 
 const difficultyLabels = {
   easy: 'Easy',
@@ -11,9 +15,10 @@ const difficultyLabels = {
 
 function QuizView() {
   const { questions, loading, error } = useQuizData()
+  const { stats, loading: statsLoading } = useQuizStats()
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [selectedAnswers, setSelectedAnswers] = useState([])
-  const [answerPercentages, setAnswerPercentages] = useState({}) // Store percentages per question
+  const [selectedAnswers, setSelectedAnswers] = useState([]) // Store answer IDs
+  const [answerPercentages, setAnswerPercentages] = useState({}) // Store percentages per question {qIndex: {answerId: percentage}}
   const [showReference, setShowReference] = useState(false)
   const containerRef = useRef(null)
   const cardsRef = useRef([])
@@ -56,50 +61,45 @@ function QuizView() {
     return () => observer.disconnect()
   }, [currentIndex])
 
-  const handleAnswerSelect = (questionIndex, answerIndex) => {
+  const handleAnswerSelect = (questionIndex, answerId) => {
+    if (selectedAnswers[questionIndex] !== undefined) return
+
     const newSelectedAnswers = [...selectedAnswers]
-    newSelectedAnswers[questionIndex] = answerIndex
+    newSelectedAnswers[questionIndex] = answerId
     setSelectedAnswers(newSelectedAnswers)
 
-    // Generate mock voting percentages
+    // Get current stats for this question or initialize empty object
+    const questionStats = stats?.[`q${questionIndex}`] || {}
+    
+    // Optimistically update local stats (+1 to selected answer)
+    const updatedStats = { ...questionStats }
+    updatedStats[answerId] = (updatedStats[answerId] || 0) + 1
+
+    // Calculate total votes
+    let totalVotes = 0
+    Object.values(updatedStats).forEach(count => totalVotes += count)
+
+    // Calculate percentages for all answers (using answer IDs)
     const question = questions[questionIndex]
-    const correctIndex = question.answers.findIndex(a => a.isCorrect)
+    const percentages = {}
     
-    // Generate realistic percentages (correct answer gets 40-60%)
-    const correctPercent = Math.floor(Math.random() * 21) + 40 // 40-60%
-    const remaining = 100 - correctPercent
-    
-    // Distribute remaining among wrong answers randomly
-    let wrongPercentages = []
-    let remainingToDistribute = remaining
-    
-    for (let i = 0; i < question.answers.length - 1; i++) {
-      if (i === question.answers.length - 2) {
-        // Last wrong answer gets whatever is left
-        wrongPercentages.push(remainingToDistribute)
-      } else {
-        // Random portion of remaining (10-25% each)
-        const portion = Math.min(
-          Math.floor(Math.random() * 16) + 10,
-          remainingToDistribute - 10
-        )
-        wrongPercentages.push(portion)
-        remainingToDistribute -= portion
-      }
-    }
-    
-    // Assign percentages
-    let wrongIndex = 0
-    const percentages = question.answers.map((answer, idx) => {
-      if (idx === correctIndex) return correctPercent
-      return wrongPercentages[wrongIndex++]
+    question.answers.forEach(answer => {
+      const count = updatedStats[answer.id] || 0
+      const percentage = totalVotes === 0 ? 0 : Math.round((count / totalVotes) * 100)
+      percentages[answer.id] = percentage
     })
-    
-    // Store percentages in state
+
     setAnswerPercentages(prev => ({
       ...prev,
       [questionIndex]: percentages
     }))
+
+    // Send vote to Firebase in background (fire and forget)
+    const todayString = getTodayString()
+    const answerRef = ref(db, `quiz_stats/${todayString}/q${questionIndex}/${answerId}`)
+    runTransaction(answerRef, (currentCount) => {
+      return (currentCount || 0) + 1
+    }).catch(e => console.error('Vote error:', e))
   }
 
   const handlePrev = () => {
@@ -125,6 +125,30 @@ function QuizView() {
     setShowReference(false)
   }
 
+  if (loading || statsLoading) {
+    return (
+      <div className="quiz-view">
+        <div className="quiz-view__loading">Loading quiz...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="quiz-view">
+        <div className="quiz-view__error">Error: {error}</div>
+      </div>
+    )
+  }
+
+  if (!questions || questions.length === 0) {
+    return (
+      <div className="quiz-view">
+        <div className="quiz-view__loading">No questions available for today</div>
+      </div>
+    )
+  }
+
   return (
     <div className="quiz-view">
       <div className="quiz-view__questions" ref={containerRef}>
@@ -146,10 +170,10 @@ function QuizView() {
                     <h3>{question.question}</h3>
                     <div className="quiz-view__options">
                       {question.answers.map((answer, aIndex) => {
-                        const isSelected = selectedAnswers[qIndex] === aIndex
+                        const isSelected = selectedAnswers[qIndex] === answer.id
                         const showResult = isAnswered
-                        const percentages = answerPercentages[qIndex] || []
-                        const percentage = percentages[aIndex] || 0
+                        const percentages = answerPercentages[qIndex] || {}
+                        const percentage = percentages[answer.id] || 0
 
                         return (
                           <label
@@ -158,14 +182,14 @@ function QuizView() {
                               ${isSelected ? 'selected' : ''}
                               ${showResult && answer.isCorrect ? 'correct' : ''}
                               ${showResult && isSelected && !answer.isCorrect ? 'wrong' : ''}
-                              ${percentages.length > 0 ? 'answered' : ''}
+                              ${Object.keys(percentages).length > 0 ? 'answered' : ''}
                             `}
                           >
                             <input
                               type="radio"
                               name={`q${qIndex}`}
                               checked={isSelected}
-                              onChange={() => handleAnswerSelect(qIndex, aIndex)}
+                              onChange={() => handleAnswerSelect(qIndex, answer.id)}
                               disabled={isAnswered || isQuestionLocked}
                             />
                             <div className="quiz-view__percent-bar" style={{ width: `${percentage}%` }}></div>
