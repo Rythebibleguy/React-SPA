@@ -1,0 +1,15 @@
+{
+  "rules": {
+    "quiz_stats": {
+      "$dateKey": {
+        ".read": true,
+        "$questionKey": {
+          "$answerId": {
+            ".write": true,
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          }
+        }
+      }
+    }
+  }
+}

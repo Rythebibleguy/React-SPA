@@ -1,5 +1,5 @@
 .results-modal {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -7,12 +7,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  z-index: 1001;
   animation: resultsModalFadeIn 0.4s ease-out;
 }
 
 .results-modal__overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -34,7 +34,7 @@
   overflow-y: auto;
   background: white;
   border-radius: calc(4 * var(--element-width));
-  padding: calc(6 * var(--element-width)) calc(5 * var(--element-width)) calc(4 * var(--element-width));
+  padding: calc(5 * var(--element-width));
   box-sizing: border-box;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -50,8 +50,6 @@
   align-items: baseline;
   justify-content: center;
   gap: calc(2 * var(--element-width));
-  margin-top: calc(4 * var(--element-width));
-  margin-bottom: calc(2 * var(--element-width));
   animation: resultsModalScoreIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
@@ -81,31 +79,19 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  background: #fafafa;
   border-radius: calc(2.5 * var(--element-width));
-  animation: resultsModalSlideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
-  padding: calc(5 * var(--element-width));
-  padding-bottom: calc(3 * var(--element-width));
   box-sizing: border-box;
-  margin-top: auto;
+  margin-top: calc(5 * var(--element-width));
+  animation: resultsModalSlideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
 }
 .results-modal__global-header {
-  font-size: calc(3.2 * var(--element-width));
-  font-weight: 500;
-  color: #6a6a6a;
-  margin-bottom: calc(4 * var(--element-width));
-  text-align: center;
-  letter-spacing: -0.01em;
-}
-.results-modal__empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: calc(6 * var(--element-width)) 0;
-  color: #999;
-  font-size: calc(3.2 * var(--element-width));
-  text-align: center;
-  font-weight: 400;
+  font-size: calc(3 * var(--element-width));
+  font-weight: 600;
+  color: #3a3a3a;
+  margin-bottom: calc(3 * var(--element-width));
+  text-align: left;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .results-modal__score-distribution {
@@ -122,7 +108,7 @@
 }
 
 .results-modal__score-label {
-  font-size: calc(3.2 * var(--element-width));
+  font-size: calc(3 * var(--element-width));
   font-weight: 600;
   color: #3a3a3a;
   height: calc(6 * var(--element-width));
@@ -187,18 +173,10 @@
   font-weight: 600;
 }
 
-.results-modal__global-footer {
-  font-size: calc(2.4 * var(--element-width));
-  font-weight: 400;
-  color: #999;
-  text-align: center;
-  margin-top: calc(3.5 * var(--element-width));
-}
-
 /* Action Button */
 .results-modal__action {
   width: 100%;
-  margin-top: calc(4 * var(--element-width));
+  margin-top: calc(7.5 * var(--element-width));
   animation: resultsModalButtonIn 0.5s ease-out 0.8s both;
 }
 

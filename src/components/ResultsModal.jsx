@@ -33,57 +33,46 @@ function ResultsModal({ score, total, stats, onClose, onShare }) {
         </div>
 
         <div className="results-modal__global-section">
-          {scoreDistribution && scoreDistribution.total > 0 ? (
-            <>
-              <div className="results-modal__global-header">
-                See how everyone else did:
-              </div>
-              <div className="results-modal__score-distribution">
-                <div className="results-modal__scores-column">
-                  {[4, 3, 2, 1].map(scoreValue => {
-                    const isUserScore = scoreValue === score
-                    const scoreLabel = `${scoreValue}/${total}`
-                    return (
-                      <span
-                        key={scoreValue}
-                        className={`results-modal__score-label ${isUserScore ? 'results-modal__score-label--highlight' : ''}`}
-                      >
-                        {scoreLabel}
-                      </span>
-                    )
-                  })}
-                </div>
-                <div className="results-modal__divider"></div>
-                <div className="results-modal__bars-column">
-                  {[4, 3, 2, 1].map(scoreValue => {
-                    const count = scoreDistribution.scoreCounts[scoreValue] || 0
-                    const maxCount = Math.max(...Object.values(scoreDistribution.scoreCounts))
-                    const barWidth = maxCount > 0 ? Math.round((count / maxCount) * 100) : 0
-                    const percentage = scoreDistribution.total > 0 ? Math.round((count / scoreDistribution.total) * 100) : 0
-                    const isUserScore = scoreValue === score
-                    return (
-                      <div
-                        key={scoreValue}
-                        className={`results-modal__bar-row ${isUserScore ? 'results-modal__bar-row--highlight' : ''}`}
-                      >
-                        <div className="results-modal__score-bar-container">
-                          <div className="results-modal__score-bar" style={{ width: `${barWidth}%` }}></div>
-                        </div>
-                        <span className="results-modal__score-percentage">{percentage}%</span>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-              <div className="results-modal__global-footer">
-                Based on {scoreDistribution.total} {scoreDistribution.total === 1 ? 'player' : 'players'}
-              </div>
-            </>
-          ) : (
-            <div className="results-modal__empty-state">
-              Be the first to complete today's quiz!
+          <div className="results-modal__global-header">
+            Global Stats
+          </div>
+          <div className="results-modal__score-distribution">
+            <div className="results-modal__scores-column">
+              {[4, 3, 2, 1].map(scoreValue => {
+                const isUserScore = scoreValue === score
+                const scoreLabel = `${scoreValue}/${total}`
+                return (
+                  <span
+                    key={scoreValue}
+                    className={`results-modal__score-label ${isUserScore ? 'results-modal__score-label--highlight' : ''}`}
+                  >
+                    {scoreLabel}
+                  </span>
+                )
+              })}
             </div>
-          )}
+            <div className="results-modal__divider"></div>
+            <div className="results-modal__bars-column">
+              {[4, 3, 2, 1].map(scoreValue => {
+                const count = scoreDistribution?.scoreCounts?.[scoreValue] || 0
+                const maxCount = scoreDistribution?.scoreCounts ? Math.max(...Object.values(scoreDistribution.scoreCounts)) : 0
+                const barWidth = maxCount > 0 ? Math.round((count / maxCount) * 100) : 0
+                const percentage = scoreDistribution?.total > 0 ? Math.round((count / scoreDistribution.total) * 100) : 0
+                const isUserScore = scoreValue === score
+                return (
+                  <div
+                    key={scoreValue}
+                    className={`results-modal__bar-row ${isUserScore ? 'results-modal__bar-row--highlight' : ''}`}
+                  >
+                    <div className="results-modal__score-bar-container">
+                      <div className="results-modal__score-bar" style={{ width: `${barWidth}%` }}></div>
+                    </div>
+                    <span className="results-modal__score-percentage">{percentage}%</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </div>
 
         <div className="results-modal__action">

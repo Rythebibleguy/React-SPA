@@ -298,9 +298,44 @@ function QuizView() {
     setShowResultsModal(false)
   }
 
-  const handleShareChallenge = () => {
-    // TODO: Implement share functionality
-    console.log('Share challenge clicked')
+  const handleShareChallenge = async () => {
+    const score = calculateScore()
+    const todayDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    
+    // Create share text with emoji indicators for score
+    const squares = '🟩'.repeat(score) + '⬜'.repeat(questions.length - score)
+    const shareText = `Daily Bible Quiz ${todayDate}\n${squares} ${score}/${questions.length}\n\nCan you beat my score?\n${window.location.origin}`
+    
+    // Try Web Share API first (mobile/modern browsers)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          text: shareText
+        })
+        console.log('Shared successfully')
+      } catch (error) {
+        // User cancelled or error occurred
+        if (error.name !== 'AbortError') {
+          console.error('Share failed:', error)
+          // Fall back to clipboard
+          copyToClipboard(shareText)
+        }
+      }
+    } else {
+      // Fall back to clipboard for desktop browsers
+      copyToClipboard(shareText)
+    }
+  }
+
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      alert('Challenge copied to clipboard!')
+    } catch (error) {
+      console.error('Clipboard copy failed:', error)
+      // Last resort: show text in alert
+      alert('Copy this challenge:\n\n' + text)
+    }
   }
 
   const calculateScore = () => {

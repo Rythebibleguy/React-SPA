@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<script>
+  (function() {
+    // Get the first folder name from the URL (e.g., 'quiz' or 'test')
+    var segment = window.location.pathname.split('/').filter(Boolean)[0];
+    // Create the base tag string (e.g., '/quiz/' or '/test/')
+    var basePath = segment ? '/' + segment + '/' : '/';
+    document.write('<base href="' + basePath + '">');
+  })();
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Daily Bible Quiz - Test Your Bible Knowledge | Rythebibleguy</title>
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- Load Eruda debug console (hidden until activated) -->
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>
+  // Clear all Eruda persistence mechanisms
+  localStorage.removeItem('eruda-dev-tools');
+  sessionStorage.removeItem('eruda-dev-tools');
+  
+  eruda.init(); // Init with all default tools
+  console.log('🐛 Eruda initialized - now logging');
+  console.log('🔗 Current URL:', window.location.href);
+  eruda.hide();
+  
+  // Force hide the container with CSS as backup
+  setTimeout(() => {
+    const erudaEl = document.getElementById('eruda');
+    if (erudaEl) {
+      erudaEl.style.display = 'none';
+    }
+  }, 0);
+  
+  localStorage.removeItem('eruda-dev-tools');
+  window.erudaLoaded = true;
+</script>
+
+<!-- Calculate viewport DVH and max width -->
+<script>
+(function() {
+  function initViewportUnits() {
+    // Store full viewport dimensions for reference
+    document.documentElement.style.setProperty('--viewport-width', window.screen.width + 'px');
+    document.documentElement.style.setProperty('--viewport-height', window.screen.height + 'px');
+
+    // Use window.innerHeight and window.innerWidth directly
+    const actualHeight = window.innerHeight;
+    const actualWidth = window.innerWidth;
+    
+    // Set app-height (1% of actual viewport height)
+    const vhUnit = actualHeight / 100;
+    document.documentElement.style.setProperty('--app-height', vhUnit + 'px');
+    document.documentElement.style.setProperty('--element-height', vhUnit + 'px');
+    
+    // Set app-width based on orientation
+    const isLandscape = actualWidth > actualHeight;
+    const customWidth = isLandscape 
+      ? actualHeight * 10 / 16  // calc(100dvh * 10 / 16) for landscape
+      : actualWidth;             // 100vw for portrait
+    const appWidthUnit = customWidth / 100;  // 1% of custom width
+    document.documentElement.style.setProperty('--app-width', appWidthUnit + 'px');
+    
+    // Calculate scale factor for tablets only (768-1200px portrait)
+    const isTablet = actualWidth >= 768 && actualWidth <= 1200 && !isLandscape;
+    let scaleFactor = 1.0;
+    
+    if (isTablet) {
+      const aspectRatio = actualWidth / actualHeight;
+      scaleFactor = aspectRatio < 0.6 
+        ? 1.0 
+        : Math.max(0.55, 1.0 - (aspectRatio - 0.6) * 1.2);
+    }
+    
+    const elementWidthUnit = appWidthUnit * scaleFactor;
+    document.documentElement.style.setProperty('--element-width', elementWidthUnit + 'px');
+  }
+  
+  // Make globally accessible for Lottie handler
+  window.initViewportUnits = initViewportUnits;
+  
+  // Set immediately when script runs
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initViewportUnits);
+  } else {
+    initViewportUnits();
+  }
+  
+  // Viewport check will be called right before Lottie animation starts
+  // See welcome screen script below for timing
+  
+  // Update on resize (debounced)
+  let resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+      initViewportUnits();
+    }, 150);
+  });
+})();
+</script>
+
+<!-- Critical CSS for instant welcome screen rendering -->
+<style>
+:root {
+  --btn-active-opacity: 0.75;
+  --btn-active-scale: 0.95;
+}
+
+html, body {
+    overflow: hidden; 
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    font-family: 'Montserrat', sans-serif;
+    -webkit-user-select: none;  
+    -moz-user-select: none;     
+    -ms-user-select: none;      
+    user-select: none;          
+    -webkit-tap-highlight-color: transparent;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+.app-container {
+    background-color: #e3d5c5;
+    width: 100%;
+    max-width: calc(100 * var(--app-width));
+    height: calc(100 * var(--app-height));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    container-type: inline-size;
+    margin: 0 auto;
+    box-sizing: border-box;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.4s cubic-bezier(0.4, 0, 0.2, 1), filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center bottom;
+}
+
+.welcome-screen {
+    position: absolute;
+    top: calc(30 * var(--app-height));
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    text-align: center;
+}
+
+.welcome-screen__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+    margin-bottom: calc(10 * var(--element-width));
+    position: relative;
+}
+
+.welcome-screen__header-icon {
+    width: calc(37 * var(--element-width));
+    height: calc(37 * var(--element-width));
+}
+
+.welcome-screen__header-title {
+    font-size: calc(9 * var(--element-width));
+    color: #2B2B2B;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    opacity: 0;
+    margin-top: calc(-8 * var(--element-width));
+    transform: translateY(calc(1.5 * var(--element-width)));
+}
+
+.welcome-screen__header-title--animate {
+    animation: fadeInUp 1.0s ease-out forwards;
+}
+
+.welcome-screen__header-tagline {
+    font-size: calc(3.8 * var(--element-width));
+    color: #444;
+    margin: 0;
+    opacity: 0;
+    transform: translateY(calc(1.5 * var(--element-width)));
+}
+
+.welcome-screen__header-tagline--animate {
+    animation: fadeInUp 1.0s ease-out forwards;
+}
+
+.welcome-screen__ready {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 1;
+}
+
+.welcome-screen__loading-btn {
+    position: relative;
+    padding: calc(3.8 * var(--element-width)) calc(11.4 * var(--element-width));
+    font-size: calc(4.6 * var(--element-width));
+    font-weight: bold;
+    background: linear-gradient(90deg, #d4c5b3 0%, #c4b5a3 50%, #d4c5b3 100%);
+    border: none;
+    border-radius: calc(6.8 * var(--element-width));
+    overflow: hidden;
+    box-shadow: 0 calc(1 * var(--element-width)) calc(3.4 * var(--element-width)) rgba(0,0,0,0.2);
+    margin-bottom: calc(1.2 * var(--element-width));
+    cursor: default;
+    opacity: 0;
+}
+
+.welcome-screen__loading-btn--visible {
+    animation: fadeIn 2s ease-out forwards;
+}
+
+.welcome-screen__loading-btn-text {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.welcome-screen__loading-btn-shimmer {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.8) 50%,
+        transparent 100%
+    );
+    animation: shimmerSweep 1.5s infinite;
+}
+
+.welcome-screen__ready-btn {
+    background-color: #000000;
+    color: white;
+    border: none;
+    padding: calc(3.8 * var(--element-width)) calc(11.4 * var(--element-width));
+    font-size: calc(4.6 * var(--element-width));
+    border-radius: calc(6.8 * var(--element-width));
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s;
+    box-shadow: 0 calc(1 * var(--element-width)) calc(3.4 * var(--element-width)) rgba(0,0,0,0.2);
+    margin-bottom: calc(1.2 * var(--element-width));
+    opacity: 0;
+    transform: scale(0.8);
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.welcome-screen__ready-btn:active {
+    transform: scale(0.98);
+    transition: none;
+}
+
+.welcome-screen__ready-date {
+    display: block;
+    text-align: center;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+    font-size: calc(3.4 * var(--element-width));
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.welcome-screen__credit {
+    position: fixed;
+    bottom: calc(2 * var(--element-width));
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: calc(2.6 * var(--element-width));
+    color: #333;
+    opacity: 0;
+    transition: opacity 1.5s ease;
+}
+
+.welcome-screen__credit.visible {
+    opacity: 0.7;
+}
+
+.welcome-screen__credit a {
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.welcome-screen__credit a:active {
+    opacity: 1;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes shimmerSweep {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+</style>
+
+<!-- dotLottie Player -->
+<script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+
+
+
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-L1W79PVGP6"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-L1W79PVGP6');
+</script>
+
+<!-- SEO Meta Tags -->
+<meta name="description" content="Test your knowledge with our Daily Bible Quiz! New trivia from the Old & New Testament every day. Track scores, challenge friends, and grow in your faith.">
+<meta name="author" content="Rythebibleguy">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://rythebibleguy.com/quiz/">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon.png">
+<link rel="icon" type="image/png" sizes="96x96" href="assets/images/favicon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/images/favicon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicon.png">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://rythebibleguy.com/quiz/">
+<meta property="og:title" content="Daily Bible Quiz - Test Your Bible Knowledge | Rythebibleguy">
+<meta property="og:description" content="Test your knowledge with our Daily Bible Quiz! New trivia from the Old & New Testament every day. Track scores, challenge friends, and grow in your faith.">
+<meta property="og:image" content="https://rythebibleguy.com/quiz/assets/images/og-image.jpg">
+<meta property="og:site_name" content="Rythebibleguy Daily Bible Quiz">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://rythebibleguy.com/quiz/">
+<meta property="twitter:title" content="Daily Bible Quiz - Test Your Bible Knowledge | Rythebibleguy">
+<meta property="twitter:description" content="Test your knowledge with our Daily Bible Quiz! New trivia from the Old & New Testament every day. Track scores, challenge friends, and grow in your faith.">
+<meta property="twitter:image" content="https://rythebibleguy.com/quiz/assets/images/og-image.jpg">
+
+<!-- Theme & Mobile -->
+<meta name="theme-color" content="#4A90E2">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Schema.org Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Rythebibleguy",
+  "alternateName": "Ry the Bible Guy",
+  "url": "https://rythebibleguy.com/quiz/"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": ["Quiz", "WebApplication"],
+  "name": "Daily Bible Quiz - Test Your Bible Knowledge | Rythebibleguy",
+  "description": "Test your knowledge with our Daily Bible Quiz! New trivia from the Old & New Testament every day. Track scores, challenge friends, and grow in your faith.",
+  "url": "https://rythebibleguy.com/quiz/",
+  "applicationCategory": "EducationalApplication",
+  "genre": "Religious",
+  "about": {
+    "@type": "Thing",
+    "name": "Bible"
+  },
+  "inLanguage": "en-US",
+  "operatingSystem": "Any",
+  "author": {
+    "@type": "Organization",
+    "name": "Rythebibleguy",
+    "url": "https://rythebibleguy.com"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+
+<!-- Firebase & External Resources -->
+<link rel="preconnect" href="https://www.gstatic.com">
+<link rel="preconnect" href="https://docs.google.com">
+<link rel="preconnect" href="https://rythebibleguy-app-default-rtdb.firebaseio.com">
+
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "v765upesq8");
+</script>
+
+<script>
+
+// --- GOOGLE SHEETS CONFIGURATION ---
+// Configure each difficulty tab's published CSV link
+window.SHEET_URLS = {
+    easy: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTgWBEz01YAfPeiQD7X3HOD9Ra2TGPybmKgpTJZr55PigZgHARwiC1l6kx_AHaHWjlHQy59rAt3yOkE/pub?gid=0&single=true&output=csv",
+    medium: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTgWBEz01YAfPeiQD7X3HOD9Ra2TGPybmKgpTJZr55PigZgHARwiC1l6kx_AHaHWjlHQy59rAt3yOkE/pub?gid=237222528&single=true&output=csv",
+    hard: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTgWBEz01YAfPeiQD7X3HOD9Ra2TGPybmKgpTJZr55PigZgHARwiC1l6kx_AHaHWjlHQy59rAt3yOkE/pub?gid=738891339&single=true&output=csv",
+    impossible: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTgWBEz01YAfPeiQD7X3HOD9Ra2TGPybmKgpTJZr55PigZgHARwiC1l6kx_AHaHWjlHQy59rAt3yOkE/pub?gid=460924046&single=true&output=csv"
+};
+
+// Helper function to get current date/time in user's local timezone
+window.getESTDate = function() {
+    return new Date();
+};
+
+// Helper function to get local date string (YYYY-MM-DD)
+window.getESTDateString = function() {
+    const localDate = window.getESTDate();
+    const year = localDate.getFullYear();
+    const month = String(localDate.getMonth() + 1).padStart(2, '0');
+    const day = String(localDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+// Initialize background processes immediately
+function initBackgroundProcesses() {
+    // Calculate today's date in user's local timezone
+    window.todayString = window.getESTDateString();
+    
+    // Calculate quiz number (days since January 26, 2026)
+    const localDate = window.getESTDate();
+    const launchDate = new Date(2026, 0, 26); // Jan 26, 2026 at 00:00 local time
+    const daysSinceLaunch = Math.floor((localDate - launchDate) / (1000 * 60 * 60 * 24));
+    window.quizNumber = daysSinceLaunch + 1; // Quiz #1 starts on January 26, 2026
+    
+    // Start fetching all quiz data in parallel immediately
+    window.preloadCache = {
+        easyQuiz: fetch(window.SHEET_URLS.easy),
+        mediumQuiz: fetch(window.SHEET_URLS.medium),
+        hardQuiz: fetch(window.SHEET_URLS.hard),
+        impossibleQuiz: fetch(window.SHEET_URLS.impossible)
+    };
+}
+initBackgroundProcesses();
+
+// Welcome screen logic
+document.addEventListener('DOMContentLoaded', () => {
+    // Prevent pinch zoom across entire app
+    // Safari iOS ignores touch-action CSS, so we use JavaScript preventDefault
+    // Blocks multi-touch gestures while preserving single-finger swipes
+    document.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 1) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    
+    document.addEventListener('gesturestart', (e) => {
+        e.preventDefault();
+    }, { passive: false });
+    
+    // Control dotLottie animation and trigger text animations
+    const bibleAnimation = document.getElementById('welcome-bible-video');
+    const headerTitle = document.querySelector('.welcome-screen__header-title');
+    const headerTagline = document.querySelector('.welcome-screen__header-tagline');
+    const readyEl = document.getElementById('welcome-ready');
+    const infoBtn = document.getElementById('info-button');
+    const guestMenuBtn = document.getElementById('guest-menu-button');
+    const userMenuBtn = document.getElementById('user-menu-button');
+    
+    // Secret debug mode: Tap bible animation 3 times
+    const bibleAnimationDebug = document.getElementById('welcome-bible-video');
+    let tapCount = 0;
+    let tapTimer = null;
+    
+    if (bibleAnimationDebug) {
+        bibleAnimationDebug.addEventListener('click', () => {
+            tapCount++;
+            
+            // Reset counter after 2 seconds of no taps
+            clearTimeout(tapTimer);
+            tapTimer = setTimeout(() => {
+                tapCount = 0;
+            }, 2000);
+            
+            // Show Eruda on 3rd tap
+            if (tapCount === 3) {
+                tapCount = 0; // Reset
+                if (window.erudaLoaded && typeof eruda !== 'undefined') {
+                    // Show the container
+                    const erudaEl = document.getElementById('eruda');
+                    if (erudaEl) {
+                        erudaEl.style.display = 'block';
+                    }
+                    eruda.show();
+                }
+            }
+        });
+    }
+    
+    // Promise.race timing: sync with Lottie ready OR 500ms timeout (whichever comes first)
+    // This ensures animations sync with Lottie when possible, but still work if Lottie fails
+    
+    // Create Promise for Lottie ready event
+    const lottieReady = new Promise((resolve) => {
+        if (bibleAnimation) {
+            bibleAnimation.addEventListener('ready', () => {
+                // Run viewport check right before animation starts
+                initViewportUnits();
+                // Start the animation
+                bibleAnimation.play();
+                resolve();
+            });
+        } else {
+            resolve();
+        }
+    });
+    
+    // Create Promise for 500ms timeout fallback
+    const timeoutFallback = new Promise((resolve) => {
+        setTimeout(() => {
+            resolve();
+        }, 500);
+    });
+    
+    // Race: whichever comes first (Lottie ready or 500ms timeout)
+    Promise.race([lottieReady, timeoutFallback]).then(() => {
+        // Trigger title and tagline animations at 0.7s after animation start
+        setTimeout(() => {
+            if (headerTitle) {
+                headerTitle.classList.add('welcome-screen__header-title--animate');
+            }
+            if (headerTagline) {
+                headerTagline.classList.add('welcome-screen__header-tagline--animate');
+            }
+        }, 700);
+        
+        // Trigger nav buttons at 1.0s if auth is ready
+        setTimeout(() => {
+            window.welcomeNavTimingPassed = true;
+            
+            // Show loading button
+            const loadingBtn = document.getElementById('welcome-loading-button');
+            if (loadingBtn) {
+                loadingBtn.classList.add('welcome-screen__loading-btn--visible');
+            }
+            
+            if (window.authStateReady) {
+                if (infoBtn) {
+                    infoBtn.classList.add('visible');
+                }
+                if (window.currentAuthState === 'logged-in' && userMenuBtn) {
+                    userMenuBtn.classList.add('visible');
+                } else if (window.currentAuthState === 'logged-out' && guestMenuBtn) {
+                    guestMenuBtn.classList.add('visible');
+                }
+            }
+        }, 1000);
+        
+        // Trigger button ready state at 1.5s if quiz data is ready
+        setTimeout(() => {
+            window.startButtonTimerPassed = true;
+            
+            if (window.quizDataReady) {
+                const loadingBtn = document.getElementById('welcome-loading-button');
+                const readyBtn = document.getElementById('welcome-ready-button');
+                const dateText = document.getElementById('welcome-date');
+                if (loadingBtn && readyBtn) {
+                    loadingBtn.style.display = 'none';
+                    readyBtn.style.display = 'block';
+                    if (dateText) {
+                        dateText.style.display = 'block';
+                        dateText.style.animation = 'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
+                    }
+                }
+            }
+        }, 1500);
+        
+        // Pause animation at 2.667s (purely decorative)
+        if (bibleAnimation) {
+            setTimeout(() => {
+                if (bibleAnimation.pause) {
+                    bibleAnimation.pause();
+                }
+            }, 2667);
+        }
+    });
+    
+    const welcomeDate = document.getElementById('welcome-date');
+    if (welcomeDate && window.quizNumber) {
+        welcomeDate.innerText = `Quiz #${window.quizNumber}`;
+    }
+    
+    // Fade in credit line
+    setTimeout(() => {
+        const credit = document.querySelector('.welcome-screen__credit');
+        if (credit) credit.classList.add('visible');
+    }, 500);
+    
+    // Attach start button handler immediately
+    const startBtn = document.getElementById('welcome-ready-button');
+    if (startBtn) {
+        startBtn.addEventListener('click', () => {
+            // Track quiz start
+            if (window.trackClarityEvent) window.trackClarityEvent('quiz_started');
+            
+            document.getElementById('welcome-screen').style.display = 'none';
+            const gameView = document.getElementById('quiz-screen');
+            gameView.style.display = 'flex';
+            document.body.classList.add('game-active');
+            
+            // Initialize quiz UI state now that game is visible
+            if (window.initQuizUI) window.initQuizUI();
+            
+            // Check if user has already completed today's quiz and show results
+            if (window.checkAndShowCompletedQuiz) window.checkAndShowCompletedQuiz();
+        });
+    }
+});
+</script>
+
+<link rel="stylesheet" href="css/styles.css">
+
+<script type="module">
+import('./js/main.js');
+</script>
+</head>
+
+
+
+
+<body>    
+<div class="app-container" id="app-container">
+    <!-- INFO CONTROLS (Top Left) -->
+    <div id="info-button-container" class="info">
+            <button id="info-button" class="info__button" aria-label="Info" style="opacity: 0; pointer-events: none;">
+                <svg class="info__button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3 2 22l10.7-3.79"></path><path d="M4 3h.01"></path><path d="M22 8h.01"></path><path d="M15 2h.01"></path><path d="M22 20h.01"></path><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12v0c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"></path><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11v0c-.11.7-.72 1.22-1.43 1.22H17"></path><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98v0C9.52 4.9 9 5.52 9 6.23V7"></path><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"></path></svg>
+            </button>
+        </div>
+
+        <!-- USER CONTROLS (Top Right) -->
+        <!-- Guest Menu -->
+        <div id="guest-menu" class="guest-menu">
+            <button id="guest-menu-button" class="guest-menu__button" aria-label="Guest Menu">
+                <svg class="guest-menu__button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </button>
+            <div id="guest-menu-dropdown" class="guest-menu__dropdown">
+                <button class="guest-menu__dropdown-item" id="login-signup-btn">
+                    <svg class="guest-menu__dropdown-item-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                    <span>Login / Sign Up</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- User Menu -->
+        <div id="user-menu" class="user-menu">
+            <button id="user-menu-button" class="user-menu__button user-menu__button--logged-in" aria-label="User Menu">
+                <div class="avatar avatar--user-button">
+                    <span class="avatar__letter">U</span>
+                </div>
+            </button>
+            <div id="user-menu-dropdown" class="user-menu__dropdown">
+                <button class="user-menu__dropdown-item" id="profile-button">
+                    <svg class="user-menu__dropdown-item-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <span>Profile</span>
+                </button>
+                <button class="user-menu__dropdown-item" id="stats-button">
+                    <svg class="user-menu__dropdown-item-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+                    <span>Stats</span>
+                </button>
+                <div class="user-menu__dropdown-divider"></div>
+                <button class="user-menu__dropdown-item" id="logout-button">
+                    <svg class="user-menu__dropdown-item-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- WELCOME VIEW -->
+            <div id="welcome-screen" class="welcome-screen">
+                <div class="welcome-screen__header">
+                    <dotlottie-player
+                        id="welcome-bible-video"
+                        class="welcome-screen__header-icon"
+                        data-src="assets/animations/dark-brown-bible.lottie"
+                        loop="false"
+                        speed="1"
+                    ></dotlottie-player>
+                    <script>
+                    // Set lottie src dynamically based on base tag
+                    (function() {
+                        const player = document.getElementById('welcome-bible-video');
+                        const baseUrl = document.querySelector('base')?.href || window.location.origin + '/';
+                        const relativePath = player.getAttribute('data-src');
+                        player.src = new URL(relativePath, baseUrl).href;
+                    })();
+                    </script>
+                    <h1 class="welcome-screen__header-title">Daily Bible Quiz</h1>
+                    <p class="welcome-screen__header-tagline">Test your knowledge of scripture.</p>
+                </div>
+                
+                <!-- Loading/Ready State -->
+                <div id="welcome-ready" class="welcome-screen__ready">
+                    <button id="welcome-loading-button" class="welcome-screen__loading-btn">
+                        <span class="welcome-screen__loading-btn-text">Play</span>
+                        <div class="welcome-screen__loading-btn-shimmer"></div>
+                    </button>
+                    <button id="welcome-ready-button" class="welcome-screen__ready-btn" style="display: none;">Play</button>
+                    <span id="welcome-date" class="welcome-screen__ready-date" style="display: none;"></span>
+                </div>
+                
+                <!-- Credit -->
+                <div class="welcome-screen__credit">
+                    <a href="https://rythebibleguy.com/" target="_blank" rel="noopener noreferrer">Made by Rythebibleguy</a>
+                </div>
+            </div>
+
+            <!-- GAME VIEW (Hidden initially) -->
+            <div id="quiz-screen" class="quiz-screen" style="display: none;">
+                    <div id="quiz-results-button" class="quiz-screen__show-results">
+                        <button id="show-results-btn" class="quiz-screen__show-results-btn" style="display: none;">
+                            Results
+                        </button>
+                    </div>
+                    
+                    <div class="quiz-screen__questions">
+                        <div class="quiz-screen__card-wrapper">
+                            <div id="quiz-content-container" class="quiz-screen__content"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="quiz-action-buttons" class="quiz-screen__actions"></div>
+                    
+                    <div class="quiz-screen__difficulty-dots" id="quiz-difficulty-dots"></div>
+        </div>
+    </div>
+
+    <!-- INFO MODAL -->
+    <div id="info-modal-overlay" class="info-modal-overlay" style="display: none;">
+        <div class="info-modal-container">
+            <button id="info-modal-close-button" class="info-modal-close-button">&times;</button>
+            
+            <div class="info-modal-content-container">
+                <div class="info-modal-about-container">
+                    <span class="info-modal-about-heading">Hi, my name is Ryan!</span>
+                    <span class="info-modal-about-text-1">
+                        I love playing the daily NY Times games like Wordle, so I created something similar for Christians.
+                        Daily Bible Quiz offers a place where you can test your knowledge, challenge your friends, and grow in your understanding of the Bible, one day at a time.
+                    </span>
+                    <span class="info-modal-about-text-2">
+                        We're just getting started, but I'm excited to keep improving and adding new features. 
+                        My goal is to build something truly special for Christians everywhere :)
+                    </span>
+                </div>
+                
+                <div class="info-modal-divider"></div>
+                
+                <div class="info-modal-contact-container">
+                    <span class="info-modal-contact-heading">Get in Touch</span>
+                    <span class="info-modal-contact-text">Have questions or feedback?<br>I'd love to hear from you!</span>
+                    <a href="mailto:ryan@rythebibleguy.com" class="info-modal-contact-email">Ryan@rythebibleguy.com</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTS MODAL -->
+    <!-- SAVED ICON: Streak Fire Icon
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="results-modal__streak-icon">
+        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+    </svg>
+    -->
+    <div id="results-modal" class="results-modal" style="display: none;">
+        <div class="results-modal__overlay"></div>
+        <div class="results-modal__content">
+            <div class="results-modal__header">
+                <h2 class="results-modal__title">Quiz Complete!</h2>
+            </div>
+            
+            <div class="results-modal__score-section">
+                <div class="results-modal__score-display">
+                    <span id="results-score" class="results-modal__score">0/4</span>
+                </div>
+            </div>
+            
+            <div class="results-modal__leaderboard-section">
+                <div class="results-modal__leaderboard-tabs">
+                    <button class="results-modal__leaderboard-tab results-modal__leaderboard-tab--active" data-tab="friends">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span>Friends</span>
+                    </button>
+                    <button class="results-modal__leaderboard-tab" data-tab="global">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                        <span>Global</span>
+                    </button>
+                </div>
+                <div class="results-modal__leaderboard-content">
+                    <div class="results-modal__leaderboard-slider">
+                        <div class="results-modal__friends-panel">
+                            <!-- Empty state (shown when no friends) -->
+                            <div id="friends-empty-state" class="friends-empty-state" style="display: none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                                <div class="friends-empty-state__title">No friends yet</div>
+                            </div>
+                            
+                            <!-- Friends list (shown when friends exist) -->
+                            <div id="friends-scores-list" class="friends-scores-list" style="display: none;"></div>
+                            
+                            <!-- Add friend button (shown for logged-in users) -->
+                            <button id="results-share-friend-link-btn" class="friends-empty-state__button" style="display: none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="18" cy="5" r="3"></circle>
+                                    <circle cx="6" cy="12" r="3"></circle>
+                                    <circle cx="18" cy="19" r="3"></circle>
+                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                </svg>
+                                Add Friends
+                            </button>
+                            <!-- Sign in button (shown for guests) -->
+                            <button id="results-guest-signin-btn" class="friends-empty-state__button" style="display: none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                                    <polyline points="10 17 15 12 10 7"></polyline>
+                                    <line x1="15" y1="12" x2="3" y2="12"></line>
+                                </svg>
+                                Sign In
+                            </button>
+                        </div>
+                        <div class="results-modal__global-panel">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="results-modal__countdown-section">
+                <p class="results-modal__countdown-label">Next quiz in:</p>
+                <div id="results-countdown" class="results-modal__countdown">00:00:00</div>
+            </div>
+            
+            <div class="results-modal__actions">
+                <button id="results-share-btn" class="results-modal__btn results-modal__btn--primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 2L11 13"></path>
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+                    </svg>
+                    Send Challenge
+                </button>
+                <button id="results-close-btn" class="results-modal__btn results-modal__btn--secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div id="auth-modal" class="stacked-modal__overlay" style="display: none;">
+        <div class="stacked-modal__sheet">
+            <div class="stacked-modal__header">
+                <button id="auth-modal-close" class="stacked-modal__close">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <h3 class="stacked-modal__header-text">Daily Bible Quiz</h3>
+            </div>
+            
+            <div class="stacked-modal__content auth-modal__content">
+                <h2 class="auth-modal__title">Log in or create an account</h2>
+                <p class="auth-modal__subtitle">By continuing, you agree to the <a href="https://rythebibleguy.com/terms/" target="_blank" rel="noopener noreferrer">Terms of Service</a> and <a href="https://rythebibleguy.com/privacy/" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.</p>
+                
+                <!-- Email Input (Always Visible) -->
+                <div class="auth-modal__email-section">
+                    <label class="auth-modal__label" for="auth-email-input">Email address</label>
+                    <input type="email" id="auth-email-input" class="auth-modal__input" placeholder="" autocomplete="email">
+                    <button id="auth-email-submit-btn" class="auth-modal__btn auth-modal__btn--primary">Continue with email</button>
+                </div>
+                
+                <!-- Login Container (Hidden by default) -->
+                <div id="auth-login-container" class="auth-modal__auth-container" style="display: none;">
+                    <label class="auth-modal__label" for="auth-login-password">Password</label>
+                    <input type="password" id="auth-login-password" class="auth-modal__input" placeholder="" autocomplete="current-password">
+                    <button id="auth-login-btn" class="auth-modal__btn auth-modal__btn--primary">Log In</button>
+                </div>
+                
+                <!-- Signup Container (Hidden by default) -->
+                <div id="auth-signup-container" class="auth-modal__auth-container" style="display: none;">
+                    <label class="auth-modal__label" for="auth-signup-name">Display Name</label>
+                    <div class="auth-modal__input-wrapper">
+                        <input type="text" id="auth-signup-name" class="auth-modal__input" placeholder="" autocomplete="name" maxlength="15">
+                        <div id="auth-signup-name-error" class="auth-modal__input-error" style="display: none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <label class="auth-modal__label" for="auth-signup-password">Create Password</label>
+                    <input type="password" id="auth-signup-password" class="auth-modal__input" placeholder="" autocomplete="new-password">
+                    <button id="auth-signup-btn" class="auth-modal__btn auth-modal__btn--primary">Sign Up</button>
+                </div>
+                
+                <div class="auth-modal__divider">
+                    <span>OR</span>
+                </div>
+                
+                <div class="auth-modal__social-btns">
+                    <button class="auth-modal__btn auth-modal__btn--outline">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="EA4335"/></svg>
+                        Continue with Google
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATS MODAL -->
+    <div id="stats-modal" class="stacked-modal__overlay" style="display: none;">
+        <div class="stacked-modal__sheet">
+            <div class="stacked-modal__header">
+                <button id="stats-modal-close" class="stacked-modal__close">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <h3 class="stacked-modal__header-text">Statistics</h3>
+            </div>
+            
+            <div class="stacked-modal__content stats-modal__content">
+                <!-- Stats Grid -->
+                <div class="stats-modal__grid">
+                    <div class="stats-modal__grid-item">
+                        <div class="stats-modal__grid-value" id="stats-played">0</div>
+                        <div class="stats-modal__grid-label">Played</div>
+                    </div>
+                    <div class="stats-modal__grid-item">
+                        <div class="stats-modal__grid-value" id="stats-win-percentage">0</div>
+                        <div class="stats-modal__grid-label">Perfect %</div>
+                    </div>
+                    <div class="stats-modal__grid-item">
+                        <div class="stats-modal__grid-value" id="stats-current-streak">0</div>
+                        <div class="stats-modal__grid-label">Current Streak</div>
+                    </div>
+                    <div class="stats-modal__grid-item">
+                        <div class="stats-modal__grid-value" id="stats-max-streak">0</div>
+                        <div class="stats-modal__grid-label">Max Streak</div>
+                    </div>
+                </div>
+
+                <hr class="stats-modal__divider">
+
+                <!-- Score Distribution -->
+                <div class="stats-modal__distribution">
+                    <h4 class="stats-modal__distribution-title">SCORE DISTRIBUTION</h4>
+                    <div class="stats-modal__distribution-chart">
+                        <div class="stats-modal__distribution-row" data-score="4">
+                            <div class="stats-modal__distribution-number">4</div>
+                            <div class="stats-modal__distribution-bar-container">
+                                <div class="stats-modal__distribution-bar" data-count="0">
+                                    <div class="stats-modal__distribution-count">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stats-modal__distribution-row" data-score="3">
+                            <div class="stats-modal__distribution-number">3</div>
+                            <div class="stats-modal__distribution-bar-container">
+                                <div class="stats-modal__distribution-bar" data-count="0">
+                                    <div class="stats-modal__distribution-count">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stats-modal__distribution-row" data-score="2">
+                            <div class="stats-modal__distribution-number">2</div>
+                            <div class="stats-modal__distribution-bar-container">
+                                <div class="stats-modal__distribution-bar" data-count="0">
+                                    <div class="stats-modal__distribution-count">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stats-modal__distribution-row" data-score="1">
+                            <div class="stats-modal__distribution-number">1</div>
+                            <div class="stats-modal__distribution-bar-container">
+                                <div class="stats-modal__distribution-bar" data-count="0">
+                                    <div class="stats-modal__distribution-count">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stats-modal__distribution-row" data-score="0">
+                            <div class="stats-modal__distribution-number">0</div>
+                            <div class="stats-modal__distribution-bar-container">
+                                <div class="stats-modal__distribution-bar" data-count="0">
+                                    <div class="stats-modal__distribution-count">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="stats-modal__divider">
+
+                <!-- Badges Section -->
+                <div class="stats-modal__badges">
+                    <h4 class="stats-modal__badges-title">BADGES</h4>
+                    <p class="stats-modal__badges-subtitle">Tap on any badge to view it in detail.</p>
+                    <div class="stats-modal__badges-grid" id="badges-grid">
+                        <!-- Badges will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BADGE TOOLTIP -->
+    <div id="badge-tooltip" class="badge-tooltip" style="display: none;">
+        <div class="badge-tooltip__content">
+            <div class="badge-tooltip__icon" id="badge-tooltip-icon"></div>
+            <div class="badge-tooltip__name" id="badge-tooltip-name"></div>
+            <div class="badge-tooltip__description" id="badge-tooltip-description"></div>
+            <div class="badge-tooltip__status" id="badge-tooltip-status"></div>
+        </div>
+        <div class="badge-tooltip__arrow"></div>
+    </div>
+
+    <!-- PROFILE MODAL -->
+    <div id="profile-modal" class="stacked-modal__overlay" style="display: none;">
+        <div class="stacked-modal__sheet">
+            <div class="stacked-modal__header">
+                <button id="profile-modal-close" class="stacked-modal__close">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <h3 class="stacked-modal__header-text">My Profile</h3>
+            </div>
+            
+            <div class="stacked-modal__content profile-modal__content">
+                <!-- Avatar Section -->
+                <div class="profile-modal__avatar-section">
+                    <div id="profile-avatar" class="profile-modal__avatar-wrapper" title="Click to change color">
+                        <div class="avatar avatar--profile-modal">
+                            <span class="avatar__letter" id="profile-avatar-letter">A</span>
+                        </div>
+                        <div class="profile-modal__avatar-edit-badge">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="13.5" cy="6.5" r=".5"></circle>
+                                <circle cx="17.5" cy="10.5" r=".5"></circle>
+                                <circle cx="8.5" cy="7.5" r=".5"></circle>
+                                <circle cx="6.5" cy="12.5" r=".5"></circle>
+                                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="profile-modal__avatar-hint">Tap avatar to change color</p>
+                </div>
+
+                <!-- Color Palette -->
+                <div id="profile-color-palette" class="profile-modal__color-palette" style="display: none;">
+                    <!-- Colors will be populated by JS -->
+                </div>
+
+                <!-- Info Section -->
+                <div class="profile-modal__info-section">
+                    <div class="profile-modal__field">
+                        <label class="profile-modal__label">Display Name</label>
+                        <div class="profile-modal__name-container">
+                            <div id="profile-display-name" class="profile-modal__value">
+                                <span id="profile-display-name-text"></span>
+                                <button id="profile-name-edit-btn" class="profile-modal__edit-btn" title="Edit name">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="profile-name-edit-container" class="profile-modal__edit-container" style="display: none;">
+                            <div class="profile-modal__input-wrapper">
+                                <input type="text" id="profile-name-input" class="profile-modal__input" maxlength="15" />
+                                <div id="profile-name-error" class="profile-modal__input-error" style="display: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="profile-modal__edit-actions">
+                                <button id="profile-name-save-btn" class="profile-modal__action-btn profile-modal__action-btn--save">Save</button>
+                                <button id="profile-name-cancel-btn" class="profile-modal__action-btn profile-modal__action-btn--cancel">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-modal__field">
+                        <label class="profile-modal__label">Email</label>
+                        <div id="profile-email" class="profile-modal__value"></div>
+                    </div>
+                    
+                    <!-- Friends Section -->
+                    <div class="profile-modal__field profile-modal__friends-section">
+                        <label class="profile-modal__label">Friends</label>
+                        <button id="profile-share-friend-link" class="profile-modal__share-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="18" cy="5" r="3"></circle>
+                                <circle cx="6" cy="12" r="3"></circle>
+                                <circle cx="18" cy="19" r="3"></circle>
+                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                            </svg>
+                            Add Friends
+                        </button>
+                        <div id="profile-friends-list" class="profile-modal__friends-list">
+                            <!-- Friends will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

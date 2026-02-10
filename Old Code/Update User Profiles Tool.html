@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile Mass Update Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status.running {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        button {
+            background: #000;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        button:hover {
+            background: #333;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .progress {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .log {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>� User Profile Mass Update Tool</h1>
+        <p><strong>Current Update:</strong> Delete <code>photoURL</code> field from all user profiles (privacy cleanup)</p>
+        <p style="font-size: 12px; color: #666; font-style: italic;">Note: This tool can be reused for future mass profile updates. See code comments for customization.</p>
+        
+        <div style="background: #fff3cd; padding: 15px; margin: 20px 0; border-radius: 4px; border-left: 4px solid #ffc107;">
+            <strong>⚠️ BEFORE RUNNING:</strong>
+            <p style="margin: 10px 0 5px 0;">1. Go to Firebase Console → Firestore → Rules</p>
+            <p style="margin: 5px 0;">2. Replace rules with this (TEMPORARY):</p>
+            <pre style="background: white; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 11px;">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+  }
+}</pre>
+            <p style="margin: 5px 0;">3. Click <strong>Publish</strong></p>
+            <p style="margin: 5px 0;">4. Run test below, then full migration</p>
+            <p style="margin: 5px 0; color: #721c24; font-weight: bold;">5. RESTORE ORIGINAL FIREBASE RULES IMMEDIATELY AFTER</p>
+        </div>
+        
+        <div id="status" class="status pending">
+            Ready to migrate
+        </div>
+        
+        <div class="progress" id="progress"></div>
+        
+        <button id="testBtn" onclick="runTest()">Test on My Profile First</button>
+        <button id="migrateBtn" onclick="runMigration()" disabled style="margin-left: 10px;">Run Full Migration</button>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7nwzw6917n2ro0mP-E5wNI8GqeZb0FVk",
+            authDomain: "rythebibleguy-app.firebaseapp.com",
+            databaseURL: "https://rythebibleguy-app-default-rtdb.firebaseio.com",
+            projectId: "rythebibleguy-app",
+            storageBucket: "rythebibleguy-app.firebasestorage.app",
+            messagingSenderId: "1093957559131",
+            appId: "1:1093957559131:web:5fa9bc7847738f4219f07e",
+            measurementId: "G-46ZN87VGZR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+
+        function logMessage(message, isError = false) {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.style.color = isError ? '#721c24' : '#333';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        function updateProgress(current, total) {
+            const progressDiv = document.getElementById('progress');
+            progressDiv.textContent = `Processing: ${current} / ${total} users`;
+        }
+
+        window.runTest = async function() {
+            const testBtn = document.getElementById('testBtn');
+            const migrateBtn = document.getElementById('migrateBtn');
+            testBtn.disabled = true;
+            
+            try {
+                updateStatus('🧪 Testing on rythebibleguy...', 'running');
+                logMessage('Running test on your profile...');
+                
+                const usersRef = collection(firestore, 'users');
+                const snapshot = await getDocs(usersRef);
+                
+                let testUser = null;
+                for (const userDoc of snapshot.docs) {
+                    const userData = userDoc.data();
+                    if (userData.displayName === 'rythebibleguy') {
+                        testUser = { id: userDoc.id, data: userData };
+                        break;
+                    }
+                }
+                
+                if (!testUser) {
+                    updateStatus('❌ Test failed: Could not find user rythebibleguy', 'error');
+                    logMessage('Error: User rythebibleguy not found', true);
+                    testBtn.disabled = false;
+                    return;
+                }
+                
+                logMessage(`Found user: ${testUser.data.displayName || testUser.id}`);
+                
+                // ========================================
+                // CUSTOMIZE THIS SECTION FOR FUTURE UPDATES
+                // ========================================
+                
+                // Check condition: Does user need the update?
+                const needsUpdate = testUser.data.photoURL !== undefined;
+                
+                if (!needsUpdate) {
+                    updateStatus('✅ Test complete: User already has the update!', 'success');
+                    logMessage('⏭️ User already up-to-date (photoURL field removed). Check Firebase Console to verify.');
+                    migrateBtn.disabled = false;
+                    logMessage('✅ Test passed! You can now run the full migration.');
+                } else {
+                    // Apply update: Delete photoURL field
+                    const userRef = doc(firestore, 'users', testUser.id);
+                    await updateDoc(userRef, { 
+                        photoURL: deleteField()  // CHANGE THIS for future updates
+                    });
+                    updateStatus('✅ Test complete: Update applied successfully!', 'success');
+                    logMessage('✅ Successfully deleted photoURL field from profile');
+                    logMessage('Check Firebase Console to verify, then run full migration.');
+                    migrateBtn.disabled = false;
+                }
+                
+                // ========================================
+                // END CUSTOMIZATION SECTION
+                // ========================================
+                
+            } catch (error) {
+                updateStatus(`❌ Test failed: ${error.message}`, 'error');
+                logMessage(`Test error: ${error.message}`, true);
+                testBtn.disabled = false;
+            }
+        };
+
+        window.runMigration = async function() {
+            const btn = document.getElementById('migrateBtn');
+            btn.disabled = true;
+            
+            try {
+                updateStatus('🔍 Fetching all users...', 'running');
+                logMessage('Starting migration...');
+                
+                const usersRef = collection(firestore, 'users');
+                const snapshot = await getDocs(usersRef);
+                
+                const totalUsers = snapshot.size;
+                logMessage(`Found ${totalUsers} users`);
+                
+                let processed = 0;
+                let updated = 0;
+                let skipped = 0;
+                let errors = 0;
+
+                for (const userDoc of snapshot.docs) {
+                    const userData = userDoc.data();
+                    const userId = userDoc.id;
+                    
+                    try {
+                        // ========================================
+                        // CUSTOMIZE THIS SECTION FOR FUTURE UPDATES
+                        // ========================================
+                        
+                        // Check condition: Does user need the update?
+                        const needsUpdate = userData.photoURL !== undefined;
+                        
+                        if (needsUpdate) {
+                            // Apply update: Delete photoURL field
+                            const userRef = doc(firestore, 'users', userId);
+                            await updateDoc(userRef, { 
+                                photoURL: deleteField()  // CHANGE THIS for future updates
+                            });
+                            updated++;
+                            logMessage(`✅ Deleted photoURL from: ${userData.displayName || userId}`);
+                        } else {
+                            // User already has the update
+                            skipped++;
+                            logMessage(`⏭️ Skipped user: ${userData.displayName || userId} (photoURL already removed)`);
+                        }
+                        
+                        // ========================================
+                        // END CUSTOMIZATION SECTION
+                        // ========================================
+                        
+                    } catch (error) {
+                        errors++;
+                        logMessage(`❌ Error updating ${userData.displayName || userId}: ${error.message}`, true);
+                    }
+                    
+                    processed++;
+                    updateProgress(processed, totalUsers);
+                }
+
+                // Complete
+                updateStatus(`✅ Migration complete! Updated: ${updated}, Skipped: ${skipped}, Errors: ${errors}`, 'success');
+                logMessage(`=== MIGRATION FINISHED ===`);
+                logMessage(`Updated: ${updated}, Skipped: ${skipped}, Errors: ${errors}`);
+                
+                if (errors === 0) {
+                    logMessage('🎉 All users migrated successfully!');
+                    logMessage('⚠️ Remember to RESTORE SECURE FIREBASE RULES NOW!');
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ Migration failed: ${error.message}`, 'error');
+                logMessage(`Migration error: ${error.message}`, true);
+                btn.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>

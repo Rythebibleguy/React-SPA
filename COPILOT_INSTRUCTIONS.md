@@ -14,7 +14,7 @@
 - UI/UX inspired by NY Times Games (Wordle, Connections, etc.)
 
 ## Legacy Code
-- `Daily-Bible-Quiz-Code/` folder contains the original HTML/CSS/JS implementation
+- `Old Code/` folder contains the original HTML/CSS/JS implementation
 - Use as reference for ideas and approach, not for copy-pasting code directly
 - Only reference this code when explicitly asked to do so
 

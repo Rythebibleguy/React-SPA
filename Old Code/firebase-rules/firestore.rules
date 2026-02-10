@@ -1,0 +1,59 @@
+// Last updated: February 7, 2026
+// Firestore Security Rules for Daily Bible Quiz
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    match /users/{userId} {
+      
+      // READ PERMISSION
+      // Who: Any logged-in user
+      // What: Can read any user profile
+      // Why: Needed for friends feature (verify friend exists, display scores)
+      // Data: displayName, history, friends, badges, streaks (email removed for privacy)
+      allow read: if request.auth != null;
+      
+      // CREATE/DELETE PERMISSION
+      // Who: Only the user themselves
+      // What: Can create/delete their own profile only
+      // Why: Prevents users from creating/deleting other people's profiles
+      allow create, delete: if request.auth != null && request.auth.uid == userId;
+      
+      // UPDATE PERMISSION (Three scenarios allowed)
+      // Scenario 1: Update your own profile (any field)
+      // Scenario 2: Add yourself to someone else's friends array (friend request system)
+      // Scenario 3: Remove yourself from someone else's friends array (unfriend)
+      allow update: if request.auth != null && (
+        // Scenario 1: You're updating your own profile
+        request.auth.uid == userId
+        
+        // Scenario 2: You're adding yourself as a friend to someone else's profile
+        || (
+          // Only the 'friends' field can be modified (no other fields)
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['friends'])
+          // Your UID is being added to the friends array
+          && request.auth.uid in request.resource.data.friends 
+          // You weren't already in the friends array (preventing duplicates)
+          && !(request.auth.uid in resource.data.friends)
+        )
+        
+        // Scenario 3: You're removing yourself from someone else's friends array
+        || (
+          // Only the 'friends' field can be modified (no other fields)
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['friends'])
+          // You were in the friends array before
+          && request.auth.uid in resource.data.friends
+          // You're no longer in the friends array after the update
+          && !(request.auth.uid in request.resource.data.friends)
+        )
+      );
+      
+      // LIST/QUERY PERMISSION
+      // Who: Anyone (even not logged in)
+      // What: Can query users collection (e.g., WHERE displayName == 'username')
+      // Why: Needed during signup to check if username is already taken
+      allow list: if true;
+    }
+    
+  }
+}
