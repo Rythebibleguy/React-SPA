@@ -3,7 +3,7 @@
   max-width: calc(100 * var(--app-width));
   height: calc(100 * var(--app-height));
   margin: 0 auto;;
-  padding-bottom: calc(20 * var(--element-width)); /* Space for bottom nav */
+  padding-bottom: var(--bottom-nav-height); /* Space for bottom nav */
   text-align: center;
   background-color: #ffffff;
   position: relative;

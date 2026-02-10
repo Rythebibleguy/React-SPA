@@ -10,6 +10,9 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Bottom nav height - single source of truth */
+  --bottom-nav-height: calc(16 * var(--element-width));
 }
 
 *,

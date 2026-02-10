@@ -1,20 +1,29 @@
 .welcome-screen {
-  position: absolute;
-  top: calc(30 * var(--app-height));
-  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.welcome-screen__content {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-  text-align: center;
+  justify-content: flex-start;
+  padding-top: calc(25 * var(--app-height));
+  gap: calc(10 * var(--element-width));
+}
+
+.welcome-screen__footer {
+  padding-bottom: calc(3 * var(--element-width));
 }
 
 .welcome-screen__header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  z-index: 1;
-  margin-bottom: calc(10 * var(--element-width));
   position: relative;
 }
 
@@ -133,10 +142,6 @@
 }
 
 .welcome-screen__credit {
-  position: fixed;
-  bottom: calc(2 * var(--element-width));
-  left: 50%;
-  transform: translateX(-50%);
   font-size: calc(2.6 * var(--element-width));
   color: #333;
   opacity: 0;

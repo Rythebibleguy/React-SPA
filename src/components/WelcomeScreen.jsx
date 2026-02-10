@@ -75,52 +75,56 @@ function WelcomeScreen({ onStart }) {
 
   return (
     <div className="welcome-screen">
-      <div className="welcome-screen__header">
-        {animationData && (
-          <Lottie
-            lottieRef={lottieRef}
-            animationData={animationData}
-            loop={false}
-            className="welcome-screen__header-icon"
-          />
-        )}
-        <h1 className={`welcome-screen__header-title ${animateTitle ? 'welcome-screen__header-title--animate' : ''}`}>
-          Daily Bible Quiz
-        </h1>
-        <p className={`welcome-screen__header-tagline ${animateTagline ? 'welcome-screen__header-tagline--animate' : ''}`}>
-          Test your knowledge of scripture.
-        </p>
-      </div>
+      <div className="welcome-screen__content">
+        <div className="welcome-screen__header">
+          {animationData && (
+            <Lottie
+              lottieRef={lottieRef}
+              animationData={animationData}
+              loop={false}
+              className="welcome-screen__header-icon"
+            />
+          )}
+          <h1 className={`welcome-screen__header-title ${animateTitle ? 'welcome-screen__header-title--animate' : ''}`}>
+            Daily Bible Quiz
+          </h1>
+          <p className={`welcome-screen__header-tagline ${animateTagline ? 'welcome-screen__header-tagline--animate' : ''}`}>
+            Test your knowledge of scripture.
+          </p>
+        </div>
 
-      <div className="welcome-screen__ready">
-        {showLoadingBtn && (
-          <button className="welcome-screen__loading-btn welcome-screen__loading-btn--visible">
-            <span className="welcome-screen__loading-btn-text">Play</span>
-            <div className="welcome-screen__loading-btn-shimmer"></div>
-          </button>
-        )}
-        
-        {showReadyBtn && (
-          <>
-            <button 
-              className="welcome-screen__ready-btn"
-              onClick={handleStart}
-            >
-              Play
+        <div className="welcome-screen__ready">
+          {showLoadingBtn && (
+            <button className="welcome-screen__loading-btn welcome-screen__loading-btn--visible">
+              <span className="welcome-screen__loading-btn-text">Play</span>
+              <div className="welcome-screen__loading-btn-shimmer"></div>
             </button>
-            {showQuizNumber && (
-              <span className="welcome-screen__ready-date">
-                Quiz #1
-              </span>
-            )}
-          </>
-        )}
+          )}
+          
+          {showReadyBtn && (
+            <>
+              <button 
+                className="welcome-screen__ready-btn"
+                onClick={handleStart}
+              >
+                Play
+              </button>
+              {showQuizNumber && (
+                <span className="welcome-screen__ready-date">
+                  Quiz #1
+                </span>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
-      <div className={`welcome-screen__credit ${showCredit ? 'visible' : ''}`}>
-        <a href="https://rythebibleguy.com/" target="_blank" rel="noopener noreferrer">
-          Made by Rythebibleguy
-        </a>
+      <div className="welcome-screen__footer">
+        <div className={`welcome-screen__credit ${showCredit ? 'visible' : ''}`}>
+          <a href="https://rythebibleguy.com/" target="_blank" rel="noopener noreferrer">
+            Made by Rythebibleguy
+          </a>
+        </div>
       </div>
     </div>
   )

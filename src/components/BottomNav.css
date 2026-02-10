@@ -3,12 +3,14 @@
   bottom: 0;
   left: 0;
   right: 0;
+  height: var(--bottom-nav-height);
   display: flex;
   justify-content: space-around;
   align-items: center;
   background: #ffffff;
   border-top: 1px solid #e0e0e0;
-  padding: calc(2 * var(--element-width)) 0 max(calc(2 * var(--element-width)), env(safe-area-inset-bottom));
+  padding: 0 0 max(0px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
   z-index: 1000;
   box-shadow: 0 calc(-0.5 * var(--element-width)) calc(2 * var(--element-width)) rgba(0, 0, 0, 0.05);
 }
