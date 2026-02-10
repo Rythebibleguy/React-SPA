@@ -85,7 +85,7 @@
   text-shadow: 0 calc(0.6 * var(--element-width)) calc(1.2 * var(--element-width)) rgba(0, 0, 0, 0.2);
 }
 
-.results-modal__leaderboard-section {
+.results-modal__global-section {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -95,7 +95,7 @@
   border-radius: calc(2.8 * var(--element-width));
   box-shadow: 0 calc(1.2 * var(--element-width)) calc(2.4 * var(--element-width)) rgba(0, 0, 0, 0.08);
   animation: resultsModalSectionFadeIn 0.5s ease-out 0.4s both;
-  padding: calc(3 * var(--element-width));
+  padding: calc(5 * var(--element-width));
   box-sizing: border-box;
 }
 
@@ -225,7 +225,7 @@
   letter-spacing: 0.05em;
 }
 
-.results-modal__actions {
+.results-modal__actions-section {
   display: flex;
   flex-direction: column;
   gap: calc(2.2 * var(--element-width));

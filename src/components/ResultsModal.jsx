@@ -15,10 +15,13 @@ function ResultsModal({ score, total, stats, onClose, onShare }) {
       scoreCounts[scoreKey] = stats.scores[scoreKey] || 0
     })
 
+    // Add the current user's score to the distribution
+    scoreCounts[score] = (scoreCounts[score] || 0) + 1
+
     const totalPlayers = Object.values(scoreCounts).reduce((sum, count) => sum + count, 0)
 
     return { scoreCounts, total: totalPlayers }
-  }, [stats])
+  }, [stats, score])
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -57,7 +60,7 @@ function ResultsModal({ score, total, stats, onClose, onShare }) {
           </div>
         </div>
 
-        <div className="results-modal__leaderboard-section">
+        <div className="results-modal__global-section">
           {scoreDistribution && scoreDistribution.total > 0 ? (
             <>
               <div className="results-modal__score-distribution">
@@ -113,7 +116,7 @@ function ResultsModal({ score, total, stats, onClose, onShare }) {
           <div className="results-modal__countdown">{countdown}</div>
         </div>
 
-        <div className="results-modal__actions">
+        <div className="results-modal__actions-section">
           <button className="results-modal__btn results-modal__btn--primary" onClick={onShare}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M22 2L11 13"></path>

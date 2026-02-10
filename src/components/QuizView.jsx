@@ -385,15 +385,15 @@ function QuizView() {
       </div>
 
       {/* Action Buttons */}
-      <div className={`quiz-view__actions ${selectedAnswers[currentIndex] !== undefined ? 'visible' : 'hidden'}`}>
+      <div className="quiz-view__actions">
         <div className="quiz-view__actions-buttons">
-            <button className="quiz-view__prev-button" onClick={handlePrev} disabled={currentIndex === 0}>
+            <button className={`quiz-view__prev-button ${currentIndex === 0 || selectedAnswers[currentIndex] === undefined ? 'hidden' : ''}`} onClick={handlePrev}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6"></polyline>
               </svg>
               <span>Prev</span>
             </button>
-            <button className="quiz-view__reference-button" onClick={handleToggleReference}>
+            <button className={`quiz-view__reference-button ${selectedAnswers[currentIndex] === undefined ? 'hidden' : ''}`} onClick={handleToggleReference}>
               {!showReference ? (
                 <>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -415,7 +415,7 @@ function QuizView() {
                 </>
               )}
             </button>
-            <button className="quiz-view__next-button" onClick={handleNext} disabled={currentIndex === questions.length - 1}>
+            <button className={`quiz-view__next-button ${currentIndex === questions.length - 1 || selectedAnswers[currentIndex] === undefined ? 'hidden' : ''}`} onClick={handleNext}>
               <span>Next</span>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="9 18 15 12 9 6"></polyline>
