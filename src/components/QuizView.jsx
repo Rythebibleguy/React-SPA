@@ -24,6 +24,7 @@ function QuizView() {
   const [showResultsModal, setShowResultsModal] = useState(false)
   const containerRef = useRef(null)
   const cardsRef = useRef([])
+  const hasSubmittedRef = useRef(false)
 
   // Unified scroll animation function
   const scrollToIndex = (index) => {
@@ -154,14 +155,47 @@ function QuizView() {
     }
   }, [currentIndex, questions.length])
 
+  // Submit all answers and score to Firebase when quiz is complete
+  const submitQuizResults = async () => {
+    const todayString = getTodayString()
+    const score = calculateScore()
+
+    try {
+      // Batch write all answers
+      const promises = selectedAnswers.map((answerId, qIndex) => {
+        const answerRef = ref(db, `quiz_stats/${todayString}/q${qIndex}/${answerId}`)
+        return runTransaction(answerRef, (currentCount) => {
+          return (currentCount || 0) + 1
+        })
+      })
+
+      // Also update score distribution
+      const scoreRef = ref(db, `quiz_stats/${todayString}/scores/${score}`)
+      promises.push(
+        runTransaction(scoreRef, (currentCount) => {
+          return (currentCount || 0) + 1
+        })
+      )
+
+      await Promise.all(promises)
+    } catch (error) {
+      console.error('Error submitting quiz results:', error)
+      // Continue to show results even if Firebase write fails
+    }
+  }
+
   // Check if all questions are answered and show results modal
   useEffect(() => {
-    if (questions.length === 4 && selectedAnswers.length === 4 && !selectedAnswers.includes(undefined)) {
-      // Small delay for better UX
-      const timeout = setTimeout(() => {
-        setShowResultsModal(true)
-      }, 800)
-      return () => clearTimeout(timeout)
+    if (questions.length === 4 && selectedAnswers.length === 4 && !selectedAnswers.includes(undefined) && !hasSubmittedRef.current) {
+      hasSubmittedRef.current = true
+      
+      // Submit results to Firebase first
+      submitQuizResults().then(() => {
+        // Small delay for better UX
+        setTimeout(() => {
+          setShowResultsModal(true)
+        }, 800)
+      })
     }
   }, [selectedAnswers, questions.length])
 
@@ -175,20 +209,16 @@ function QuizView() {
     // Get current stats for this question or initialize empty object
     const questionStats = stats?.[`q${questionIndex}`] || {}
     
-    // Optimistically update local stats (+1 to selected answer)
-    const updatedStats = { ...questionStats }
-    updatedStats[answerId] = (updatedStats[answerId] || 0) + 1
-
-    // Calculate total votes
+    // Calculate percentages using existing stats only (don't include user's answer yet)
     let totalVotes = 0
-    Object.values(updatedStats).forEach(count => totalVotes += count)
+    Object.values(questionStats).forEach(count => totalVotes += count)
 
     // Calculate percentages for all answers (using answer IDs)
     const question = questions[questionIndex]
     const percentages = {}
     
     question.answers.forEach(answer => {
-      const count = updatedStats[answer.id] || 0
+      const count = questionStats[answer.id] || 0
       const percentage = totalVotes === 0 ? 0 : Math.round((count / totalVotes) * 100)
       percentages[answer.id] = percentage
     })
@@ -197,13 +227,6 @@ function QuizView() {
       ...prev,
       [questionIndex]: percentages
     }))
-
-    // Send vote to Firebase in background (fire and forget)
-    const todayString = getTodayString()
-    const answerRef = ref(db, `quiz_stats/${todayString}/q${questionIndex}/${answerId}`)
-    runTransaction(answerRef, (currentCount) => {
-      return (currentCount || 0) + 1
-    }).catch(e => console.error('Vote error:', e))
   }
 
   const handlePrev = () => {
