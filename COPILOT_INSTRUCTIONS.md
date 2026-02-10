@@ -5,12 +5,8 @@
 - Pitch multiple options: When discussing ways to add or change something, present 2-3 different approaches with pros/cons so I can choose
 - Reuse existing code: Search for existing functions, patterns, or utilities before writing new code
 
-## Deployment Architecture
-**Testing:**
-- `rythebibleguy.com/test` - WordPress site (SiteGround) for testing before going live
-- How it works: Files manually uploaded to `/test` folder for non-live testing
-
-**Production:**
-- `daily-bible-quiz-code.pages.dev` - Cloudflare Pages (auto-deploys from GitHub)
-- `rythebibleguy.com/quiz` - What users access (proxied to Pages via Cloudflare Worker)
-- How it works: Domain points to Cloudflare. Worker intercepts `/quiz` traffic and sends it to the Pages site. Everything else goes to WordPress.
+## Hosting Setup
+- Live URL: rythebibleguy.com/react (WordPress hosting)
+- Development: `npm run dev` → localhost:5173 with hot reload
+- Production: `npm run build` → creates `dist/` folder → upload dist contents to WordPress /react directory
+- Base path configured as `/react/` in vite.config.js
