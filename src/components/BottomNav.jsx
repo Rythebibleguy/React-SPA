@@ -1,10 +1,7 @@
-import { useState } from 'react'
 import './BottomNav.css'
 import { FileText, Users, CircleUser } from 'lucide-react'
 
-function BottomNav() {
-  const [activeTab, setActiveTab] = useState('quiz')
-
+function BottomNav({ currentScreen, onNavigate }) {
   const tabs = [
     { id: 'quiz', icon: <FileText />, label: 'Quiz' },
     { id: 'friends', icon: <Users />, label: 'Friends' },
@@ -16,8 +13,8 @@ function BottomNav() {
       {tabs.map(tab => (
         <button
           key={tab.id}
-          className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
-          onClick={() => setActiveTab(tab.id)}
+          className={`nav-item ${currentScreen === tab.id ? 'active' : ''}`}
+          onClick={() => onNavigate(tab.id)}
         >
           <span className="nav-icon">{tab.icon}</span>
           <span className="nav-label">{tab.label}</span>
