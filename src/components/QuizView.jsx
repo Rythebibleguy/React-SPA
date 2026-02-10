@@ -65,20 +65,47 @@ function QuizView() {
   const [selectedAnswers, setSelectedAnswers] = useState([])
   const [showReference, setShowReference] = useState(false)
   const containerRef = useRef(null)
+  const cardsRef = useRef([])
 
-  useEffect(() => {
-    // Scroll to current question when index changes
+  // Navigate programmatically (from buttons/dots) with scroll
+  const navigateToIndex = (index) => {
+    setCurrentIndex(index)
     if (containerRef.current) {
-      const questionCard = containerRef.current.children[currentIndex]
+      const questionCard = cardsRef.current[index]
       if (questionCard) {
         questionCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
       }
     }
+  }
+
+  // Intersection Observer to detect swipe navigation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.75) {
+            const index = cardsRef.current.findIndex((ref) => ref === entry.target)
+            if (index !== -1 && index !== currentIndex) {
+              setCurrentIndex(index)
+              setShowReference(false)
+            }
+          }
+        })
+      },
+      {
+        root: containerRef.current,
+        threshold: [0.5, 0.75, 1.0],
+      }
+    )
+
+    cardsRef.current.forEach((card) => {
+      if (card) observer.observe(card)
+    })
+
+    return () => observer.disconnect()
   }, [currentIndex])
 
   const handleAnswerSelect = (questionIndex, answerIndex) => {
-    if (isLocked) return
-
     const newSelectedAnswers = [...selectedAnswers]
     newSelectedAnswers[questionIndex] = answerIndex
     setSelectedAnswers(newSelectedAnswers)
@@ -87,21 +114,21 @@ function QuizView() {
     if (questionIndex < mockQuestions.length - 1) {
       // Auto-advance after short delay
       setTimeout(() => {
-        setCurrentIndex(questionIndex + 1)
+        navigateToIndex(questionIndex + 1)
       }, 600)
     }
   }
 
   const handlePrev = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1)
+      navigateToIndex(currentIndex - 1)
       setShowReference(false)
     }
   }
 
   const handleNext = () => {
     if (currentIndex < mockQuestions.length - 1) {
-      setCurrentIndex(currentIndex + 1)
+      navigateToIndex(currentIndex + 1)
       setShowReference(false)
     }
   }
@@ -111,11 +138,8 @@ function QuizView() {
   }
 
   const handleDotClick = (index) => {
-    // Only allow navigation to unlocked questions
-    if (index === 0 || selectedAnswers[index - 1] !== undefined) {
-      setCurrentIndex(index)
-      setShowReference(false)
-    }
+    navigateToIndex(index)
+    setShowReference(false)
   }
 
   return (
@@ -126,7 +150,12 @@ function QuizView() {
           const isAnswered = selectedAnswers[qIndex] !== undefined
 
           return (
-            <div key={qIndex} className="quiz-view__card" id={`block-q${qIndex}`}>
+            <div 
+              key={qIndex} 
+              className="quiz-view__card" 
+              id={`block-q${qIndex}`}
+              ref={(el) => (cardsRef.current[qIndex] = el)}
+            >
               <div className={`quiz-view__card-flipper ${showReference && qIndex === currentIndex ? 'flipped' : ''}`}>
                 <div className="quiz-view__card-inner">
                   {/* Front - Question */}

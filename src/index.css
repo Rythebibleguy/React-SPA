@@ -12,6 +12,19 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+*,
+*:focus,
+*:active,
+button,
+button:focus,
+button:active,
+input,
+input:focus,
+input:active {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
 body {
   margin: 0;
   display: flex;

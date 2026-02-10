@@ -9,9 +9,15 @@
 ## Design Reference
 - UI/UX inspired by NY Times Games (Wordle, Connections, etc.)
 
+## Legacy Code
+- `Daily-Bible-Quiz-Code/` folder contains the original HTML/CSS/JS implementation
+- Use as reference for ideas and approach, not for copy-pasting code directly
+- Only reference this code when explicitly asked to do so
+
 ## Hosting Setup
 - Development: 
   - `npm run dev` → starts server on localhost:5173 + exposes on network for mobile testing
   - Server automatically accessible from other devices on same WiFi
   - Mobile access: http://192.168.1.4:5173/
+  - React DevTools browser extension installed for debugging
 - Production: `npm run build` → creates `dist/` folder → upload dist contents to WordPress /react directory
