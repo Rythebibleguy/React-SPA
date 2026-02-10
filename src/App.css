@@ -1,6 +1,17 @@
 #root {
+  width: 100%;
+  max-width: calc(100 * var(--app-width));
+  height: calc(100 * var(--app-height));
   margin: 0 auto;
   padding: calc(5 * var(--element-width));
   padding-bottom: calc(25 * var(--element-width)); /* Space for bottom nav */
   text-align: center;
+  background-color: #ffffff;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
