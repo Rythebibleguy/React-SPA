@@ -5,6 +5,7 @@ import './QuizView.css'
 import { useQuizData } from '../hooks/useQuizData'
 import { useQuizStats } from '../hooks/useQuizStats'
 import { getTodayString } from '../utils/csvParser'
+import ResultsModal from './ResultsModal'
 
 const difficultyLabels = {
   easy: 'Easy',
@@ -20,6 +21,7 @@ function QuizView() {
   const [selectedAnswers, setSelectedAnswers] = useState([]) // Store answer IDs
   const [answerPercentages, setAnswerPercentages] = useState({}) // Store percentages per question {qIndex: {answerId: percentage}}
   const [showReference, setShowReference] = useState(false)
+  const [showResultsModal, setShowResultsModal] = useState(false)
   const containerRef = useRef(null)
   const cardsRef = useRef([])
 
@@ -152,6 +154,17 @@ function QuizView() {
     }
   }, [currentIndex, questions.length])
 
+  // Check if all questions are answered and show results modal
+  useEffect(() => {
+    if (questions.length === 4 && selectedAnswers.length === 4 && !selectedAnswers.includes(undefined)) {
+      // Small delay for better UX
+      const timeout = setTimeout(() => {
+        setShowResultsModal(true)
+      }, 800)
+      return () => clearTimeout(timeout)
+    }
+  }, [selectedAnswers, questions.length])
+
   const handleAnswerSelect = (questionIndex, answerId) => {
     if (selectedAnswers[questionIndex] !== undefined) return
 
@@ -214,6 +227,26 @@ function QuizView() {
   const handleDotClick = (index) => {
     navigateToIndex(index)
     setShowReference(false)
+  }
+
+  const handleCloseResults = () => {
+    setShowResultsModal(false)
+  }
+
+  const handleShareChallenge = () => {
+    // TODO: Implement share functionality
+    console.log('Share challenge clicked')
+  }
+
+  const calculateScore = () => {
+    if (!questions || questions.length === 0) return 0
+    let correct = 0
+    selectedAnswers.forEach((answerId, qIndex) => {
+      const question = questions[qIndex]
+      const answer = question?.answers.find(a => a.id === answerId)
+      if (answer?.isCorrect) correct++
+    })
+    return correct
   }
 
   if (loading || statsLoading) {
@@ -383,6 +416,16 @@ function QuizView() {
           )
         })}
       </div>
+
+      {/* Results Modal */}
+      {showResultsModal && (
+        <ResultsModal 
+          score={calculateScore()} 
+          total={questions.length}
+          onClose={handleCloseResults}
+          onShare={handleShareChallenge}
+        />
+      )}
     </div>
   )
 }
