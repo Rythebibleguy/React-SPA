@@ -66,9 +66,6 @@ function QuizView() {
   const [showReference, setShowReference] = useState(false)
   const containerRef = useRef(null)
 
-  const currentQuestion = mockQuestions[currentIndex]
-  const isLocked = currentIndex > 0 && selectedAnswers[currentIndex - 1] === undefined
-
   useEffect(() => {
     // Scroll to current question when index changes
     if (containerRef.current) {

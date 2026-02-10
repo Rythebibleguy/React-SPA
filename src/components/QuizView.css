@@ -376,7 +376,7 @@
   display: flex;
   justify-content: center;
   gap: calc(1.4 * var(--element-width));
-  margin-bottom: calc(3 * var(--element-width));;
+  margin-bottom: calc(3 * var(--element-width));
   flex-wrap: nowrap;
   flex-shrink: 0;
 }
