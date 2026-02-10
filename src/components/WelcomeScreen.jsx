@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import Lottie from 'lottie-react'
+import { preloadQuizData } from '../utils/dataPreloader'
 import './WelcomeScreen.css'
 
 function WelcomeScreen({ onStart }) {
@@ -14,10 +15,25 @@ function WelcomeScreen({ onStart }) {
   const lottieRef = useRef(null)
 
   useEffect(() => {
-    // Load Lottie animation
+    // Load Lottie animation first (high priority - welcome screen needs this)
     fetch('/assets/animations/Book with bookmark.json')
       .then(res => res.json())
-      .then(data => setAnimationData(data))
+      .then(data => {
+        setAnimationData(data)
+        
+        // Once Lottie is loaded, start preloading quiz data
+        const { questionsPromise, statsPromise } = preloadQuizData()
+        
+        Promise.all([questionsPromise, statsPromise])
+          .then(() => {
+            setQuizDataReady(true)
+          })
+          .catch(err => {
+            console.error('Error preloading data:', err)
+            // Still allow quiz to start even if preload failed
+            setQuizDataReady(true)
+          })
+      })
       .catch(err => console.error('Failed to load animation:', err))
 
     // Animation timeline
@@ -27,11 +43,6 @@ function WelcomeScreen({ onStart }) {
       setAnimateTagline(true)
     }, 700)
     const loadingBtnTimer = setTimeout(() => setShowLoadingBtn(true), 1000)
-    
-    // Simulate quiz data loading (replace with actual data loading later)
-    const dataTimer = setTimeout(() => {
-      setQuizDataReady(true)
-    }, 1500)
 
     // Pause animation at 2.667s
     const pauseTimer = setTimeout(() => {
@@ -44,11 +55,9 @@ function WelcomeScreen({ onStart }) {
       clearTimeout(creditTimer)
       clearTimeout(titleTimer)
       clearTimeout(loadingBtnTimer)
-      clearTimeout(dataTimer)
       clearTimeout(pauseTimer)
     }
   }, [])
-
   useEffect(() => {
     // Switch to ready button when data is ready and timer has passed
     if (quizDataReady && showLoadingBtn) {
