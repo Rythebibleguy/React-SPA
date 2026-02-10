@@ -2,9 +2,8 @@
   width: 100%;
   max-width: calc(100 * var(--app-width));
   height: calc(100 * var(--app-height));
-  margin: 0 auto;
-  padding: calc(3 * var(--element-width));
-  padding-bottom: calc(23 * var(--element-width)); /* Space for bottom nav */
+  margin: 0 auto;;
+  padding-bottom: calc(20 * var(--element-width)); /* Space for bottom nav */
   text-align: center;
   background-color: #ffffff;
   position: relative;
