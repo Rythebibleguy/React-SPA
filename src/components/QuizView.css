@@ -106,6 +106,7 @@
   line-height: 1.4;
   color: #000000;
   font-weight: 600;
+  text-align: left;
 }
 
 .quiz-view__question.locked > *:not(.quiz-view__lock-overlay) {
