@@ -422,6 +422,7 @@ function QuizView() {
         <ResultsModal 
           score={calculateScore()} 
           total={questions.length}
+          stats={stats}
           onClose={handleCloseResults}
           onShare={handleShareChallenge}
         />
