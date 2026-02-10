@@ -11,15 +11,14 @@
 .quiz-view__questions {
   display: flex;
   width: 100%;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
+  overflow-x: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
   gap: 0;
   align-items: center;
   flex: 1;
   min-height: 0;
+  touch-action: pan-y pinch-zoom;
 }
 
 .quiz-view__questions::-webkit-scrollbar {
@@ -319,7 +318,7 @@
   color: #333;
   margin: 0;
   font-style: italic;
-  text-align: left;
+  text-align: justify;
 }
 
 /* Action Buttons */
@@ -329,6 +328,14 @@
   width: calc(100% - 2 * calc(4.6 * var(--element-width)));
   box-sizing: border-box;
   align-self: center;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.3s ease;
+}
+
+.quiz-view__actions.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .quiz-view__actions-buttons {

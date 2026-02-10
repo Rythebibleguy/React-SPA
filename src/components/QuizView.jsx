@@ -23,43 +23,134 @@ function QuizView() {
   const containerRef = useRef(null)
   const cardsRef = useRef([])
 
-  // Navigate programmatically (from buttons/dots) with scroll
-  const navigateToIndex = (index) => {
-    setCurrentIndex(index)
-    if (containerRef.current) {
-      const questionCard = cardsRef.current[index]
-      if (questionCard) {
-        questionCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
+  // Unified scroll animation function
+  const scrollToIndex = (index) => {
+    if (!containerRef.current || !cardsRef.current[index]) return
+    
+    const container = containerRef.current
+    const targetCard = cardsRef.current[index]
+    
+    // Calculate target scroll position
+    const targetLeft = targetCard.offsetLeft
+    const startLeft = container.scrollLeft
+    const distance = targetLeft - startLeft
+    const duration = 300
+    
+    let startTime = null
+    
+    const animateScroll = (currentTime) => {
+      if (startTime === null) startTime = currentTime
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      
+      // Easing function (ease-out)
+      const easeOut = 1 - Math.pow(1 - progress, 3)
+      
+      container.scrollLeft = startLeft + (distance * easeOut)
+      
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll)
       }
     }
+    
+    requestAnimationFrame(animateScroll)
   }
 
-  // Intersection Observer to detect swipe navigation
+  // Navigate to index (used by buttons, dots, swipes)
+  const navigateToIndex = (index) => {
+    if (index < 0 || index >= questions.length) return
+    setCurrentIndex(index)
+    scrollToIndex(index)
+  }
+
+  // Detect swipe gestures
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio > 0.75) {
-            const index = cardsRef.current.findIndex((ref) => ref === entry.target)
-            if (index !== -1 && index !== currentIndex) {
-              setCurrentIndex(index)
-              setShowReference(false)
-            }
-          }
-        })
-      },
-      {
-        root: containerRef.current,
-        threshold: [0.5, 0.75, 1.0],
+    const container = containerRef.current
+    if (!container) return
+
+    let startX = 0
+    let isDragging = false
+    let hasTriggered = false
+
+    const handleTouchStart = (e) => {
+      startX = e.touches[0].clientX
+      isDragging = true
+      hasTriggered = false
+    }
+
+    const handleTouchMove = (e) => {
+      if (!isDragging || hasTriggered) return
+      
+      const currentX = e.touches[0].clientX
+      const deltaX = currentX - startX
+      
+      // Trigger navigation as soon as we detect 50px swipe
+      if (Math.abs(deltaX) > 50) {
+        hasTriggered = true
+        isDragging = false
+        
+        if (deltaX > 0) {
+          navigateToIndex(currentIndex - 1)
+        } else {
+          navigateToIndex(currentIndex + 1)
+        }
+        setShowReference(false)
       }
-    )
+    }
 
-    cardsRef.current.forEach((card) => {
-      if (card) observer.observe(card)
-    })
+    const handleTouchEnd = (e) => {
+      isDragging = false
+      hasTriggered = false
+    }
 
-    return () => observer.disconnect()
-  }, [currentIndex])
+    const handleMouseDown = (e) => {
+      startX = e.clientX
+      isDragging = true
+      hasTriggered = false
+      e.preventDefault()
+    }
+
+    const handleMouseMove = (e) => {
+      if (!isDragging || hasTriggered) return
+      
+      const currentX = e.clientX
+      const deltaX = currentX - startX
+      
+      // Trigger navigation as soon as we detect 50px swipe
+      if (Math.abs(deltaX) > 50) {
+        hasTriggered = true
+        isDragging = false
+        
+        if (deltaX > 0) {
+          navigateToIndex(currentIndex - 1)
+        } else {
+          navigateToIndex(currentIndex + 1)
+        }
+        setShowReference(false)
+      }
+    }
+
+    const handleMouseUp = (e) => {
+      isDragging = false
+      hasTriggered = false
+    }
+
+    container.addEventListener('touchstart', handleTouchStart, { passive: true })
+    container.addEventListener('touchmove', handleTouchMove, { passive: false })
+    container.addEventListener('touchend', handleTouchEnd, { passive: true })
+    container.addEventListener('mousedown', handleMouseDown)
+    container.addEventListener('mousemove', handleMouseMove)
+    container.addEventListener('mouseup', handleMouseUp)
+    
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart)
+      container.removeEventListener('touchmove', handleTouchMove)
+      container.removeEventListener('touchend', handleTouchEnd)
+      container.removeEventListener('mousedown', handleMouseDown)
+      container.removeEventListener('mousemove', handleMouseMove)
+      container.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [currentIndex, questions.length])
 
   const handleAnswerSelect = (questionIndex, answerId) => {
     if (selectedAnswers[questionIndex] !== undefined) return
@@ -236,44 +327,44 @@ function QuizView() {
       </div>
 
       {/* Action Buttons */}
-      <div className="quiz-view__actions">
+      <div className={`quiz-view__actions ${selectedAnswers[currentIndex] !== undefined ? 'visible' : 'hidden'}`}>
         <div className="quiz-view__actions-buttons">
-          <button className="quiz-view__prev-button" onClick={handlePrev} disabled={currentIndex === 0}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            <span>Prev</span>
-          </button>
-          <button className="quiz-view__reference-button" onClick={handleToggleReference}>
-            {!showReference ? (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
-                </svg>
-                Show Reference
-              </>
-            ) : (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12"></line>
-                  <line x1="8" y1="18" x2="21" y2="18"></line>
-                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                </svg>
-                Back to Question
-              </>
-            )}
-          </button>
-          <button className="quiz-view__next-button" onClick={handleNext} disabled={currentIndex === questions.length - 1}>
-            <span>Next</span>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          </button>
+            <button className="quiz-view__prev-button" onClick={handlePrev} disabled={currentIndex === 0}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+              <span>Prev</span>
+            </button>
+            <button className="quiz-view__reference-button" onClick={handleToggleReference}>
+              {!showReference ? (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                  </svg>
+                  Show Reference
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                  </svg>
+                  Back to Question
+                </>
+              )}
+            </button>
+            <button className="quiz-view__next-button" onClick={handleNext} disabled={currentIndex === questions.length - 1}>
+              <span>Next</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
         </div>
-      </div>
 
       {/* Difficulty Dots */}
       <div className="quiz-view__difficulty-dots">
