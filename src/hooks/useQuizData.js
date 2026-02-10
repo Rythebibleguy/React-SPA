@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { SHEET_URLS } from '../config/sheets'
-import { parseSingleQuestionForDate, getTodayString } from '../utils/csvParser'
+import { getTodayString } from '../utils/csvParser'
 
 /**
- * Custom hook to fetch and manage quiz questions from Google Sheets
- * Progressively loads questions: Easy first, then Medium, Hard, Impossible
+ * Custom hook to fetch and manage quiz questions from static JSON
+ * Loads all questions for today's date
  */
 export function useQuizData() {
   const [questions, setQuestions] = useState([])
@@ -18,40 +17,30 @@ export function useQuizData() {
     hasLoadedRef.current = true
 
     const todayString = getTodayString()
-    const difficulties = ['easy', 'medium', 'hard', 'impossible']
-    const loadedQuestions = [null, null, null, null] // Placeholder array to maintain order
-    
-    async function fetchQuestion(difficulty, index) {
-      try {
-        const response = await fetch(SHEET_URLS[difficulty])
-        if (!response.ok) throw new Error(`Failed to fetch ${difficulty} question`)
-        
-        const csvText = await response.text()
-        const question = parseSingleQuestionForDate(csvText, todayString, difficulty)
-        
-        if (question) {
-          loadedQuestions[index] = question
-        }
-      } catch (err) {
-        console.error(`Error loading ${difficulty} question:`, err)
-        setError(err.message)
-      }
-    }
 
     async function loadQuestions() {
       setLoading(true)
       
-      // Load all questions in parallel
-      await Promise.all([
-        fetchQuestion('easy', 0),
-        fetchQuestion('medium', 1),
-        fetchQuestion('hard', 2),
-        fetchQuestion('impossible', 3)
-      ])
-      
-      // Set all questions at once in correct order
-      setQuestions(loadedQuestions.filter(q => q !== null))
-      setLoading(false)
+      try {
+        const response = await fetch('/data/questions.json')
+        if (!response.ok) throw new Error('Failed to fetch questions')
+        
+        const allQuestions = await response.json()
+        const todaysQuestions = allQuestions[todayString] || []
+        
+        // Shuffle answers for each question
+        const shuffledQuestions = todaysQuestions.map(q => ({
+          ...q,
+          answers: [...q.answers].sort(() => Math.random() - 0.5)
+        }))
+        
+        setQuestions(shuffledQuestions)
+      } catch (err) {
+        console.error('Error loading questions:', err)
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
     }
 
     loadQuestions()
