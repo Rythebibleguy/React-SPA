@@ -4,6 +4,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  gap: calc(3 * var(--element-width));
 }
 
 /* Questions Container */
@@ -18,12 +19,8 @@
   gap: 0;
   overflow-y: hidden;
   align-items: center;
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  transform: translateY(-50%);
-  padding: calc(4.6 * var(--element-width)) 0;
+  flex: 1;
+  min-height: 0;
 }
 
 .quiz-view__questions::-webkit-scrollbar {
@@ -291,12 +288,7 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  padding: 0 calc(4.6 * var(--element-width));
   box-sizing: border-box;
-  position: absolute;
-  bottom: calc(14 * var(--element-width));
-  left: 0;
-  right: 0;
 }
 
 .quiz-view__actions-buttons {
@@ -382,11 +374,7 @@
   justify-content: center;
   gap: calc(1.4 * var(--element-width));
   flex-wrap: nowrap;
-  position: absolute;
-  bottom: calc(2.2 * var(--element-width));
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
+  flex-shrink: 0;
 }
 
 .quiz-view__difficulty-dot {
