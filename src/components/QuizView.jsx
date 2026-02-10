@@ -23,16 +23,6 @@ function QuizView() {
   const containerRef = useRef(null)
   const cardsRef = useRef([])
 
-  // Display viewport and app size
-  useEffect(() => {
-    const screenWidth = window.innerWidth
-    const screenHeight = window.innerHeight
-    const appWidth = document.documentElement.clientWidth
-    const appHeight = document.documentElement.clientHeight
-    
-    alert(`Screen Size: ${screenWidth}x${screenHeight}\nApp Size: ${appWidth}x${appHeight}`)
-  }, [])
-
   // Unified scroll animation function
   const scrollToIndex = (index) => {
     if (!containerRef.current || !cardsRef.current[index]) return

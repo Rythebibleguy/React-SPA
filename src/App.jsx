@@ -24,6 +24,27 @@ function App() {
       .catch(err => console.error('Failed to load animation:', err))
   }, [])
 
+  // Prevent pinch zoom on mobile
+  useEffect(() => {
+    const preventPinchZoom = (e) => {
+      if (e.touches.length > 1) {
+        e.preventDefault()
+      }
+    }
+
+    const preventGesture = (e) => {
+      e.preventDefault()
+    }
+
+    document.addEventListener('touchstart', preventPinchZoom, { passive: false })
+    document.addEventListener('gesturestart', preventGesture, { passive: false })
+
+    return () => {
+      document.removeEventListener('touchstart', preventPinchZoom)
+      document.removeEventListener('gesturestart', preventGesture)
+    }
+  }, [])
+
   const handleStartQuiz = () => {
     setShowWelcome(false)
     setWelcomeShownBefore(true)

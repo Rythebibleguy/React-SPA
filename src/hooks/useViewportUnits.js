@@ -11,11 +11,6 @@ export function useViewportUnits() {
       const actualHeight = window.innerHeight
       const actualWidth = window.innerWidth
       
-      // Set app-height (1% of actual viewport height)
-      const vhUnit = actualHeight / 100
-      document.documentElement.style.setProperty('--app-height', vhUnit + 'px')
-      document.documentElement.style.setProperty('--element-height', vhUnit + 'px')
-      
       // Set app-width based on orientation
       const isLandscape = actualWidth > actualHeight
       const customWidth = isLandscape 
