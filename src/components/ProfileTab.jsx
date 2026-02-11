@@ -4,7 +4,7 @@ import ProfileScreen from './ProfileScreen'
 
 function ProfileTab({ isTransitioning }) {
   // TODO: Replace with actual auth state check
-  const isAuthenticated = false
+  const isAuthenticated = true
 
   return (
     <div className={`profile-tab ${isTransitioning ? 'fade-out' : 'fade-in'}`}>

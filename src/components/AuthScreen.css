@@ -33,65 +33,149 @@
 .auth-screen__features {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: calc(5 * var(--element-width));
 }
 
-.auth-screen__feature-list {
+.auth-screen__hero-card {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(135deg, #FFB84D 0%, #FF9500 100%);
+  border-radius: calc(4 * var(--element-width));
+  padding: calc(6 * var(--element-width));
+  box-shadow: 
+    0 calc(2 * var(--element-width)) calc(4 * var(--element-width)) rgba(255, 149, 0, 0.2),
+    0 calc(8 * var(--element-width)) calc(16 * var(--element-width)) rgba(255, 149, 0, 0.15);
+  overflow: hidden;
+}
+
+.auth-screen__hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
+
+.auth-screen__hero-card-content {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: calc(6 * var(--element-width));
-  width: 100%;
+  gap: calc(4 * var(--element-width));
 }
 
-.auth-screen__feature {
-  display: flex;
-  align-items: flex-start;
-  gap: calc(3.5 * var(--element-width));
+.auth-screen__hero-stat {
+  text-align: center;
 }
 
-.auth-screen__feature-icon {
-  width: calc(12 * var(--element-width));
-  height: calc(12 * var(--element-width));
-  border-radius: calc(3 * var(--element-width));
+.auth-screen__hero-percentage {
+  font-size: calc(14 * var(--element-width));
+  font-weight: 700;
+  color: white;
+  line-height: 1;
+  margin-bottom: calc(1.5 * var(--element-width));
+  text-shadow: 0 calc(0.5 * var(--element-width)) calc(2 * var(--element-width)) rgba(0, 0, 0, 0.1);
+}
+
+.auth-screen__hero-label {
+  font-size: calc(3.5 * var(--element-width));
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.auth-screen__hero-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+  margin: calc(2 * var(--element-width)) 0;
+}
+
+.auth-screen__hero-streak {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: calc(3 * var(--element-width));
+  padding: calc(3 * var(--element-width)) calc(4 * var(--element-width));
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: calc(2.5 * var(--element-width));
+  backdrop-filter: blur(calc(2 * var(--element-width)));
+}
+
+.auth-screen__hero-streak-icon {
+  font-size: calc(8 * var(--element-width));
+  line-height: 1;
+}
+
+.auth-screen__hero-streak-number {
+  font-size: calc(7 * var(--element-width));
+  font-weight: 700;
   color: white;
-  flex-shrink: 0;
+  line-height: 1;
+  margin-bottom: calc(0.5 * var(--element-width));
 }
 
-.auth-screen__feature-icon--trophy {
-  background: linear-gradient(135deg, #FFB84D 0%, #FF9500 100%);
-  box-shadow: 0 calc(1 * var(--element-width)) calc(3 * var(--element-width)) rgba(255, 149, 0, 0.3);
+.auth-screen__hero-streak-label {
+  font-size: calc(3 * var(--element-width));
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
 }
 
-.auth-screen__feature-icon--users {
-  background: linear-gradient(135deg, #5AC8FA 0%, #007AFF 100%);
-  box-shadow: 0 calc(1 * var(--element-width)) calc(3 * var(--element-width)) rgba(0, 122, 255, 0.3);
-}
-
-.auth-screen__feature-icon--chart {
-  background: linear-gradient(135deg, #BF5AF2 0%, #AF52DE 100%);
-  box-shadow: 0 calc(1 * var(--element-width)) calc(3 * var(--element-width)) rgba(175, 82, 222, 0.3);
-}
-
-.auth-screen__feature-text {
-  flex: 1;
-}
-
-.auth-screen__feature-text h3 {
-  margin: 0 0 calc(1 * var(--element-width)) 0;
-  font-size: calc(4 * var(--element-width));
-  font-weight: 600;
-  color: #2B2B2B;
-}
-
-.auth-screen__feature-text p {
-  margin: 0;
+.auth-screen__hero-trend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(1.5 * var(--element-width));
   font-size: calc(3.2 * var(--element-width));
-  color: #666;
-  line-height: 1.4;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.auth-screen__hero-badge {
+  position: absolute;
+  top: calc(3 * var(--element-width));
+  right: calc(3 * var(--element-width));
+  padding: calc(1.5 * var(--element-width)) calc(3 * var(--element-width));
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(calc(2 * var(--element-width)));
+  border-radius: calc(5 * var(--element-width));
+  font-size: calc(2.8 * var(--element-width));
+  font-weight: 600;
+  color: white;
+  z-index: 2;
+}
+
+.auth-screen__feature-badges {
+  display: flex;
+  gap: calc(2.5 * var(--element-width));
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.auth-screen__badge {
+  padding: calc(2 * var(--element-width)) calc(4 * var(--element-width));
+  border-radius: calc(5 * var(--element-width));
+  font-size: calc(3.2 * var(--element-width));
+  font-weight: 600;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: calc(1.5 * var(--element-width));
+  box-shadow: 0 calc(0.5 * var(--element-width)) calc(2 * var(--element-width)) rgba(0, 0, 0, 0.1);
+}
+
+.auth-screen__badge--blue {
+  background: linear-gradient(135deg, #5AC8FA 0%, #007AFF 100%);
+}
+
+.auth-screen__badge--purple {
+  background: linear-gradient(135deg, #BF5AF2 0%, #AF52DE 100%);
 }
 
 .auth-screen__actions {

@@ -1,5 +1,5 @@
 import './AuthScreen.css'
-import { Trophy, Users, BarChart3 } from 'lucide-react'
+import { TrendingUp } from 'lucide-react'
 
 function AuthScreen() {
   const handleGoogleSignIn = () => {
@@ -20,35 +20,40 @@ function AuthScreen() {
       </div>
       
       <div className="auth-screen__features">
-        <div className="auth-screen__feature-list">
-          <div className="auth-screen__feature">
-            <div className="auth-screen__feature-icon auth-screen__feature-icon--trophy">
-              <Trophy size={24} strokeWidth={2} />
+        <div className="auth-screen__hero-card">
+          <div className="auth-screen__hero-card-content">
+            <div className="auth-screen__hero-stat">
+              <div className="auth-screen__hero-percentage">87%</div>
+              <div className="auth-screen__hero-label">Average Score</div>
             </div>
-            <div className="auth-screen__feature-text">
-              <h3>Track Your Stats</h3>
-              <p>See your scores, streaks, and progress over time</p>
+            
+            <div className="auth-screen__hero-divider"></div>
+            
+            <div className="auth-screen__hero-streak">
+              <span className="auth-screen__hero-streak-icon">🔥</span>
+              <div>
+                <div className="auth-screen__hero-streak-number">12</div>
+                <div className="auth-screen__hero-streak-label">day streak</div>
+              </div>
+            </div>
+            
+            <div className="auth-screen__hero-trend">
+              <TrendingUp size={16} strokeWidth={2.5} />
+              <span>+15% this week</span>
             </div>
           </div>
           
-          <div className="auth-screen__feature">
-            <div className="auth-screen__feature-icon auth-screen__feature-icon--users">
-              <Users size={24} strokeWidth={2} />
-            </div>
-            <div className="auth-screen__feature-text">
-              <h3>Add Friends</h3>
-              <p>Compare scores and compete with friends</p>
-            </div>
+          <div className="auth-screen__hero-badge">
+            🔒 Unlock by signing up
           </div>
-          
-          <div className="auth-screen__feature">
-            <div className="auth-screen__feature-icon auth-screen__feature-icon--chart">
-              <BarChart3 size={24} strokeWidth={2} />
-            </div>
-            <div className="auth-screen__feature-text">
-              <h3>View History</h3>
-              <p>Access your quiz history and review past quizzes</p>
-            </div>
+        </div>
+        
+        <div className="auth-screen__feature-badges">
+          <div className="auth-screen__badge auth-screen__badge--blue">
+            👥 Add Friends
+          </div>
+          <div className="auth-screen__badge auth-screen__badge--purple">
+            📊 View History
           </div>
         </div>
       </div>

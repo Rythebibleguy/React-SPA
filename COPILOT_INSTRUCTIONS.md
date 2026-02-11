@@ -2,7 +2,8 @@
 - **Always start dev server**: Run `npm run dev` at the beginning of each chat session
 
 ## Communication Style
-- Keep it simple: Concise responses, no unnecessary code snippets
+- Keep it simple: Concise responses
+- Don't show code snippets in chat unless critical for explanation
 - Ask, don't assume: Clarify anything ambiguous rather than guessing
 
 ## Discussing Changes
