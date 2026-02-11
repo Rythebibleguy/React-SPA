@@ -304,7 +304,7 @@ function QuizView() {
     
     // Create share text with emoji indicators for score
     const squares = '✅'.repeat(score) + '❌'.repeat(questions.length - score)
-    const shareText = `I got ${score}/${questions.length} on the Daily Bible Quiz\n${squares}\n\nCan you beat my score?\n${window.location.origin}`
+    const shareText = `I got ${score}/${questions.length} on Daily Bible Quiz\n${squares}\n\nCan you beat my score?\n${window.location.origin}`
     
     // Try Web Share API first (mobile/modern browsers)
     if (navigator.share) {
@@ -312,11 +312,10 @@ function QuizView() {
         await navigator.share({
           text: shareText
         })
-        console.log('Shared successfully')
+        console.log('Share method: Web Share API')
       } catch (error) {
         // User cancelled or error occurred
         if (error.name !== 'AbortError') {
-          console.error('Share failed:', error)
           // Fall back to clipboard
           copyToClipboard(shareText)
         }
@@ -330,9 +329,9 @@ function QuizView() {
   const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text)
+      console.log('Share method: Clipboard')
       alert('Challenge copied to clipboard!')
     } catch (error) {
-      console.error('Clipboard copy failed:', error)
       // Last resort: show text in alert
       alert('Copy this challenge:\n\n' + text)
     }

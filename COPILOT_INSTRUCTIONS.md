@@ -24,4 +24,5 @@
   - Server automatically accessible from other devices on same WiFi
   - Mobile access: http://192.168.1.4:5173/
   - React DevTools browser extension installed for debugging
-- Production: `npm run build` → creates `dist/` folder → upload dist contents to WordPress /react directory
+- Production: 
+  - Live site: https://react-spa-57t.pages.dev/ (Cloudflare Pages)
