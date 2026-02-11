@@ -37,6 +37,7 @@ function QuizView() {
   const [showReference, setShowReference] = useState(false)
   const [showResultsModal, setShowResultsModal] = useState(false)
   const [showCopied, setShowCopied] = useState(false)
+  const [showShareFailed, setShowShareFailed] = useState(false)
   const containerRef = useRef(null)
   const cardsRef = useRef([])
   const hasSubmittedRef = useRef(savedState?.hasSubmitted ?? false)
@@ -334,8 +335,9 @@ function QuizView() {
       setShowCopied(true)
       setTimeout(() => setShowCopied(false), 2000)
     } catch (error) {
-      // Last resort: show text in alert
-      alert('Copy this link:\n\n' + text)
+      console.error('Clipboard copy failed:', error)
+      setShowShareFailed(true)
+      setTimeout(() => setShowShareFailed(false), 2000)
     }
   }
 
@@ -534,6 +536,7 @@ function QuizView() {
           onClose={handleCloseResults}
           onShare={handleShareChallenge}
           showCopied={showCopied}
+          showShareFailed={showShareFailed}
         />
       )}
     </div>
