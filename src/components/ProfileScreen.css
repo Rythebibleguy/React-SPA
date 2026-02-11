@@ -3,8 +3,188 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  padding: calc(6 * var(--element-width));
+  padding-bottom: calc(20 * var(--element-width));
+  box-sizing: border-box;
+  overflow-y: auto;
+  gap: calc(6 * var(--element-width));
 }
 
-/* TODO: Add authenticated profile styles */
+.profile-screen__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(3 * var(--element-width));
+  margin-bottom: calc(2 * var(--element-width));
+}
+
+.profile-screen__avatar {
+  width: calc(20 * var(--element-width));
+  height: calc(20 * var(--element-width));
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 calc(1 * var(--element-width)) calc(3 * var(--element-width)) rgba(0, 0, 0, 0.15);
+}
+
+.profile-screen__avatar-letter {
+  font-size: calc(9 * var(--element-width));
+  font-weight: 700;
+  color: white;
+}
+
+.profile-screen__name {
+  margin: 0;
+  font-size: calc(6 * var(--element-width));
+  font-weight: 700;
+  color: #2B2B2B;
+}
+
+.profile-screen__stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(3 * var(--element-width));
+}
+
+.profile-screen__stat {
+  background: white;
+  border-radius: calc(3 * var(--element-width));
+  padding: calc(4 * var(--element-width));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(1 * var(--element-width));
+  box-shadow: 0 calc(0.5 * var(--element-width)) calc(2 * var(--element-width)) rgba(0, 0, 0, 0.08);
+}
+
+.profile-screen__stat-value {
+  font-size: calc(8 * var(--element-width));
+  font-weight: 700;
+  color: #2B2B2B;
+}
+
+.profile-screen__stat-label {
+  font-size: calc(3 * var(--element-width));
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.profile-screen__section {
+  display: flex;
+  flex-direction: column;
+  gap: calc(3 * var(--element-width));
+}
+
+.profile-screen__section-title {
+  margin: 0;
+  font-size: calc(3.5 * var(--element-width));
+  font-weight: 700;
+  color: #2B2B2B;
+  letter-spacing: 0.05em;
+}
+
+.profile-screen__section-subtitle {
+  margin: 0;
+  margin-top: calc(-1.5 * var(--element-width));
+  font-size: calc(3 * var(--element-width));
+  color: #999;
+}
+
+.profile-screen__distribution {
+  background: white;
+  border-radius: calc(3 * var(--element-width));
+  padding: calc(4 * var(--element-width));
+  display: flex;
+  flex-direction: column;
+  gap: calc(2.5 * var(--element-width));
+  box-shadow: 0 calc(0.5 * var(--element-width)) calc(2 * var(--element-width)) rgba(0, 0, 0, 0.08);
+}
+
+.profile-screen__distribution-row {
+  display: flex;
+  align-items: center;
+  gap: calc(3 * var(--element-width));
+}
+
+.profile-screen__distribution-score {
+  font-size: calc(4 * var(--element-width));
+  font-weight: 700;
+  color: #2B2B2B;
+  min-width: calc(5 * var(--element-width));
+  text-align: center;
+}
+
+.profile-screen__distribution-bar-container {
+  flex: 1;
+  height: calc(7 * var(--element-width));
+  border-radius: calc(1.5 * var(--element-width));
+  overflow: hidden;
+  position: relative;
+}
+
+.profile-screen__distribution-bar {
+  height: 100%;
+  background: #999;
+  border-radius: calc(1.5 * var(--element-width));
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: calc(2 * var(--element-width));
+  min-width: calc(8 * var(--element-width));
+  transition: width 0.3s ease;
+  box-sizing: border-box;
+}
+
+.profile-screen__distribution-bar--perfect {
+  background: #34C759;
+}
+
+.profile-screen__distribution-count {
+  font-size: calc(3 * var(--element-width));
+  font-weight: 700;
+  color: white;
+}
+
+.profile-screen__badges {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(3 * var(--element-width));
+}
+
+.profile-screen__badge {
+  aspect-ratio: 1;
+  background: white;
+  border-radius: calc(3 * var(--element-width));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 calc(0.5 * var(--element-width)) calc(2 * var(--element-width)) rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.profile-screen__badge:active {
+  transform: scale(0.95);
+}
+
+.profile-screen__badge--locked {
+  opacity: 0.4;
+}
+
+.profile-screen__badge-icon {
+  font-size: calc(10 * var(--element-width));
+}
+
+.profile-screen__badge-lock {
+  position: absolute;
+  bottom: calc(1.5 * var(--element-width));
+  right: calc(1.5 * var(--element-width));
+  font-size: calc(4 * var(--element-width));
+}
 
 
