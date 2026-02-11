@@ -54,7 +54,7 @@
 }
 
 .results-modal__score-number {
-  font-size: calc(32 * var(--element-width));
+  font-size: calc(28 * var(--element-width));
   font-weight: 800;
   color: #1a1a1a;
   line-height: 1;
@@ -62,14 +62,14 @@
 }
 
 .results-modal__score-divider {
-  font-size: calc(20 * var(--element-width));
+  font-size: calc(17 * var(--element-width));
   font-weight: 400;
   color: #d0d0d0;
   line-height: 1;
 }
 
 .results-modal__score-total {
-  font-size: calc(20 * var(--element-width));
+  font-size: calc(17 * var(--element-width));
   font-weight: 600;
   color: #8a8a8a;
   line-height: 1;
