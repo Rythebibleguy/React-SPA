@@ -57,6 +57,25 @@ function QuizView() {
     }
   }, [currentIndex, selectedAnswers, answerPercentages])
 
+  // Auto-open results modal when navigating back to quiz after completion
+  useEffect(() => {
+    const isQuizComplete = questions.length === 4 && selectedAnswers.length === 4 && !selectedAnswers.includes(undefined)
+    if (isQuizComplete) {
+      setShowResultsModal(true)
+    }
+  }, [questions.length, selectedAnswers])
+
+  // Restore scroll position on mount
+  useEffect(() => {
+    if (questions.length > 0 && containerRef.current) {
+      // Scroll to saved index without animation
+      const targetCard = cardsRef.current[currentIndex]
+      if (targetCard) {
+        containerRef.current.scrollLeft = targetCard.offsetLeft
+      }
+    }
+  }, [questions.length])
+
   // Unified scroll animation function
   const scrollToIndex = (index) => {
     if (!containerRef.current || !cardsRef.current[index]) return
