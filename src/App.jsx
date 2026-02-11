@@ -55,8 +55,8 @@ function App() {
       
       setTimeout(() => {
         setIsTransitioning(false)
-      }, 50)
-    }, 100)
+      }, 10)
+    }, 20)
   }
 
   return (

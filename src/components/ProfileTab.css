@@ -7,7 +7,7 @@
   justify-content: center;
   overflow-y: auto;
   background: linear-gradient(180deg, var(--brown-primary) 0%, var(--brown-secondary) 100%);
-  transition: opacity 100ms ease-in-out;
+  transition: opacity 20ms ease-in-out;
 }
 
 .profile-tab.fade-in {
