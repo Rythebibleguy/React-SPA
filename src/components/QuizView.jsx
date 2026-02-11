@@ -379,11 +379,7 @@ function QuizView() {
     <div className="quiz-view">
       {isQuizComplete && (
         <button className="quiz-view__open-results" onClick={() => setShowResultsModal(true)}>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 3h18v18H3V3z"></path>
-            <path d="M9 9h6v6H9V9z"></path>
-          </svg>
-          View Results
+          Show Results
         </button>
       )}
       <div className="quiz-view__cards" ref={containerRef}>
