@@ -376,21 +376,7 @@ function QuizView() {
   const isQuizComplete = questions.length === 4 && selectedAnswers.length === 4 && !selectedAnswers.includes(undefined)
 
   return (
-    <div className="quiz-view">      {/* Difficulty Dots */}
-      <div className="quiz-view__difficulty-dots">
-        {['easy', 'medium', 'hard', 'impossible'].map((difficulty, index) => {
-          const question = questions[index]
-          return (
-            <span
-              key={difficulty}
-              className={`quiz-view__difficulty-dot quiz-view__difficulty-dot--${difficulty} ${index === currentIndex ? 'active' : ''}`}
-              onClick={() => handleDotClick(index)}
-            >
-              <span className="quiz-view__difficulty-dot-text">{difficultyLabels[difficulty]}</span>
-            </span>
-          )
-        })}
-      </div>
+    <div className="quiz-view">
       {isQuizComplete && (
         <button className="quiz-view__open-results" onClick={() => setShowResultsModal(true)}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -536,6 +522,22 @@ function QuizView() {
           showShareFailed={showShareFailed}
         />
       )}
+
+      {/* Difficulty Dots */}
+      <div className="quiz-view__difficulty-dots">
+        {['easy', 'medium', 'hard', 'impossible'].map((difficulty, index) => {
+          const question = questions[index]
+          return (
+            <span
+              key={difficulty}
+              className={`quiz-view__difficulty-dot quiz-view__difficulty-dot--${difficulty} ${index === currentIndex ? 'active' : ''}`}
+              onClick={() => handleDotClick(index)}
+            >
+              <span className="quiz-view__difficulty-dot-text">{difficultyLabels[difficulty]}</span>
+            </span>
+          )
+        })}
+      </div>
     </div>
   )
 }

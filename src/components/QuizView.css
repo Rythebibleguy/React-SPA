@@ -467,6 +467,7 @@
   gap: calc(1.4 * var(--element-width));
   flex-wrap: nowrap;
   flex-shrink: 0;
+  height: calc(6 * var(--element-width));
 }
 
 .quiz-view__difficulty-dot {
