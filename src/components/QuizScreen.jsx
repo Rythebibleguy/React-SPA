@@ -4,6 +4,7 @@ import { db } from '../config/firebase'
 import './QuizScreen.css'
 import { useQuizData } from '../hooks/useQuizData'
 import { useQuizStats } from '../hooks/useQuizStats'
+import { useAuth } from '../contexts/AuthContext'
 import { getTodayString } from '../utils/csvParser'
 import ResultsModal from './ResultsModal'
 
@@ -17,6 +18,7 @@ const difficultyLabels = {
 function QuizScreen({ isEntering = false }) {
   const { questions, loading, error } = useQuizData()
   const { stats, loading: statsLoading } = useQuizStats()
+  const { currentUser, completeQuiz } = useAuth()
   
   // Load saved state from sessionStorage
   const loadSavedState = () => {
@@ -41,6 +43,14 @@ function QuizScreen({ isEntering = false }) {
   const containerRef = useRef(null)
   const cardsRef = useRef([])
   const hasSubmittedRef = useRef(savedState?.hasSubmitted ?? false)
+  const quizStartTimeRef = useRef(null)
+
+  // Start timing when component first mounts (quiz becomes visible)
+  useEffect(() => {
+    if (!quizStartTimeRef.current) {
+      quizStartTimeRef.current = Date.now()
+    }
+  }, [])
 
   // Save state to sessionStorage whenever it changes
   useEffect(() => {
@@ -212,9 +222,11 @@ function QuizScreen({ isEntering = false }) {
   const submitQuizResults = async () => {
     const todayString = getTodayString()
     const score = calculateScore()
+    const quizEndTime = Date.now()
+    const duration = quizStartTimeRef.current ? Math.floor((quizEndTime - quizStartTimeRef.current) / 1000) : null
 
     try {
-      // Batch write all answers
+      // Submit global quiz stats first (existing logic)
       const promises = selectedAnswers.map((answerId, qIndex) => {
         const answerRef = ref(db, `quiz_stats/${todayString}/q${qIndex}/${answerId}`)
         return runTransaction(answerRef, (currentCount) => {
@@ -231,6 +243,15 @@ function QuizScreen({ isEntering = false }) {
       )
 
       await Promise.all(promises)
+      
+      // Complete quiz profile update if user is logged in
+      if (currentUser) {
+        const result = await completeQuiz(score, 4, duration, selectedAnswers)
+        if (!result.success) {
+          console.error('Failed to complete quiz profile update:', result.error)
+        }
+      }
+      
     } catch (error) {
       console.error('Error submitting quiz results:', error)
       // Continue to show results even if Firebase write fails

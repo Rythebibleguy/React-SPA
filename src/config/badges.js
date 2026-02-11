@@ -308,6 +308,72 @@ export function getUnlockedBadges(userData) {
   return BADGES.filter(badge => badge.checkUnlocked(userData));
 }
 
+// Helper function to check for newly unlocked badges after quiz completion
+export function checkNewlyUnlockedBadges(currentUserData, newStats, dateKey) {
+  const currentBadges = currentUserData.badges || []
+  const newlyUnlocked = []
+  
+  // Create combined data for checking
+  const checkData = {
+    ...currentUserData,
+    ...newStats
+  }
+  
+  BADGES.forEach(badge => {
+    // Check if badge is already unlocked
+    const alreadyHas = currentBadges.some(b => b.id === badge.id)
+    
+    if (!alreadyHas) {
+      // Check if badge criteria is now met
+      const isUnlocked = badge.checkUnlocked(checkData)
+      
+      if (isUnlocked) {
+        newlyUnlocked.push({
+          id: badge.id,
+          unlockedOn: dateKey || new Date().toISOString().split('T')[0]
+        })
+      }
+    }
+  })
+  
+  return newlyUnlocked
+}
+
+// Helper function to calculate current streak from quiz history
+export function calculateCurrentStreakFromHistory(history) {
+  if (!history || history.length === 0) return 0
+  
+  // Sort by date (most recent first)
+  const sortedHistory = [...history].sort((a, b) => new Date(b.date) - new Date(a.date))
+  
+  let streak = 0
+  const today = new Date()
+  let checkDate = new Date(today)
+  
+  // Check each consecutive day going backwards
+  for (let i = 0; i < sortedHistory.length; i++) {
+    const entryDate = new Date(sortedHistory[i].date)
+    const expectedDate = new Date(checkDate)
+    expectedDate.setHours(0, 0, 0, 0)
+    entryDate.setHours(0, 0, 0, 0)
+    
+    if (entryDate.getTime() === expectedDate.getTime()) {
+      streak++
+      checkDate.setDate(checkDate.getDate() - 1)
+    } else {
+      break
+    }
+  }
+  
+  return streak
+}
+
+// Helper function to get today's date string in YYYY-MM-DD format
+export function getTodayString() {
+  const today = new Date()
+  return today.toISOString().split('T')[0]
+}
+
 // Helper function to get badge categories for organization
 export const BADGE_CATEGORIES = {
   MILESTONES: ['first-steps', 'dedicated-scholar', 'master-scholar', 'bible-champion'],

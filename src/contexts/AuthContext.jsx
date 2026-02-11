@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { 
   auth, 
   firestore, 
@@ -10,8 +10,15 @@ import {
   onAuthStateChanged,
   doc,
   setDoc,
-  getDoc
+  getDoc,
+  updateDoc,
+  arrayUnion
 } from '../config/firebase'
+import { 
+  checkNewlyUnlockedBadges, 
+  calculateCurrentStreakFromHistory, 
+  getTodayString 
+} from '../config/badges'
 
 const AuthContext = createContext({})
 
@@ -24,6 +31,7 @@ export function AuthProvider({ children }) {
   const [userProfile, setUserProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const abortControllerRef = useRef(null)
 
   // Sign up with email and password
   async function signUp(email, password, displayName) {
@@ -207,12 +215,17 @@ export function AuthProvider({ children }) {
   }
 
   // Load user profile from Firestore
-  async function loadUserProfile(user) {
+  async function loadUserProfile(user, abortController = null) {
     if (!user) return
     
     try {
       const userRef = doc(firestore, 'users', user.uid)
       const userSnap = await getDoc(userRef)
+      
+      // Check if request was aborted
+      if (abortController?.signal.aborted) {
+        return
+      }
       
       if (userSnap.exists()) {
         const rawData = userSnap.data()
@@ -230,12 +243,142 @@ export function AuthProvider({ children }) {
         setUserProfile(null)
       }
     } catch (error) {
+      // Ignore AbortError - this is expected when requests are cancelled
+      if (error.name === 'AbortError' || error.message.includes('aborted')) {
+        return
+      }
       console.error('Error loading user profile:', error)
       setError('Failed to load user profile: ' + error.message)
     }
   }
 
-  // Update user profile data (for quiz completions, etc.)
+  // Complete quiz and update user profile with streaks, badges, and stats
+  async function completeQuiz(score, totalQuestions, duration, selectedAnswers) {
+    if (!currentUser || !userProfile) return { success: false, error: 'Not logged in' }
+    
+    try {
+      const dateKey = getTodayString()
+      const now = new Date()
+      const timestamp = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+      
+      // Create history entry for this quiz
+      const historyEntry = {
+        date: dateKey,
+        score,
+        totalQuestions,
+        timestamp,
+        duration,
+        answers: selectedAnswers,
+        shared: false
+      }
+      
+      // Get existing history and check if today's quiz already exists
+      const existingHistory = userProfile.quizHistory || []
+      const todayEntryIndex = existingHistory.findIndex(entry => entry.date === dateKey)
+      const alreadyCompleted = todayEntryIndex >= 0
+      
+      // Build complete history (existing + new entry)
+      let fullHistory
+      if (alreadyCompleted) {
+        fullHistory = [...existingHistory]
+        fullHistory[todayEntryIndex] = {
+          ...fullHistory[todayEntryIndex],
+          duration,
+          answers: selectedAnswers
+        }
+      } else {
+        fullHistory = [...existingHistory, historyEntry]
+      }
+      
+      // Calculate streak from history
+      const newStreak = calculateCurrentStreakFromHistory(fullHistory)
+      const newMaxStreak = Math.max(newStreak, userProfile.maxStreak || 0)
+      
+      // Calculate total stats
+      const newTotalQuizzesCompleted = alreadyCompleted ? 
+        userProfile.totalQuizzesCompleted : 
+        (userProfile.totalQuizzesCompleted || 0) + 1
+      
+      // Update score distribution
+      const newScoreDistribution = [...(userProfile.scoreDistribution || [])]
+      const scoreEntry = newScoreDistribution.find(s => s.score === score)
+      if (scoreEntry && !alreadyCompleted) {
+        scoreEntry.count += 1
+      }
+      
+      // Calculate average score
+      const totalScore = alreadyCompleted ? 
+        userProfile.averageScore * userProfile.totalQuizzesCompleted : 
+        (userProfile.averageScore * (userProfile.totalQuizzesCompleted || 0)) + score
+      const newAverageScore = Math.round((totalScore / newTotalQuizzesCompleted) * 100) / 100
+      
+      // Check for newly unlocked badges
+      const statsForBadgeCheck = {
+        quizzesTaken: newTotalQuizzesCompleted,
+        maxStreak: newMaxStreak,
+        currentStreak: newStreak,
+        history: fullHistory,
+        shares: userProfile.shares || 0
+      }
+      
+      const newlyUnlockedBadges = checkNewlyUnlockedBadges(
+        userProfile,
+        statsForBadgeCheck,
+        dateKey
+      )
+      
+      const updatedBadges = [...(userProfile.badges || []), ...newlyUnlockedBadges]
+      
+      // Prepare complete profile update
+      const profileUpdates = {
+        quizHistory: fullHistory,
+        currentStreak: newStreak,
+        maxStreak: newMaxStreak,
+        totalQuizzesCompleted: newTotalQuizzesCompleted,
+        averageScore: newAverageScore,
+        scoreDistribution: newScoreDistribution,
+        badges: updatedBadges
+      }
+      
+      // Update local state immediately for instant UI feedback
+      setUserProfile(prev => ({ ...prev, ...profileUpdates }))
+      
+      // Push to Firebase in background (non-blocking)
+      const userRef = doc(firestore, 'users', currentUser.uid)
+      const firebaseUpdates = {
+        quizHistory: fullHistory,
+        currentStreak: newStreak,
+        maxStreak: newMaxStreak,
+        totalQuizzesCompleted: newTotalQuizzesCompleted,
+        averageScore: newAverageScore,
+        scoreDistribution: newScoreDistribution
+      }
+      
+      // Add newly unlocked badges to Firebase update if any exist
+      if (newlyUnlockedBadges.length > 0) {
+        firebaseUpdates.badges = arrayUnion(...newlyUnlockedBadges)
+      }
+      
+      // Background Firebase sync with error handling
+      updateDoc(userRef, firebaseUpdates).catch(error => {
+        console.error('Error syncing quiz completion to Firebase:', error)
+        // Don't throw - local state is already updated
+      })
+      
+      return { 
+        success: true, 
+        newlyUnlockedBadges,
+        newStreak,
+        newMaxStreak
+      }
+      
+    } catch (error) {
+      console.error('Error completing quiz:', error)
+      return { success: false, error: error.message }
+    }
+  }
+  
+  // Update user profile data (for other updates like sharing)
   async function updateUserProfile(updates) {
     if (!currentUser) return
     
@@ -253,18 +396,31 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      // Cancel any pending requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+      
       setCurrentUser(user)
+      setLoading(false) // Set loading false immediately after auth state is determined
       
       if (user) {
-        await loadUserProfile(user)
+        // Create new AbortController for this request
+        abortControllerRef.current = new AbortController()
+        // Load profile in background - don't block app rendering
+        loadUserProfile(user, abortControllerRef.current)
       } else {
         setUserProfile(null)
       }
-      
-      setLoading(false)
     })
 
-    return unsubscribe
+    return () => {
+      // Cancel any pending requests on cleanup
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+      unsubscribe()
+    }
   }, [])
 
   const value = {
@@ -277,12 +433,13 @@ export function AuthProvider({ children }) {
     signInWithGoogle,
     logout,
     updateUserProfile,
+    completeQuiz,
     setError
   }
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   )
 }
