@@ -6,11 +6,18 @@ import FriendsTab from './components/FriendsTab'
 import ProfileTab from './components/ProfileTab'
 import { useViewportUnits } from './hooks/useViewportUnits'
 
+// Clear quiz state on page load (before any components mount)
+sessionStorage.removeItem('quizState')
+sessionStorage.removeItem('welcomeAnimated')
+
 function App() {
   useViewportUnits()
-  const [currentScreen, setCurrentScreen] = useState('quiz') // 'quiz', 'friends', 'profile'
+  const [currentScreen, setCurrentScreen] = useState('quiz')
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [showBottomNav, setShowBottomNav] = useState(false)
+  const [welcomeAnimated, setWelcomeAnimated] = useState(() => {
+    return sessionStorage.getItem('welcomeAnimated') === 'true'
+  })
 
   // Start bottom nav animation immediately
   useEffect(() => {
@@ -54,7 +61,13 @@ function App() {
 
   return (
     <>
-      {currentScreen === 'quiz' && <QuizTab isTransitioning={isTransitioning} />}
+      {currentScreen === 'quiz' && (
+        <QuizTab 
+          isTransitioning={isTransitioning} 
+          welcomeAnimated={welcomeAnimated}
+          setWelcomeAnimated={setWelcomeAnimated}
+        />
+      )}
       {currentScreen === 'friends' && <FriendsTab isTransitioning={isTransitioning} />}
       {currentScreen === 'profile' && <ProfileTab isTransitioning={isTransitioning} />}
       <BottomNav currentScreen={currentScreen} onNavigate={handleNavigation} show={showBottomNav} />

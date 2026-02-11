@@ -3,18 +3,22 @@ import './QuizTab.css'
 import WelcomeScreen from './WelcomeScreen'
 import QuizScreen from './QuizScreen'
 
-function QuizTab({ isTransitioning }) {
+function QuizTab({ isTransitioning, welcomeAnimated, setWelcomeAnimated }) {
   const [showWelcome, setShowWelcome] = useState(true)
-  const [welcomeShownBefore, setWelcomeShownBefore] = useState(false)
   const [welcomeAnimationComplete, setWelcomeAnimationComplete] = useState(false)
   const [welcomeExiting, setWelcomeExiting] = useState(false)
   const [quizEntering, setQuizEntering] = useState(false)
   const [animationData, setAnimationData] = useState(null)
   const [lottieInstance, setLottieInstance] = useState(null)
 
-  // Clear quiz state on fresh page load
+  // Check sessionStorage on mount to restore state
   useEffect(() => {
-    sessionStorage.removeItem('quizState')
+    const savedQuizState = sessionStorage.getItem('quizState')
+    
+    // If quiz already started, skip welcome screen
+    if (savedQuizState) {
+      setShowWelcome(false)
+    }
   }, [])
 
   // Load Lottie animation once on tab mount
@@ -25,14 +29,35 @@ function QuizTab({ isTransitioning }) {
       .catch(err => console.error('Failed to load animation:', err))
   }, [])
 
+  // Set welcomeAnimated when animation completes
+  useEffect(() => {
+    if (welcomeAnimationComplete) {
+      sessionStorage.setItem('welcomeAnimated', 'true')
+      setWelcomeAnimated(true)
+    }
+  }, [welcomeAnimationComplete, setWelcomeAnimated])
+
+  // Set welcomeAnimated when user navigates away from quiz tab
+  useEffect(() => {
+    return () => {
+      if (showWelcome && !welcomeAnimated) {
+        sessionStorage.setItem('welcomeAnimated', 'true')
+        setWelcomeAnimated(true)
+      }
+    }
+  }, [showWelcome, welcomeAnimated, setWelcomeAnimated])
+
   const handleStartQuiz = () => {
+    // Mark welcome as animated when user starts quiz
+    sessionStorage.setItem('welcomeAnimated', 'true')
+    setWelcomeAnimated(true)
+    
     // Start exit animation
     setWelcomeExiting(true)
     
     // Wait for exit animation to complete
     setTimeout(() => {
       setShowWelcome(false)
-      setWelcomeShownBefore(true)
       setQuizEntering(true)
       
       // Reset entering state after animation completes (250ms cards + 500ms last dot delay + 300ms dot animation)
@@ -52,7 +77,7 @@ function QuizTab({ isTransitioning }) {
       {showWelcome ? (
         <WelcomeScreen 
           onStart={handleStartQuiz} 
-          skipAnimations={welcomeShownBefore}
+          skipAnimations={welcomeAnimated}
           animationData={animationData}
           lottieInstance={lottieInstance}
           setLottieInstance={setLottieInstance}
@@ -68,3 +93,4 @@ function QuizTab({ isTransitioning }) {
 }
 
 export default QuizTab
+
