@@ -8,6 +8,7 @@
 ## Discussing Changes
 - **Reuse existing code**: Search for existing functions, patterns, or utilities before writing new code
 - **Pitch multiple options**: When discussing ways to add or change something, present 3 different approaches with pros/cons so I can choose (when possible). After presenting options, state your recommended option and briefly explain why.
+- **Debug persistent bugs**: If we're experiencing bugs and haven't solved them after several code changes, suggest adding debug logs to find the root issue rather than continuing to guess
 
 ## 🚨 CRITICAL: Before Making ANY Code Changes
 **STOP AND CONFIRM FIRST** - You must ALWAYS:
@@ -15,8 +16,6 @@
 2. Show or describe the specific changes you'll make
 3. Wait for explicit approval ("do it", "implement it", "yes", "go ahead", etc.)
 4. NEVER make edits without confirmation, even if the request seems clear
-
-Only after I explicitly approve should you proceed with implementation.
 
 ## React Best Practices
 - **No DOM manipulation**: This is a React project - use state and props, not `querySelector`, `getElementById`, `classList`, etc.

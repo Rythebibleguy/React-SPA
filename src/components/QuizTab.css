@@ -3,7 +3,8 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  transition: opacity 200ms ease-in-out;
+  background: linear-gradient(180deg, var(--brown-primary) 0%, var(--brown-secondary) 100%);
+  transition: opacity 100ms ease-in-out;
 }
 
 .quiz-tab.fade-in {

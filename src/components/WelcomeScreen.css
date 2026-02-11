@@ -4,7 +4,6 @@
   display: flex;
   flex-direction: column;
   text-align: center;
-  background-color: var(--brown-primary);
 }
 
 .welcome-screen__content {

@@ -13,6 +13,7 @@
 
   /* Colors */
   --brown-primary: #e3d5c5;
+  --brown-secondary: #f0e5d8;
 
   /* Bottom nav height - single source of truth */
   --bottom-nav-height: calc(16 * var(--element-width));
