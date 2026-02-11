@@ -13,6 +13,7 @@ function App() {
   const [welcomeShownBefore, setWelcomeShownBefore] = useState(false)
   const [welcomeAnimationComplete, setWelcomeAnimationComplete] = useState(false)
   const [currentScreen, setCurrentScreen] = useState('quiz') // 'quiz', 'friends', 'profile'
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const [animationData, setAnimationData] = useState(null)
   const [lottieInstance, setLottieInstance] = useState(null)
 
@@ -62,10 +63,20 @@ function App() {
   }
 
   const handleNavigation = (screen) => {
-    if (!welcomeShownBefore && showWelcome) {
-      setWelcomeShownBefore(true)
-    }
-    setCurrentScreen(screen)
+    if (screen === currentScreen) return
+    
+    setIsTransitioning(true)
+    
+    setTimeout(() => {
+      if (!welcomeShownBefore && showWelcome) {
+        setWelcomeShownBefore(true)
+      }
+      setCurrentScreen(screen)
+      
+      setTimeout(() => {
+        setIsTransitioning(false)
+      }, 50)
+    }, 200)
   }
 
   return (
@@ -81,11 +92,11 @@ function App() {
           setAnimationComplete={setWelcomeAnimationComplete}
         />
       ) : (
-        <>
+        <div className={`screen-container ${isTransitioning ? 'fade-out' : 'fade-in'}`}>
           {currentScreen === 'quiz' && <QuizScreen />}
           {currentScreen === 'friends' && <FriendsScreen />}
           {currentScreen === 'profile' && <ProfileScreen />}
-        </>
+        </div>
       )}
       <BottomNav currentScreen={currentScreen} onNavigate={handleNavigation} />
     </>
