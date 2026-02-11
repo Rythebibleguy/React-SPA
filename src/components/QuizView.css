@@ -4,7 +4,8 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: calc(3 * var(--element-width));
+  align-items: center;
+  justify-content: center;
 }
 
 .quiz-view__open-results {
@@ -32,6 +33,12 @@
   transition: none;
 }
 
+.quiz-view__actions-counter-buffer {
+  flex-shrink: 0;
+  width: calc(100% - 2 * calc(4.6 * var(--element-width)));
+  height: calc(10 * var(--element-width));
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -42,10 +49,6 @@
 }
 
 .quiz-view__cards {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
   display: flex;
   width: 100%;
   overflow-x: hidden;
@@ -54,7 +57,8 @@
   gap: 0;
   touch-action: none;
   align-items: center;
-  padding: calc(4 * var(--element-width)) 0; /* Vertical padding for card shadows */
+  padding: calc(2 * var(--element-width)) 0;
+  flex-shrink: 0;
 }
 
 .quiz-view__cards::-webkit-scrollbar {
@@ -359,14 +363,12 @@
 
 /* Action Buttons */
 .quiz-view__actions {
-  position: absolute;
-  bottom: calc(12 * var(--element-width));
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   justify-content: center;
   width: calc(100% - 2 * calc(4.6 * var(--element-width)));
   box-sizing: border-box;
+  flex-shrink: 0;
+  height: calc(10 * var(--element-width));
 }
 
 .quiz-view__actions-buttons {
@@ -381,7 +383,6 @@
   display: flex;
   align-items: center;
   gap: calc(1 * var(--element-width));
-  height: calc(10 * var(--element-width));
   background: white;
   color: #444;
   border: 1px solid #e0e0e0;

@@ -401,6 +401,7 @@ function QuizView() {
           Show Results
         </button>
       )}
+      <div className="quiz-view__actions-counter-buffer"></div>
       <div className="quiz-view__cards" ref={containerRef}>
           {questions.map((question, qIndex) => {
           const isQuestionLocked = qIndex > 0 && selectedAnswers[qIndex - 1] === undefined
