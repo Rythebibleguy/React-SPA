@@ -4,7 +4,6 @@
   display: flex;
   flex-direction: column;
   padding: calc(6 * var(--element-width));
-  padding-bottom: calc(20 * var(--element-width));
   box-sizing: border-box;
   overflow-y: auto;
   gap: calc(6 * var(--element-width));
@@ -81,11 +80,10 @@
 }
 
 .profile-screen__welcome {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: white;
   border-radius: calc(4 * var(--element-width));
   padding: calc(8 * var(--element-width));
   text-align: center;
-  margin: calc(4 * var(--element-width)) 0;
   border: 2px dashed #dee2e6;
 }
 

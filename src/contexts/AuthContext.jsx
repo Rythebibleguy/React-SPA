@@ -131,19 +131,6 @@ export function AuthProvider({ children }) {
   /**
    * FIREBASE USER PROFILE SCHEMA
    * 
-   * Two-collection structure for public/private data separation:
-   * PUBLIC PROFILE (users/{uid}) - Readable by authenticated users for friends, leaderboards
-   * PRIVATE DATA (userPrivate/{uid}) - Only readable by owner for emails, preferences
-   * 
-   * REQUIRED SECURITY RULES:
-   * match /users/{userId} {
-   *   allow read: if request.auth != null;
-   *   allow write: if request.auth.uid == userId;
-   * }
-   * match /userPrivate/{userId} {
-   *   allow read, write: if request.auth.uid == userId;
-   * }
-   * 
    * @typedef {Object} UserProfile (Public Profile - users/{uid})
    * @property {string} displayName - Random username (user12345) for Google signups, custom name for others
    * @property {string} avatarColor - Generated color for avatar (e.g. "#74b9ff")
