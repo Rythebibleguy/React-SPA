@@ -54,6 +54,11 @@ function App() {
     setShowWelcome(false)
     setWelcomeShownBefore(true)
     setCurrentScreen('quiz')
+    
+    // Track quiz start in Clarity
+    if (window.clarity) {
+      window.clarity("event", "quiz_started")
+    }
   }
 
   const handleNavigation = (screen) => {
