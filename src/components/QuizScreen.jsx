@@ -60,8 +60,11 @@ function QuizScreen() {
   // Auto-open results modal when navigating back to quiz after completion
   useEffect(() => {
     const isQuizComplete = questions.length === 4 && selectedAnswers.length === 4 && !selectedAnswers.includes(undefined)
-    if (isQuizComplete) {
-      setShowResultsModal(true)
+    // Only auto-open if quiz was already submitted (navigating back), not during first completion
+    if (isQuizComplete && hasSubmittedRef.current) {
+      setTimeout(() => {
+        setShowResultsModal(true)
+      }, 200)
     }
   }, [questions.length, selectedAnswers])
 
