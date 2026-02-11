@@ -123,7 +123,7 @@ function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieI
               </button>
               {showQuizNumber && (
                 <span className={`welcome-screen__ready-date ${skipAnimations ? 'show-immediate' : ''}`}>
-                  Quiz #1
+                  {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
                 </span>
               )}
             </>
