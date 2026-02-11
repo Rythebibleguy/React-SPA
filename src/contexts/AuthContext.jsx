@@ -12,7 +12,11 @@ import {
   setDoc,
   getDoc,
   updateDoc,
-  arrayUnion
+  arrayUnion,
+  collection,
+  query,
+  where,
+  getDocs
 } from '../config/firebase'
 import { 
   checkNewlyUnlockedBadges, 
@@ -90,16 +94,59 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // Check if displayName already exists
+  async function isDisplayNameExists(displayName) {
+    try {
+      const usersRef = collection(firestore, 'users')
+      const q = query(usersRef, where('displayName', '==', displayName))
+      const querySnapshot = await getDocs(q)
+      return !querySnapshot.empty
+    } catch (error) {
+      return false // If error, assume displayName doesn't exist
+    }
+  }
+
+  // Generate unique random displayName
+  async function generateRandomDisplayName() {
+    let attempts = 0
+    const maxAttempts = 50 // Prevent infinite loops
+    
+    while (attempts < maxAttempts) {
+      const randomNumber = Math.floor(Math.random() * 99999) + 1
+      const displayName = `user${randomNumber.toString().padStart(5, '0')}`
+      
+      const exists = await isDisplayNameExists(displayName)
+      if (!exists) {
+        return displayName
+      }
+      
+      attempts++
+    }
+    
+    // Fallback: add timestamp if all attempts failed
+    const timestamp = Date.now().toString().slice(-5)
+    return `user${timestamp}`
+  }
+
   /**
    * FIREBASE USER PROFILE SCHEMA
    * 
-   * Standard user profile structure stored in Firestore.
-   * Uses existing legacy field names and formats.
+   * Two-collection structure for public/private data separation:
+   * PUBLIC PROFILE (users/{uid}) - Readable by authenticated users for friends, leaderboards
+   * PRIVATE DATA (userPrivate/{uid}) - Only readable by owner for emails, preferences
    * 
-   * @typedef {Object} UserProfile
-   * @property {string} displayName - User's display name (from auth or 'Anonymous')
+   * REQUIRED SECURITY RULES:
+   * match /users/{userId} {
+   *   allow read: if request.auth != null;
+   *   allow write: if request.auth.uid == userId;
+   * }
+   * match /userPrivate/{userId} {
+   *   allow read, write: if request.auth.uid == userId;
+   * }
+   * 
+   * @typedef {Object} UserProfile (Public Profile - users/{uid})
+   * @property {string} displayName - Random username (user12345) for Google signups, custom name for others
    * @property {string} avatarColor - Generated color for avatar (e.g. "#74b9ff")
-   * @property {string} signUpMethod - How user signed up ("google", "email")
    * @property {string} createdOn - Account creation date as string (YYYY-MM-DD)
    * @property {number} quizzesTaken - Total unique quizzes completed
    * @property {number} totalScore - Sum of all quiz scores
@@ -112,30 +159,47 @@ export function AuthProvider({ children }) {
    * @property {Array<Object>} badges - Array of unlocked badges:
    *   - {id: string, unlockedOn: string (YYYY-MM-DD)}
    * @property {Array<string>} friends - Array of friend user IDs
+   * 
+   * @typedef {Object} UserPrivateData (Private Data - userPrivate/{uid})
+   * @property {string|null} email - User's email address from authentication
+   * @property {string|null} googlePhotoURL - User's profile photo URL from Google
+   * @property {string|null} googleName - User's original name from Google profile (not used as display name)
+   * @property {string} signUpMethod - How user signed up ("google", "email")
+   * @property {Date} createdAt - Account creation timestamp
+   * @property {Object} preferences - User preferences and private settings
    */
   
-  // Create or update user profile in Firestore
+  // Create or update user profile in Firestore (public + private data)
   async function createUserProfile(user, additionalData = {}) {
     if (!user) {
       return
     }
+    
     const userRef = doc(firestore, 'users', user.uid)
+    const userPrivateRef = doc(firestore, 'userPrivate', user.uid)
     
     try {
       const userSnap = await getDoc(userRef)
       
       if (!userSnap.exists()) {
-        const { displayName } = user
+        const { displayName, email, photoURL } = user
         const createdOnDate = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
+        const createdAt = new Date()
         
         // Generate random avatar color
         const colors = ['#74b9ff', '#fd79a8', '#fdcb6e', '#6c5ce7', '#a29bfe', '#fd79a8', '#00b894', '#e17055']
         const randomColor = colors[Math.floor(Math.random() * colors.length)]
         
+        // Generate random displayName for Google signups, use provided name for others
+        const isGoogleSignup = additionalData.signUpMethod === 'google' || !additionalData.signUpMethod
+        const publicDisplayName = isGoogleSignup ? 
+          await generateRandomDisplayName() : 
+          (additionalData.displayName || displayName || 'Anonymous')
+        
+        // Public profile data (readable by friends)
         const profileData = {
-          displayName: additionalData.displayName || displayName || 'Anonymous',
+          displayName: publicDisplayName,
           avatarColor: additionalData.avatarColor || randomColor,
-          signUpMethod: additionalData.signUpMethod || 'google',
           createdOn: createdOnDate,
           quizzesTaken: 0,
           totalScore: 0,
@@ -148,7 +212,22 @@ export function AuthProvider({ children }) {
           ...additionalData
         }
         
-        await setDoc(userRef, profileData)
+        // Private data (only readable by owner)
+        const privateData = {
+          email: email || null,
+          googlePhotoURL: photoURL || null,
+          googleName: displayName || null,
+          signUpMethod: additionalData.signUpMethod || 'google',
+          createdAt,
+          preferences: {}
+        }
+        
+        // Create both documents
+        await Promise.all([
+          setDoc(userRef, profileData),
+          setDoc(userPrivateRef, privateData)
+        ])
+        
         setUserProfile(profileData)
       } else {
         const rawData = userSnap.data()
@@ -156,6 +235,32 @@ export function AuthProvider({ children }) {
       }
     } catch (error) {
       setError('Failed to load user profile: ' + error.message)
+    }
+  }
+
+  // Get user's private data (email, preferences, etc.)
+  async function getUserPrivateData(userId = null) {
+    const uid = userId || currentUser?.uid
+    if (!uid) return null
+    
+    try {
+      const privateRef = doc(firestore, 'userPrivate', uid)
+      const privateSnap = await getDoc(privateRef)
+      return privateSnap.exists() ? privateSnap.data() : null
+    } catch (error) {
+      return null
+    }
+  }
+
+  // Update user's private data
+  async function updateUserPrivateData(updates) {
+    if (!currentUser) return
+    
+    try {
+      const privateRef = doc(firestore, 'userPrivate', currentUser.uid)
+      await updateDoc(privateRef, updates)
+    } catch (error) {
+      throw error
     }
   }
 
@@ -367,6 +472,8 @@ export function AuthProvider({ children }) {
     logout,
     updateUserProfile,
     completeQuiz,
+    getUserPrivateData,
+    updateUserPrivateData,
     setError
   }
 
