@@ -1,3 +1,10 @@
+## 🎯 ALWAYS REFERENCE THESE INSTRUCTIONS
+**CRITICAL**: Read and consider ALL instructions in this file before every single chat response. These guidelines should influence how you:
+- Communicate with me
+- Approach problem-solving  
+- Make code changes
+- Handle requests and questions
+
 ## Session Setup
 - **Always start dev server**: Run `npm run dev` at the beginning of each chat session
 

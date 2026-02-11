@@ -1,15 +1,132 @@
 import './AuthScreen.css'
 import { TrendingUp } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { useState } from 'react'
 
 function AuthScreen() {
-  const handleGoogleSignIn = () => {
-    // TODO: Implement Google sign-in
-    console.log('Google sign-in clicked')
+  const { signInWithGoogle, signIn, signUp, error, setError } = useAuth()
+  const [loading, setLoading] = useState(false)
+  const [showEmailForm, setShowEmailForm] = useState(false)
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [displayName, setDisplayName] = useState('')
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      await signInWithGoogle()
+    } catch (error) {
+      console.error('Google sign-in error:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleEmailSignIn = () => {
-    // TODO: Implement email sign-in
-    console.log('Email sign-in clicked')
+    setShowEmailForm(true)
+    setIsSignUp(false)
+  }
+
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault()
+    if (!email || !password) {
+      setError('Please fill in all fields')
+      return
+    }
+
+    try {
+      setLoading(true)
+      setError(null)
+      
+      if (isSignUp) {
+        await signUp(email, password, displayName)
+      } else {
+        await signIn(email, password)
+      }
+    } catch (error) {
+      console.error('Email auth error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const resetForm = () => {
+    setShowEmailForm(false)
+    setEmail('')
+    setPassword('')
+    setDisplayName('')
+    setError(null)
+  }
+
+  if (showEmailForm) {
+    return (
+      <div className="auth-screen">
+        <div className="auth-screen__header">
+          <h2 className="auth-screen__title">
+            {isSignUp ? 'Create Account' : 'Welcome Back'}
+          </h2>
+          <p className="auth-screen__subtitle">
+            {isSignUp ? 'Join to save your progress' : 'Sign in to your account'}
+          </p>
+        </div>
+
+        <form onSubmit={handleEmailSubmit} className="auth-screen__form">
+          {isSignUp && (
+            <input
+              type="text"
+              placeholder="Display Name"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className="auth-screen__input"
+            />
+          )}
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="auth-screen__input"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="auth-screen__input"
+            required
+          />
+
+          {error && <div className="auth-screen__error">{error}</div>}
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="auth-screen__btn auth-screen__btn--primary"
+          >
+            {loading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
+          </button>
+
+          <button 
+            type="button"
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="auth-screen__toggle"
+          >
+            {isSignUp ? 'Already have an account? Sign in' : 'Need an account? Sign up'}
+          </button>
+
+          <button 
+            type="button"
+            onClick={resetForm}
+            className="auth-screen__back"
+          >
+            ← Back to options
+          </button>
+        </form>
+      </div>
+    )
   }
 
   return (
@@ -76,6 +193,9 @@ function AuthScreen() {
           className="auth-screen__btn auth-screen__btn--email"
           onClick={handleEmailSignIn}
         >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="auth-screen__email-icon">
+            <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+          </svg>
           Continue with Email
         </button>
         

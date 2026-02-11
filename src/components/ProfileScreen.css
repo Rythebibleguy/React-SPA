@@ -12,10 +12,16 @@
 
 .profile-screen__header {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: calc(2 * var(--element-width));
+  padding: 0 calc(1 * var(--element-width));
+}
+
+.profile-screen__header-left {
+  display: flex;
   align-items: center;
   gap: calc(3 * var(--element-width));
-  margin-bottom: calc(2 * var(--element-width));
 }
 
 .profile-screen__avatar {
@@ -40,6 +46,73 @@
   font-size: calc(6 * var(--element-width));
   font-weight: 700;
   color: #2B2B2B;
+}
+
+.profile-screen__sign-out {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: calc(2 * var(--element-width));
+  border-radius: calc(2 * var(--element-width));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.profile-screen__sign-out:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #d32f2f;
+}
+
+.profile-screen__sign-out:active {
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(0.95);
+}
+
+.profile-screen__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  color: #666;
+  font-size: calc(4 * var(--element-width));
+}
+
+.profile-screen__welcome {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: calc(4 * var(--element-width));
+  padding: calc(8 * var(--element-width));
+  text-align: center;
+  margin: calc(4 * var(--element-width)) 0;
+  border: 2px dashed #dee2e6;
+}
+
+.profile-screen__welcome-icon {
+  font-size: calc(12 * var(--element-width));
+  margin-bottom: calc(3 * var(--element-width));
+}
+
+.profile-screen__welcome-title {
+  margin: 0 0 calc(3 * var(--element-width)) 0;
+  font-size: calc(6 * var(--element-width));
+  font-weight: 700;
+  color: #2B2B2B;
+}
+
+.profile-screen__welcome-text {
+  margin: 0 0 calc(2 * var(--element-width)) 0;
+  font-size: calc(3.5 * var(--element-width));
+  color: #666;
+  line-height: 1.4;
+}
+
+.profile-screen__welcome-hint {
+  margin: 0;
+  font-size: calc(3 * var(--element-width));
+  color: #999;
+  font-style: italic;
 }
 
 .profile-screen__stats-grid {

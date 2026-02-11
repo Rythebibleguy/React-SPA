@@ -220,6 +220,12 @@
   flex-shrink: 0;
 }
 
+.auth-screen__email-icon {
+  width: calc(5 * var(--element-width));
+  height: calc(5 * var(--element-width));
+  flex-shrink: 0;
+}
+
 .auth-screen__btn--email {
   background: linear-gradient(135deg, #2B2B2B 0%, #1a1a1a 100%);
   color: white;
@@ -245,4 +251,76 @@
 
 .auth-screen__terms a:active {
   color: #2B2B2B;
+}
+
+/* Email Form Styles */
+.auth-screen__form {
+  display: flex;
+  flex-direction: column;
+  gap: calc(3 * var(--element-width));
+  padding: calc(4 * var(--element-width));
+  flex: 1;
+  justify-content: center;
+}
+
+.auth-screen__input {
+  padding: calc(3.5 * var(--element-width)) calc(4 * var(--element-width));
+  border: 2px solid #e1e5e9;
+  border-radius: calc(3 * var(--element-width));
+  font-size: calc(3.5 * var(--element-width));
+  background: white;
+  color: #2B2B2B;
+  transition: border-color 0.2s ease;
+}
+
+.auth-screen__input:focus {
+  outline: none;
+  border-color: #4285F4;
+}
+
+.auth-screen__input::placeholder {
+  color: #999;
+}
+
+.auth-screen__error {
+  background: #fee;
+  color: #c33;
+  padding: calc(3 * var(--element-width));
+  border-radius: calc(2 * var(--element-width));
+  font-size: calc(3 * var(--element-width));
+  text-align: center;
+  border: 1px solid #fcc;
+}
+
+.auth-screen__btn--primary {
+  background: linear-gradient(135deg, #4285F4 0%, #3367d6 100%);
+  color: white;
+}
+
+.auth-screen__btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-screen__toggle {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: calc(3 * var(--element-width));
+  padding: calc(2 * var(--element-width));
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.auth-screen__toggle:active {
+  color: #2B2B2B;
+}
+
+.auth-screen__back {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: calc(3 * var(--element-width));
+  padding: calc(2 * var(--element-width));
+  cursor: pointer;
 }
