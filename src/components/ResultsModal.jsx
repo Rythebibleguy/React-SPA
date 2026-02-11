@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import './ResultsModal.css'
 
-function ResultsModal({ score, total, stats, onClose, onShare }) {
+function ResultsModal({ score, total, stats, onClose, onShare, showCopied }) {
 
   // Calculate score distribution from stats
   const scoreDistribution = useMemo(() => {
@@ -77,11 +77,22 @@ function ResultsModal({ score, total, stats, onClose, onShare }) {
 
         <div className="results-modal__action">
           <button className="results-modal__btn" onClick={onShare}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 2L11 13"></path>
-              <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
-            </svg>
-            Send Challenge
+            {showCopied ? (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Copied!
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 2L11 13"></path>
+                  <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+                </svg>
+                Send Challenge
+              </>
+            )}
           </button>
         </div>
       </div>

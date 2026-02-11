@@ -36,6 +36,7 @@ function QuizView() {
   const [answerPercentages, setAnswerPercentages] = useState(savedState?.answerPercentages ?? {})
   const [showReference, setShowReference] = useState(false)
   const [showResultsModal, setShowResultsModal] = useState(false)
+  const [showCopied, setShowCopied] = useState(false)
   const containerRef = useRef(null)
   const cardsRef = useRef([])
   const hasSubmittedRef = useRef(savedState?.hasSubmitted ?? false)
@@ -330,7 +331,8 @@ function QuizView() {
     try {
       await navigator.clipboard.writeText(text)
       console.log('Share method: Clipboard')
-      alert('Link copied to clipboard!')
+      setShowCopied(true)
+      setTimeout(() => setShowCopied(false), 2000)
     } catch (error) {
       // Last resort: show text in alert
       alert('Copy this link:\n\n' + text)
@@ -531,6 +533,7 @@ function QuizView() {
           stats={stats}
           onClose={handleCloseResults}
           onShare={handleShareChallenge}
+          showCopied={showCopied}
         />
       )}
     </div>
