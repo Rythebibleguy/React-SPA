@@ -1,0 +1,15 @@
+.profile-tab {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 200ms ease-in-out;
+}
+
+.profile-tab.fade-in {
+  opacity: 1;
+}
+
+.profile-tab.fade-out {
+  opacity: 0;
+}

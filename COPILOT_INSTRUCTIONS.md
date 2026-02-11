@@ -22,9 +22,6 @@ Only after I explicitly approve should you proceed with implementation.
 - **No DOM manipulation**: This is a React project - use state and props, not `querySelector`, `getElementById`, `classList`, etc.
 - Keep components declarative and let React handle the DOM
 
-## Design Reference
-- UI/UX inspired by NY Times Games (Wordle, Connections, etc.)
-
 ## Legacy Code
 - `Old Code/` folder contains the original HTML/CSS/JS implementation
 - Use as reference for ideas and approach, not for copy-pasting code directly
