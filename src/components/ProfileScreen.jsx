@@ -1,7 +1,12 @@
 import './ProfileScreen.css'
 import { Trophy, Award, Flame } from 'lucide-react'
+import { useState } from 'react'
+import { getAllBadgesWithProgress } from '../config/badges'
 
 function ProfileScreen() {
+  // Badge details modal state
+  const [selectedBadge, setSelectedBadge] = useState(null)
+
   // Mock data
   const stats = {
     played: 47,
@@ -20,14 +25,21 @@ function ProfileScreen() {
 
   const maxCount = Math.max(...scoreDistribution.map(s => s.count))
 
-  const badges = [
-    { id: 1, icon: '🔥', name: 'Hot Streak', description: 'Complete 7 quizzes in a row', unlocked: true },
-    { id: 2, icon: '⚡', name: 'Speed Demon', description: 'Finish quiz in under 2 minutes', unlocked: true },
-    { id: 3, icon: '🎯', name: 'Perfect Score', description: 'Get all 4 questions correct', unlocked: true },
-    { id: 4, icon: '📚', name: 'Scholar', description: 'Complete 50 quizzes', unlocked: false },
-    { id: 5, icon: '👑', name: 'Quiz Master', description: 'Get 10 perfect scores', unlocked: false },
-    { id: 6, icon: '💎', name: 'Diamond Streak', description: 'Complete 30 quizzes in a row', unlocked: false }
-  ]
+  // Mock user data for badge checking
+  const userData = {
+    quizzesTaken: stats.played,
+    maxStreak: stats.maxStreak,
+    shares: 2, // Mock shares
+    history: [
+      { score: 4, totalQuestions: 4, date: '2024-02-10', timestamp: '14:30', duration: 45 },
+      { score: 3, totalQuestions: 4, date: '2024-02-09', timestamp: '09:15', duration: 62 },
+      { score: 4, totalQuestions: 4, date: '2024-02-08', timestamp: '05:45', duration: 8 },
+      // More mock history...
+    ]
+  }
+
+  // Get all badges with calculated progress (array order determines display order)
+  const badges = getAllBadgesWithProgress(userData)
 
   return (
     <div className="profile-screen">
@@ -53,7 +65,7 @@ function ProfileScreen() {
         </div>
         <div className="profile-screen__stat">
           <div className="profile-screen__stat-value">{stats.maxStreak}</div>
-          <div className="profile-screen__stat-label">Max Streak</div>
+          <div className="profile-screen__stat-label">Best Streak</div>
         </div>
       </div>
 
@@ -96,15 +108,51 @@ function ProfileScreen() {
                   ? 'profile-screen__badge--unlocked' 
                   : 'profile-screen__badge--locked'
               }`}
+              onClick={() => setSelectedBadge(badge)}
             >
-              <div className="profile-screen__badge-icon">{badge.icon}</div>
-              {!badge.unlocked && (
-                <div className="profile-screen__badge-lock">🔒</div>
-              )}
+              <img 
+                src={badge.icon} 
+                alt={badge.name}
+                className="profile-screen__badge-icon"
+              />
             </div>
           ))}
         </div>
       </div>
+
+      {/* Badge Details Modal */}
+      {selectedBadge && (
+        <div className="profile-screen__modal-overlay" onClick={() => setSelectedBadge(null)}>
+          <div className="profile-screen__modal">
+            <div className="profile-screen__modal-header">
+              <img 
+                src={selectedBadge.icon} 
+                alt={selectedBadge.name}
+                className="profile-screen__modal-icon"
+              />
+            </div>
+            <h3 className="profile-screen__modal-title">{selectedBadge.name}</h3>
+            <p className="profile-screen__modal-description">{selectedBadge.description}</p>
+            
+            {selectedBadge.progress && (
+              <div className="profile-screen__modal-progress">
+                <div className="profile-screen__modal-progress-text">
+                  Progress: {selectedBadge.progress.current}/{selectedBadge.progress.total} {selectedBadge.progress.type}
+                </div>
+                <div className="profile-screen__modal-progress-bar">
+                  <div 
+                    className="profile-screen__modal-progress-fill"
+                    style={{ width: `${selectedBadge.progressPercent}%` }}
+                  />
+                </div>
+                <div className="profile-screen__modal-progress-percent">
+                  {Math.round(selectedBadge.progressPercent)}%
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

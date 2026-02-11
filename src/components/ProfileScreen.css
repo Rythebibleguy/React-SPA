@@ -177,7 +177,9 @@
 }
 
 .profile-screen__badge-icon {
-  font-size: calc(10 * var(--element-width));
+  width: calc(10 * var(--element-width));
+  height: calc(10 * var(--element-width));
+  object-fit: contain;
 }
 
 .profile-screen__badge-lock {
@@ -185,6 +187,113 @@
   bottom: calc(1.5 * var(--element-width));
   right: calc(1.5 * var(--element-width));
   font-size: calc(4 * var(--element-width));
+}
+
+/* Badge Details Modal */
+.profile-screen__modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: calc(4 * var(--element-width));
+  box-sizing: border-box;
+}
+
+.profile-screen__modal {
+  background: white;
+  border-radius: calc(4 * var(--element-width));
+  padding: calc(6 * var(--element-width));
+  max-width: calc(80 * var(--element-width));
+  width: 100%;
+  box-shadow: 0 calc(2 * var(--element-width)) calc(8 * var(--element-width)) rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.profile-screen__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: calc(4 * var(--element-width));
+}
+
+.profile-screen__modal-icon {
+  width: calc(16 * var(--element-width));
+  height: calc(16 * var(--element-width));
+  object-fit: contain;
+}
+
+.profile-screen__modal-title {
+  margin: 0 0 calc(3 * var(--element-width));
+  font-size: calc(6 * var(--element-width));
+  font-weight: 700;
+  color: #2B2B2B;
+  text-align: center;
+}
+
+.profile-screen__modal-description {
+  margin: 0 0 calc(5 * var(--element-width));
+  font-size: calc(4 * var(--element-width));
+  line-height: 1.4;
+  color: #666;
+  text-align: center;
+}
+
+.profile-screen__modal-status {
+  text-align: center;
+  margin-bottom: calc(4 * var(--element-width));
+}
+
+.profile-screen__modal-status--unlocked {
+  color: #34C759;
+  font-weight: 600;
+  font-size: calc(4 * var(--element-width));
+}
+
+.profile-screen__modal-status--locked {
+  color: #999;
+  font-weight: 600;
+  font-size: calc(4 * var(--element-width));
+}
+
+.profile-screen__modal-progress {
+  margin-top: calc(4 * var(--element-width));
+  text-align: center;
+}
+
+.profile-screen__modal-progress-text {
+  font-size: calc(3.5 * var(--element-width));
+  color: #666;
+  margin-bottom: calc(2 * var(--element-width));
+  font-weight: 500;
+}
+
+.profile-screen__modal-progress-bar {
+  width: 100%;
+  height: calc(2 * var(--element-width));
+  background: #f0f0f0;
+  border-radius: calc(1 * var(--element-width));
+  overflow: hidden;
+  margin-bottom: calc(1.5 * var(--element-width));
+}
+
+.profile-screen__modal-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34C759 0%, #30B753 100%);
+  border-radius: calc(1 * var(--element-width));
+  transition: width 0.3s ease;
+  min-width: 0;
+}
+
+.profile-screen__modal-progress-percent {
+  font-size: calc(3 * var(--element-width));
+  color: #34C759;
+  font-weight: 600;
 }
 
 
