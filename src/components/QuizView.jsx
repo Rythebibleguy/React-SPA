@@ -317,12 +317,12 @@ function QuizView() {
         // User cancelled or error occurred
         if (error.name !== 'AbortError') {
           // Fall back to clipboard
-          copyToClipboard(shareText)
+          copyToClipboard(window.location.origin)
         }
       }
     } else {
       // Fall back to clipboard for desktop browsers
-      copyToClipboard(shareText)
+      copyToClipboard(window.location.origin)
     }
   }
 
@@ -330,10 +330,10 @@ function QuizView() {
     try {
       await navigator.clipboard.writeText(text)
       console.log('Share method: Clipboard')
-      alert('Challenge copied to clipboard!')
+      alert('Link copied to clipboard!')
     } catch (error) {
       // Last resort: show text in alert
-      alert('Copy this challenge:\n\n' + text)
+      alert('Copy this link:\n\n' + text)
     }
   }
 
