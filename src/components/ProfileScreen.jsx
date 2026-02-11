@@ -9,7 +9,26 @@ function ProfileScreen() {
   // Badge details modal state
   const [selectedBadge, setSelectedBadge] = useState(null)
 
-  // Show loading state if profile is still loading
+  // Show different states based on auth status
+  if (!currentUser) {
+    // User is not logged in - show auth prompt instead of loading
+    return (
+      <div className="profile-screen">
+        <div className="profile-screen__welcome">
+          <div className="profile-screen__welcome-icon">👤</div>
+          <h3 className="profile-screen__welcome-title">Sign In Required</h3>
+          <p className="profile-screen__welcome-text">
+            Sign in to track your progress, earn badges, and compete with friends!
+          </p>
+          <p className="profile-screen__welcome-hint">
+            Click the user icon in any tab to sign in.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // User is logged in but profile is still loading
   if (!userProfile) {
     return (
       <div className="profile-screen">

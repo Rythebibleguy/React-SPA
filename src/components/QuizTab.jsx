@@ -26,7 +26,7 @@ function QuizTab({ isTransitioning, welcomeAnimated, setWelcomeAnimated }) {
     fetch('/assets/animations/Book with bookmark.json')
       .then(res => res.json())
       .then(data => setAnimationData(data))
-      .catch(err => console.error('Failed to load animation:', err))
+      .catch(err => {/* Failed to load animation */})
   }, [])
 
   // Set welcomeAnimated when animation completes

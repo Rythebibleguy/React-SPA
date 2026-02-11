@@ -12,6 +12,7 @@ if (import.meta.env.DEV) {
 // Suppress Firebase AbortError warnings in development
 if (import.meta.env.DEV) {
   const originalError = console.error
+  
   console.error = (...args) => {
     // Filter out Firebase AbortError warnings
     const message = args[0]

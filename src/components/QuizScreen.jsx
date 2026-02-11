@@ -26,7 +26,6 @@ function QuizScreen({ isEntering = false }) {
       const saved = sessionStorage.getItem('quizState')
       return saved ? JSON.parse(saved) : null
     } catch (e) {
-      console.error('Error loading saved state:', e)
       return null
     }
   }
@@ -63,7 +62,7 @@ function QuizScreen({ isEntering = false }) {
       }
       sessionStorage.setItem('quizState', JSON.stringify(stateToSave))
     } catch (e) {
-      console.error('Error saving state:', e)
+      // Ignore storage errors
     }
   }, [currentIndex, selectedAnswers, answerPercentages])
 
@@ -248,12 +247,11 @@ function QuizScreen({ isEntering = false }) {
       if (currentUser) {
         const result = await completeQuiz(score, 4, duration, selectedAnswers)
         if (!result.success) {
-          console.error('Failed to complete quiz profile update:', result.error)
+          // Handle error silently, local state already updated
         }
       }
       
     } catch (error) {
-      console.error('Error submitting quiz results:', error)
       // Continue to show results even if Firebase write fails
     }
   }
@@ -273,7 +271,7 @@ function QuizScreen({ isEntering = false }) {
         }
         sessionStorage.setItem('quizState', JSON.stringify(stateToSave))
       } catch (e) {
-        console.error('Error saving state:', e)
+        // Ignore storage errors
       }
       
       // Submit results to Firebase first

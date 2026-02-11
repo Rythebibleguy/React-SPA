@@ -29,7 +29,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null)
   const [userProfile, setUserProfile] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const abortControllerRef = useRef(null)
 
@@ -53,7 +53,8 @@ export function AuthProvider({ children }) {
   async function signIn(email, password) {
     try {
       setError(null)
-      return await signInWithEmailAndPassword(auth, email, password)
+      const result = await signInWithEmailAndPassword(auth, email, password)
+      return result
     } catch (error) {
       setError(error.message)
       throw error
@@ -66,7 +67,7 @@ export function AuthProvider({ children }) {
       setError(null)
       const result = await signInWithPopup(auth, googleProvider)
       
-      // Check if user profile exists, create if not
+      // Create user profile if needed
       await createUserProfile(result.user)
       
       return result
@@ -81,104 +82,67 @@ export function AuthProvider({ children }) {
     try {
       setError(null)
       setUserProfile(null)
-      return await signOut(auth)
+      const result = await signOut(auth)
+      return result
     } catch (error) {
       setError(error.message)
       throw error
     }
   }
 
-  // Migrate old profile data structure to new format
-  function migrateProfileData(oldData) {
-    // Calculate score distribution from history array
-    const scoreDistribution = [
-      { score: 4, count: 0, label: 'Perfect' },
-      { score: 3, count: 0, label: '3 Right' },
-      { score: 2, count: 0, label: '2 Right' },
-      { score: 1, count: 0, label: '1 Right' },
-      { score: 0, count: 0, label: '0 Right' }
-    ]
-    
-    // Count scores from history if available
-    if (oldData.history && Array.isArray(oldData.history)) {
-      oldData.history.forEach(quiz => {
-        if (quiz.score !== undefined) {
-          const scoreIndex = scoreDistribution.findIndex(s => s.score === quiz.score)
-          if (scoreIndex !== -1) {
-            scoreDistribution[scoreIndex].count++
-          }
-        }
-      })
-    }
-    
-    // Calculate average score percentage
-    const averageScore = oldData.totalQuestionsAnswered > 0 ? 
-      Math.round((oldData.totalScore / oldData.totalQuestionsAnswered) * 100) : 0
-    
-    const migratedData = {
-      // Keep existing fields that match
-      displayName: oldData.displayName || 'User',
-      email: oldData.email,
-      photoURL: oldData.photoURL || null,
-      avatarColor: oldData.avatarColor,
-      createdAt: oldData.createdAt || oldData.createdOn,
-      signUpMethod: oldData.signUpMethod,
-      
-      // Map old fields to new structure 
-      totalQuizzesCompleted: oldData.quizzesTaken || 0,
-      averageScore: averageScore,
-      currentStreak: oldData.currentStreak || 0,
-      maxStreak: oldData.maxStreak || 0,
-      shares: oldData.shares || 0,
-      
-      // Use calculated score distribution
-      scoreDistribution: scoreDistribution,
-      
-      // Map history and preserve all quiz data
-      quizHistory: oldData.history || [],
-      badges: oldData.badges || [],
-      friends: oldData.friends || [],
-      
-      // Preserve any other existing data
-      totalScore: oldData.totalScore,
-      totalQuestionsAnswered: oldData.totalQuestionsAnswered,
-      ...oldData
-    }
-    
-    return migratedData
-  }
-
+  /**
+   * FIREBASE USER PROFILE SCHEMA
+   * 
+   * Standard user profile structure stored in Firestore.
+   * Uses existing legacy field names and formats.
+   * 
+   * @typedef {Object} UserProfile
+   * @property {string} displayName - User's display name (from auth or 'Anonymous')
+   * @property {string} avatarColor - Generated color for avatar (e.g. "#74b9ff")
+   * @property {string} signUpMethod - How user signed up ("google", "email")
+   * @property {string} createdOn - Account creation date as string (YYYY-MM-DD)
+   * @property {number} quizzesTaken - Total unique quizzes completed
+   * @property {number} totalScore - Sum of all quiz scores
+   * @property {number} totalQuestionsAnswered - Total questions across all quizzes
+   * @property {number} currentStreak - Current consecutive days with quiz completion
+   * @property {number} maxStreak - Highest streak ever achieved
+   * @property {Array<Object>} history - Array of completed quizzes:
+   *   - {date: string (YYYY-MM-DD), score: number, totalQuestions: number,
+   *     timestamp: string (HH:MM), duration: number, answers: Array<number>, shared?: boolean}
+   * @property {Array<Object>} badges - Array of unlocked badges:
+   *   - {id: string, unlockedOn: string (YYYY-MM-DD)}
+   * @property {Array<string>} friends - Array of friend user IDs
+   */
+  
   // Create or update user profile in Firestore
   async function createUserProfile(user, additionalData = {}) {
-    if (!user) return
-    
+    if (!user) {
+      return
+    }
     const userRef = doc(firestore, 'users', user.uid)
     
     try {
       const userSnap = await getDoc(userRef)
       
       if (!userSnap.exists()) {
-        const { displayName, email, photoURL } = user
-        const createdAt = new Date()
+        const { displayName } = user
+        const createdOnDate = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
+        
+        // Generate random avatar color
+        const colors = ['#74b9ff', '#fd79a8', '#fdcb6e', '#6c5ce7', '#a29bfe', '#fd79a8', '#00b894', '#e17055']
+        const randomColor = colors[Math.floor(Math.random() * colors.length)]
         
         const profileData = {
           displayName: additionalData.displayName || displayName || 'Anonymous',
-          email,
-          photoURL: photoURL || null,
-          createdAt,
-          totalQuizzesCompleted: 0,
-          averageScore: 0,
+          avatarColor: additionalData.avatarColor || randomColor,
+          signUpMethod: additionalData.signUpMethod || 'google',
+          createdOn: createdOnDate,
+          quizzesTaken: 0,
+          totalScore: 0,
+          totalQuestionsAnswered: 0,
           currentStreak: 0,
           maxStreak: 0,
-          shares: 0,
-          scoreDistribution: [
-            { score: 4, count: 0, label: 'Perfect' },
-            { score: 3, count: 0, label: '3 Right' },
-            { score: 2, count: 0, label: '2 Right' },
-            { score: 1, count: 0, label: '1 Right' },
-            { score: 0, count: 0, label: '0 Right' }
-          ],
-          quizHistory: [],
+          history: [],
           badges: [],
           friends: [],
           ...additionalData
@@ -188,35 +152,18 @@ export function AuthProvider({ children }) {
         setUserProfile(profileData)
       } else {
         const rawData = userSnap.data()
-        
-        // Check if this is old format data that needs migration
-        const hasNewFormat = rawData.hasOwnProperty('totalQuizzesCompleted')
-        
-        if (hasNewFormat) {
-          setUserProfile(rawData)
-        } else {
-          const migratedData = migrateProfileData(rawData)
-          
-          // Save the migrated data back to Firestore
-          try {
-            await setDoc(userRef, migratedData, { merge: true })
-            setUserProfile(migratedData)
-          } catch (error) {
-            console.error('Error saving migrated data:', error)
-            // Still use the migrated data locally even if save fails
-            setUserProfile(migratedData)
-          }
-        }
+        setUserProfile(rawData)
       }
     } catch (error) {
-      console.error('Error in createUserProfile:', error)
       setError('Failed to load user profile: ' + error.message)
     }
   }
 
   // Load user profile from Firestore
   async function loadUserProfile(user, abortController = null) {
-    if (!user) return
+    if (!user) {
+      return
+    }
     
     try {
       const userRef = doc(firestore, 'users', user.uid)
@@ -229,16 +176,7 @@ export function AuthProvider({ children }) {
       
       if (userSnap.exists()) {
         const rawData = userSnap.data()
-        
-        // Check if this is old format data that needs migration
-        const hasNewFormat = rawData.hasOwnProperty('totalQuizzesCompleted')
-        
-        if (hasNewFormat) {
-          setUserProfile(rawData)
-        } else {
-          const migratedData = migrateProfileData(rawData)
-          setUserProfile(migratedData)
-        }
+        setUserProfile(rawData)
       } else {
         setUserProfile(null)
       }
@@ -247,14 +185,15 @@ export function AuthProvider({ children }) {
       if (error.name === 'AbortError' || error.message.includes('aborted')) {
         return
       }
-      console.error('Error loading user profile:', error)
       setError('Failed to load user profile: ' + error.message)
     }
   }
 
   // Complete quiz and update user profile with streaks, badges, and stats
   async function completeQuiz(score, totalQuestions, duration, selectedAnswers) {
-    if (!currentUser || !userProfile) return { success: false, error: 'Not logged in' }
+    if (!currentUser || !userProfile) {
+      return { success: false, error: 'Not logged in' }
+    }
     
     try {
       const dateKey = getTodayString()
@@ -273,7 +212,7 @@ export function AuthProvider({ children }) {
       }
       
       // Get existing history and check if today's quiz already exists
-      const existingHistory = userProfile.quizHistory || []
+      const existingHistory = userProfile.history || []
       const todayEntryIndex = existingHistory.findIndex(entry => entry.date === dateKey)
       const alreadyCompleted = todayEntryIndex >= 0
       
@@ -295,30 +234,25 @@ export function AuthProvider({ children }) {
       const newMaxStreak = Math.max(newStreak, userProfile.maxStreak || 0)
       
       // Calculate total stats
-      const newTotalQuizzesCompleted = alreadyCompleted ? 
-        userProfile.totalQuizzesCompleted : 
-        (userProfile.totalQuizzesCompleted || 0) + 1
+      const newQuizzesTaken = alreadyCompleted ? 
+        userProfile.quizzesTaken : 
+        (userProfile.quizzesTaken || 0) + 1
       
-      // Update score distribution
-      const newScoreDistribution = [...(userProfile.scoreDistribution || [])]
-      const scoreEntry = newScoreDistribution.find(s => s.score === score)
-      if (scoreEntry && !alreadyCompleted) {
-        scoreEntry.count += 1
-      }
-      
-      // Calculate average score
-      const totalScore = alreadyCompleted ? 
-        userProfile.averageScore * userProfile.totalQuizzesCompleted : 
-        (userProfile.averageScore * (userProfile.totalQuizzesCompleted || 0)) + score
-      const newAverageScore = Math.round((totalScore / newTotalQuizzesCompleted) * 100) / 100
+      const newTotalScore = alreadyCompleted ?
+        userProfile.totalScore :
+        (userProfile.totalScore || 0) + score
+        
+      const newTotalQuestionsAnswered = alreadyCompleted ?
+        userProfile.totalQuestionsAnswered :
+        (userProfile.totalQuestionsAnswered || 0) + totalQuestions
       
       // Check for newly unlocked badges
       const statsForBadgeCheck = {
-        quizzesTaken: newTotalQuizzesCompleted,
+        quizzesTaken: newQuizzesTaken,
         maxStreak: newMaxStreak,
         currentStreak: newStreak,
         history: fullHistory,
-        shares: userProfile.shares || 0
+        shares: 0 // Legacy profiles don't track shares
       }
       
       const newlyUnlockedBadges = checkNewlyUnlockedBadges(
@@ -331,12 +265,12 @@ export function AuthProvider({ children }) {
       
       // Prepare complete profile update
       const profileUpdates = {
-        quizHistory: fullHistory,
+        history: fullHistory,
         currentStreak: newStreak,
         maxStreak: newMaxStreak,
-        totalQuizzesCompleted: newTotalQuizzesCompleted,
-        averageScore: newAverageScore,
-        scoreDistribution: newScoreDistribution,
+        quizzesTaken: newQuizzesTaken,
+        totalScore: newTotalScore,
+        totalQuestionsAnswered: newTotalQuestionsAnswered,
         badges: updatedBadges
       }
       
@@ -346,12 +280,12 @@ export function AuthProvider({ children }) {
       // Push to Firebase in background (non-blocking)
       const userRef = doc(firestore, 'users', currentUser.uid)
       const firebaseUpdates = {
-        quizHistory: fullHistory,
+        history: fullHistory,
         currentStreak: newStreak,
         maxStreak: newMaxStreak,
-        totalQuizzesCompleted: newTotalQuizzesCompleted,
-        averageScore: newAverageScore,
-        scoreDistribution: newScoreDistribution
+        quizzesTaken: newQuizzesTaken,
+        totalScore: newTotalScore,
+        totalQuestionsAnswered: newTotalQuestionsAnswered
       }
       
       // Add newly unlocked badges to Firebase update if any exist
@@ -361,7 +295,6 @@ export function AuthProvider({ children }) {
       
       // Background Firebase sync with error handling
       updateDoc(userRef, firebaseUpdates).catch(error => {
-        console.error('Error syncing quiz completion to Firebase:', error)
         // Don't throw - local state is already updated
       })
       
@@ -373,7 +306,6 @@ export function AuthProvider({ children }) {
       }
       
     } catch (error) {
-      console.error('Error completing quiz:', error)
       return { success: false, error: error.message }
     }
   }
@@ -389,7 +321,6 @@ export function AuthProvider({ children }) {
       // Update local state
       setUserProfile(prev => ({ ...prev, ...updates }))
     } catch (error) {
-      console.error('Error updating user profile:', error)
       throw error
     }
   }
@@ -401,16 +332,18 @@ export function AuthProvider({ children }) {
         abortControllerRef.current.abort()
       }
       
-      setCurrentUser(user)
-      setLoading(false) // Set loading false immediately after auth state is determined
-      
       if (user) {
+        setCurrentUser(user)
+        setLoading(false) // Set loading false immediately after auth state is determined
+        
         // Create new AbortController for this request
         abortControllerRef.current = new AbortController()
         // Load profile in background - don't block app rendering
         loadUserProfile(user, abortControllerRef.current)
       } else {
+        setCurrentUser(null)
         setUserProfile(null)
+        setLoading(false)
       }
     })
 

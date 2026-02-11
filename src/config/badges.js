@@ -341,7 +341,9 @@ export function checkNewlyUnlockedBadges(currentUserData, newStats, dateKey) {
 
 // Helper function to calculate current streak from quiz history
 export function calculateCurrentStreakFromHistory(history) {
-  if (!history || history.length === 0) return 0
+  if (!history || history.length === 0) {
+    return 0
+  }
   
   // Sort by date (most recent first)
   const sortedHistory = [...history].sort((a, b) => new Date(b.date) - new Date(a.date))

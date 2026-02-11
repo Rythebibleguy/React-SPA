@@ -37,7 +37,6 @@ export function preloadQuizData() {
         return shuffledQuestions;
       })
       .catch(error => {
-        console.error('Error preloading questions:', error);
         cache.questionsPromise = null; // Reset on error so it can retry
         throw error;
       });
@@ -86,7 +85,6 @@ export function preloadQuizData() {
         }
       })
       .catch(error => {
-        console.warn('Could not preload stats:', error);
         cache.stats = {};
         cache.statsPromise = null; // Reset on error so it can retry
         return {};

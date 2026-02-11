@@ -22,7 +22,6 @@ function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieI
         setQuizDataReady(true)
       })
       .catch(err => {
-        console.error('Error preloading data:', err)
         setQuizDataReady(true)
       })
   }, [])

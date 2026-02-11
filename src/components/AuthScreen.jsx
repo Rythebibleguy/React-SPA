@@ -18,7 +18,7 @@ function AuthScreen() {
       setError(null)
       await signInWithGoogle()
     } catch (error) {
-      console.error('Google sign-in error:', error)
+      // Error is handled by auth context
     } finally {
       setLoading(false)
     }
@@ -46,7 +46,7 @@ function AuthScreen() {
         await signIn(email, password)
       }
     } catch (error) {
-      console.error('Email auth error:', error)
+      // Error is handled by auth context
     } finally {
       setLoading(false)
     }
