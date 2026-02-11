@@ -380,15 +380,18 @@
 .quiz-view__prev-button {
   display: flex;
   align-items: center;
+  gap: calc(1 * var(--element-width));
   height: calc(10 * var(--element-width));
-  background: transparent;
+  background: white;
   color: #444;
-  border: 2px solid #444;
-  border-radius: calc(6 * var(--element-width));
+  border: 1px solid #e0e0e0;
+  border-radius: calc(2.8 * var(--element-width));
   font-size: calc(3.4 * var(--element-width));
-  font-weight: 600;
+  font-weight: bold;
   cursor: pointer;
   justify-content: center;
+  box-shadow: calc(0.4 * var(--element-width)) calc(0.4 * var(--element-width)) calc(2.8 * var(--element-width)) rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
 .quiz-view__reference-button {
@@ -409,7 +412,7 @@
 .quiz-view__reference-button:active,
 .quiz-view__next-button:active,
 .quiz-view__prev-button:active {
-  transform: scale(0.98);
+  opacity: 0.7;
   transition: none;
 }
 
