@@ -314,7 +314,6 @@ function QuizView() {
         await navigator.share({
           text: shareText
         })
-        console.log('Share method: Web Share API')
       } catch (error) {
         // User cancelled or error occurred
         if (error.name !== 'AbortError') {
@@ -331,11 +330,9 @@ function QuizView() {
   const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text)
-      console.log('Share method: Clipboard')
       setShowCopied(true)
       setTimeout(() => setShowCopied(false), 2000)
     } catch (error) {
-      console.error('Clipboard copy failed:', error)
       setShowShareFailed(true)
       setTimeout(() => setShowShareFailed(false), 2000)
     }
