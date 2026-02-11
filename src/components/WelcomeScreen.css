@@ -12,7 +12,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding-top: 25dvh;
+  transform: translateY(25dvh);
   gap: calc(10 * var(--element-width));
 }
 
@@ -23,11 +23,11 @@
 @keyframes contentExit {
   from {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(25dvh);
   }
   to {
     opacity: 0;
-    transform: translateY(calc(2.5 * var(--element-width)));
+    transform: translateY(calc(25dvh + 2.5 * var(--element-width)));
   }
 }
 
