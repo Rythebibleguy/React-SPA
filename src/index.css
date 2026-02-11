@@ -11,6 +11,9 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  /* Colors */
+  --brown-primary: #e3d5c5;
+
   /* Bottom nav height - single source of truth */
   --bottom-nav-height: calc(16 * var(--element-width));
 }
