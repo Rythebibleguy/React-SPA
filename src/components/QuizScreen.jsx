@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { ref, runTransaction } from 'firebase/database'
 import { db } from '../config/firebase'
-import './QuizView.css'
+import './QuizScreen.css'
 import { useQuizData } from '../hooks/useQuizData'
 import { useQuizStats } from '../hooks/useQuizStats'
 import { getTodayString } from '../utils/csvParser'
@@ -14,7 +14,7 @@ const difficultyLabels = {
   impossible: 'Impossible'
 }
 
-function QuizView() {
+function QuizScreen() {
   const { questions, loading, error } = useQuizData()
   const { stats, loading: statsLoading } = useQuizStats()
   
@@ -370,24 +370,24 @@ function QuizView() {
 
   if (loading || statsLoading) {
     return (
-      <div className="quiz-view">
-        <div className="quiz-view__loading">Loading quiz...</div>
+      <div className="quiz-screen">
+        <div className="quiz-screen__loading">Loading quiz...</div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="quiz-view">
-        <div className="quiz-view__error">Error: {error}</div>
+      <div className="quiz-screen">
+        <div className="quiz-screen__error">Error: {error}</div>
       </div>
     )
   }
 
   if (!questions || questions.length === 0) {
     return (
-      <div className="quiz-view">
-        <div className="quiz-view__loading">No questions available for today</div>
+      <div className="quiz-screen">
+        <div className="quiz-screen__loading">No questions available for today</div>
       </div>
     )
   }
@@ -395,14 +395,14 @@ function QuizView() {
   const isQuizComplete = questions.length === 4 && selectedAnswers.length === 4 && !selectedAnswers.includes(undefined)
 
   return (
-    <div className="quiz-view">
+    <div className="quiz-screen">
       {isQuizComplete && (
-        <button className="quiz-view__open-results" onClick={() => setShowResultsModal(true)}>
+        <button className="quiz-screen__open-results" onClick={() => setShowResultsModal(true)}>
           Show Results
         </button>
       )}
-      <div className="quiz-view__actions-counter-buffer"></div>
-      <div className="quiz-view__cards" ref={containerRef}>
+      <div className="quiz-screen__actions-counter-buffer"></div>
+      <div className="quiz-screen__cards" ref={containerRef}>
           {questions.map((question, qIndex) => {
           const isQuestionLocked = qIndex > 0 && selectedAnswers[qIndex - 1] === undefined
           const isAnswered = selectedAnswers[qIndex] !== undefined
@@ -410,16 +410,16 @@ function QuizView() {
           return (
             <div 
               key={qIndex} 
-              className="quiz-view__card" 
+              className="quiz-screen__card" 
               id={`block-q${qIndex}`}
               ref={(el) => (cardsRef.current[qIndex] = el)}
             >
-              <div className={`quiz-view__card-flipper ${showReference && qIndex === currentIndex ? 'flipped' : ''}`}>
-                <div className="quiz-view__card-inner">
+              <div className={`quiz-screen__card-flipper ${showReference && qIndex === currentIndex ? 'flipped' : ''}`}>
+                <div className="quiz-screen__card-inner">
                   {/* Front - Question */}
-                  <div className={`quiz-view__card-front quiz-view__question ${question.difficulty} ${isQuestionLocked ? 'locked' : ''}`}>
+                  <div className={`quiz-screen__card-front quiz-screen__question ${question.difficulty} ${isQuestionLocked ? 'locked' : ''}`}>
                     <h3>{question.question}</h3>
-                    <div className="quiz-view__options">
+                    <div className="quiz-screen__options">
                       {question.answers.map((answer, aIndex) => {
                         const isSelected = selectedAnswers[qIndex] === answer.id
                         const showResult = isAnswered
@@ -443,40 +443,40 @@ function QuizView() {
                               onChange={() => handleAnswerSelect(qIndex, answer.id)}
                               disabled={isAnswered || isQuestionLocked}
                             />
-                            <div className="quiz-view__percent-bar" style={{ width: `${percentage}%` }}></div>
-                            <span className="quiz-view__answer-text">
+                            <div className="quiz-screen__percent-bar" style={{ width: `${percentage}%` }}></div>
+                            <span className="quiz-screen__answer-text">
                               <span>{answer.text}</span>
-                              <span className="quiz-view__percent-text">{percentage}%</span>
+                              <span className="quiz-screen__percent-text">{percentage}%</span>
                             </span>
                           </label>
                         )
                       })}
                     </div>
                     {isQuestionLocked && (
-                      <div className="quiz-view__lock-overlay">
-                        <div className="quiz-view__lock-box">
-                          <div className="quiz-view__lock-icon">
+                      <div className="quiz-screen__lock-overlay">
+                        <div className="quiz-screen__lock-box">
+                          <div className="quiz-screen__lock-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                               <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                             </svg>
                           </div>
-                          <div className="quiz-view__lock-text">Complete previous question<br />to unlock</div>
+                          <div className="quiz-screen__lock-text">Complete previous question<br />to unlock</div>
                         </div>
                       </div>
                     )}
                   </div>
 
                   {/* Back - Reference */}
-                  <div className={`quiz-view__card-back quiz-view__question ${question.difficulty}`}>
-                    <div className="quiz-view__reference-display">
-                      <div className="quiz-view__reference-header">
+                  <div className={`quiz-screen__card-back quiz-screen__question ${question.difficulty}`}>
+                    <div className="quiz-screen__reference-display">
+                      <div className="quiz-screen__reference-header">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
                         </svg>
                         <h3>{question.referenceCitation}</h3>
                       </div>
-                      <p className="quiz-view__reference-text">{question.referenceVerse}</p>
+                      <p className="quiz-screen__reference-text">{question.referenceVerse}</p>
                     </div>
                   </div>
                 </div>
@@ -487,15 +487,15 @@ function QuizView() {
       </div>
 
       {/* Action Buttons */}
-      <div className="quiz-view__actions">
-        <div className="quiz-view__actions-buttons">
-            <button className={`quiz-view__prev-button ${currentIndex === 0 || selectedAnswers[currentIndex] === undefined ? 'hidden' : ''}`} onClick={handlePrev}>
+      <div className="quiz-screen__actions">
+        <div className="quiz-screen__actions-buttons">
+            <button className={`quiz-screen__prev-button ${currentIndex === 0 || selectedAnswers[currentIndex] === undefined ? 'hidden' : ''}`} onClick={handlePrev}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6"></polyline>
               </svg>
               <span>Prev</span>
             </button>
-            <button className={`quiz-view__reference-button ${selectedAnswers[currentIndex] === undefined ? 'hidden' : ''}`} onClick={handleToggleReference}>
+            <button className={`quiz-screen__reference-button ${selectedAnswers[currentIndex] === undefined ? 'hidden' : ''}`} onClick={handleToggleReference}>
               {!showReference ? (
                 <>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -517,7 +517,7 @@ function QuizView() {
                 </>
               )}
             </button>
-            <button className={`quiz-view__next-button ${currentIndex === questions.length - 1 || selectedAnswers[currentIndex] === undefined ? 'hidden' : ''}`} onClick={handleNext}>
+            <button className={`quiz-screen__next-button ${currentIndex === questions.length - 1 || selectedAnswers[currentIndex] === undefined ? 'hidden' : ''}`} onClick={handleNext}>
               <span>Next</span>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -540,16 +540,16 @@ function QuizView() {
       )}
 
       {/* Difficulty Dots */}
-      <div className="quiz-view__difficulty-dots">
+      <div className="quiz-screen__difficulty-dots">
         {['easy', 'medium', 'hard', 'impossible'].map((difficulty, index) => {
           const question = questions[index]
           return (
             <span
               key={difficulty}
-              className={`quiz-view__difficulty-dot quiz-view__difficulty-dot--${difficulty} ${index === currentIndex ? 'active' : ''}`}
+              className={`quiz-screen__difficulty-dot quiz-screen__difficulty-dot--${difficulty} ${index === currentIndex ? 'active' : ''}`}
               onClick={() => handleDotClick(index)}
             >
-              <span className="quiz-view__difficulty-dot-text">{difficultyLabels[difficulty]}</span>
+              <span className="quiz-screen__difficulty-dot-text">{difficultyLabels[difficulty]}</span>
             </span>
           )
         })}
@@ -558,4 +558,5 @@ function QuizView() {
   )
 }
 
-export default QuizView
+export default QuizScreen
+

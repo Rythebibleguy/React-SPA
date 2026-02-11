@@ -26,13 +26,13 @@ function ResultsModal({ score, total, stats, onClose, onShare, showCopied, showS
     <div className="results-modal">
       <div className="results-modal__overlay" onClick={onClose}></div>
       <div className="results-modal__content">
-        <div className="results-modal__score-hero">
+        <div className="results-modal__score">
           <div className="results-modal__score-number">{score}</div>
           <div className="results-modal__score-divider">/</div>
           <div className="results-modal__score-total">{total}</div>
         </div>
 
-        <div className="results-modal__global-section">
+        <div className="results-modal__global">
           <div className="results-modal__global-header">
             Global Stats
           </div>
@@ -109,3 +109,5 @@ function ResultsModal({ score, total, stats, onClose, onShare, showCopied, showS
 }
 
 export default ResultsModal
+
+

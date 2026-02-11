@@ -45,7 +45,7 @@
 }
 
 /* Giant Score Display */
-.results-modal__score-hero {
+.results-modal__score {
   display: flex;
   align-items: baseline;
   justify-content: center;
@@ -75,7 +75,7 @@
   line-height: 1;
 }
 
-.results-modal__global-section {
+.results-modal__global {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -263,3 +263,5 @@
     transform: translateY(0);
   }
 }
+
+

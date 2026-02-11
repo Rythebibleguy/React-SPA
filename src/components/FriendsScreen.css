@@ -1,23 +1,23 @@
-.profile {
+.friends-screen {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
 }
 
-.profile__header {
+.friends-screen__header {
   padding: calc(5 * var(--element-width)) calc(4.6 * var(--element-width));
   border-bottom: 1px solid #e0e0e0;
 }
 
-.profile__header h1 {
+.friends-screen__header h1 {
   margin: 0;
   font-size: calc(6 * var(--element-width));
   color: #2B2B2B;
   text-align: left;
 }
 
-.profile__content {
+.friends-screen__content {
   flex: 1;
   display: flex;
   align-items: center;
@@ -25,7 +25,9 @@
   padding: calc(4.6 * var(--element-width));
 }
 
-.profile__content p {
+.friends-screen__content p {
   font-size: calc(4 * var(--element-width));
   color: #666;
 }
+
+

@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import BottomNav from './components/BottomNav'
 import WelcomeScreen from './components/WelcomeScreen'
-import QuizView from './components/QuizView'
-import Friends from './components/Friends'
-import Profile from './components/Profile'
+import QuizScreen from './components/QuizScreen'
+import FriendsScreen from './components/FriendsScreen'
+import ProfileScreen from './components/ProfileScreen'
 import { useViewportUnits } from './hooks/useViewportUnits'
 
 function App() {
@@ -82,9 +82,9 @@ function App() {
         />
       ) : (
         <>
-          {currentScreen === 'quiz' && <QuizView />}
-          {currentScreen === 'friends' && <Friends />}
-          {currentScreen === 'profile' && <Profile />}
+          {currentScreen === 'quiz' && <QuizScreen />}
+          {currentScreen === 'friends' && <FriendsScreen />}
+          {currentScreen === 'profile' && <ProfileScreen />}
         </>
       )}
       <BottomNav currentScreen={currentScreen} onNavigate={handleNavigation} />
