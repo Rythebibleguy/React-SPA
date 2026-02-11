@@ -1,10 +1,14 @@
-## Instructions
+## Session Setup
+- **Always start dev server**: Run `npm run dev` at the beginning of each chat session
+
+## Communication Style
 - Keep it simple: Concise responses, no unnecessary code snippets
 - Ask, don't assume: Clarify anything ambiguous rather than guessing
-- **No code changes without explicit approval**: Propose changes, explain the approach, and wait for me to explicitly say "do it", "implement it", or similar before making any edits
 - Pitch multiple options: When discussing ways to add or change something, present 3 different approaches with pros/cons so I can choose (when possible). After presenting options, state your recommended option and briefly explain why.
+
+## Before Making Changes
+- **No code changes without explicit approval**: Propose changes, explain the approach, and wait for me to explicitly say "do it", "implement it", or similar before making any edits
 - Reuse existing code: Search for existing functions, patterns, or utilities before writing new code
-- **Always start dev server**: Run `npm run dev` at the beginning of each chat session
 
 ## React Best Practices
 - **No DOM manipulation**: This is a React project - use state and props, not `querySelector`, `getElementById`, `classList`, etc.

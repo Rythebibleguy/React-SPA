@@ -1,7 +1,7 @@
 import './BottomNav.css'
 import { FileText, Users, CircleUser } from 'lucide-react'
 
-function BottomNav({ currentScreen, onNavigate }) {
+function BottomNav({ currentScreen, onNavigate, show = false }) {
   const tabs = [
     { id: 'quiz', icon: <FileText />, label: 'Quiz' },
     { id: 'friends', icon: <Users />, label: 'Friends' },
@@ -9,7 +9,7 @@ function BottomNav({ currentScreen, onNavigate }) {
   ]
 
   return (
-    <nav className="bottom-nav">
+    <nav className={`bottom-nav ${show ? 'show' : ''}`}>
       {tabs.map(tab => (
         <button
           key={tab.id}

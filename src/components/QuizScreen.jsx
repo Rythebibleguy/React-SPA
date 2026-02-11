@@ -14,7 +14,7 @@ const difficultyLabels = {
   impossible: 'Impossible'
 }
 
-function QuizScreen() {
+function QuizScreen({ isEntering = false }) {
   const { questions, loading, error } = useQuizData()
   const { stats, loading: statsLoading } = useQuizStats()
   
@@ -371,28 +371,8 @@ function QuizScreen() {
     return correct
   }
 
-  if (loading || statsLoading) {
-    return (
-      <div className="quiz-screen">
-        <div className="quiz-screen__loading">Loading quiz...</div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="quiz-screen">
-        <div className="quiz-screen__error">Error: {error}</div>
-      </div>
-    )
-  }
-
   if (!questions || questions.length === 0) {
-    return (
-      <div className="quiz-screen">
-        <div className="quiz-screen__loading">No questions available for today</div>
-      </div>
-    )
+    return null
   }
 
   const isQuizComplete = questions.length === 4 && selectedAnswers.length === 4 && !selectedAnswers.includes(undefined)
@@ -405,7 +385,7 @@ function QuizScreen() {
         </button>
       )}
       <div className="quiz-screen__actions-counter-buffer"></div>
-      <div className="quiz-screen__cards" ref={containerRef}>
+      <div className={`quiz-screen__cards ${isEntering ? 'entering' : ''}`} ref={containerRef}>
           {questions.map((question, qIndex) => {
           const isQuestionLocked = qIndex > 0 && selectedAnswers[qIndex - 1] === undefined
           const isAnswered = selectedAnswers[qIndex] !== undefined
@@ -490,7 +470,7 @@ function QuizScreen() {
       </div>
 
       {/* Action Buttons */}
-      <div className="quiz-screen__actions">
+      <div className={`quiz-screen__actions ${isEntering ? 'entering' : ''}`}>
         <div className="quiz-screen__actions-buttons">
             <button className={`quiz-screen__prev-button ${currentIndex === 0 || selectedAnswers[currentIndex] === undefined ? 'hidden' : ''}`} onClick={handlePrev}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -543,7 +523,7 @@ function QuizScreen() {
       )}
 
       {/* Difficulty Dots */}
-      <div className="quiz-screen__difficulty-dots">
+      <div className={`quiz-screen__difficulty-dots ${isEntering ? 'entering' : ''}`}>
         {['easy', 'medium', 'hard', 'impossible'].map((difficulty, index) => {
           const question = questions[index]
           return (

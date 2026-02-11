@@ -12,8 +12,11 @@ function App() {
   const [showWelcome, setShowWelcome] = useState(true)
   const [welcomeShownBefore, setWelcomeShownBefore] = useState(false)
   const [welcomeAnimationComplete, setWelcomeAnimationComplete] = useState(false)
+  const [welcomeExiting, setWelcomeExiting] = useState(false)
   const [currentScreen, setCurrentScreen] = useState('quiz') // 'quiz', 'friends', 'profile'
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [quizEntering, setQuizEntering] = useState(false)
+  const [showBottomNav, setShowBottomNav] = useState(false)
   const [animationData, setAnimationData] = useState(null)
   const [lottieInstance, setLottieInstance] = useState(null)
 
@@ -28,6 +31,9 @@ function App() {
       .then(res => res.json())
       .then(data => setAnimationData(data))
       .catch(err => console.error('Failed to load animation:', err))
+    
+    // Start bottom nav animation immediately
+    setShowBottomNav(true)
   }, [])
 
   // Prevent pinch zoom on mobile
@@ -52,14 +58,26 @@ function App() {
   }, [])
 
   const handleStartQuiz = () => {
-    setShowWelcome(false)
-    setWelcomeShownBefore(true)
-    setCurrentScreen('quiz')
+    // Start exit animation
+    setWelcomeExiting(true)
     
-    // Track quiz start in Clarity
-    if (window.clarity) {
-      window.clarity("event", "quiz_started")
-    }
+    // Wait for exit animation to complete
+    setTimeout(() => {
+      setShowWelcome(false)
+      setWelcomeShownBefore(true)
+      setCurrentScreen('quiz')
+      setQuizEntering(true)
+      
+      // Reset entering state after animation completes (250ms cards + 500ms last dot delay + 300ms dot animation)
+      setTimeout(() => {
+        setQuizEntering(false)
+      }, 1100)
+      
+      // Track quiz start in Clarity
+      if (window.clarity) {
+        window.clarity("event", "quiz_started")
+      }
+    }, 250)
   }
 
   const handleNavigation = (screen) => {
@@ -90,15 +108,16 @@ function App() {
           setLottieInstance={setLottieInstance}
           animationComplete={welcomeAnimationComplete}
           setAnimationComplete={setWelcomeAnimationComplete}
+          isExiting={welcomeExiting}
         />
       ) : (
-        <div className={`screen-container ${isTransitioning ? 'fade-out' : 'fade-in'}`}>
-          {currentScreen === 'quiz' && <QuizScreen />}
+        <div className={`screen-container ${isTransitioning ? 'fade-out' : quizEntering ? '' : 'fade-in'}`}>
+          {currentScreen === 'quiz' && <QuizScreen isEntering={quizEntering} />}
           {currentScreen === 'friends' && <FriendsScreen />}
           {currentScreen === 'profile' && <ProfileScreen />}
         </div>
       )}
-      <BottomNav currentScreen={currentScreen} onNavigate={handleNavigation} />
+      <BottomNav currentScreen={currentScreen} onNavigate={handleNavigation} show={showBottomNav} />
     </>
   )
 }

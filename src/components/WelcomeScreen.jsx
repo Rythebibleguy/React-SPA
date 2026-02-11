@@ -3,7 +3,7 @@ import Lottie from 'lottie-react'
 import { preloadQuizData } from '../utils/dataPreloader'
 import './WelcomeScreen.css'
 
-function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieInstance, setLottieInstance, animationComplete, setAnimationComplete }) {
+function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieInstance, setLottieInstance, animationComplete, setAnimationComplete, isExiting = false }) {
   const [showLoadingBtn, setShowLoadingBtn] = useState(false)
   const [showReadyBtn, setShowReadyBtn] = useState(skipAnimations)
   const [showQuizNumber, setShowQuizNumber] = useState(skipAnimations)
@@ -48,7 +48,7 @@ function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieI
     const titleTimer = setTimeout(() => {
       setAnimateTitle(true)
       setAnimateTagline(true)
-    }, 700)
+    }, 500)
     const loadingBtnTimer = setTimeout(() => setShowLoadingBtn(true), 1000)
     const pauseTimer = setTimeout(() => {
       if (lottieInstance) {
@@ -81,7 +81,7 @@ function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieI
 
   return (
     <div className="welcome-screen">
-      <div className="welcome-screen__content">
+      <div className={`welcome-screen__content ${isExiting ? 'exiting' : ''}`}>
         <div className="welcome-screen__header">
           {animationData && (
             <Lottie
@@ -132,8 +132,8 @@ function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieI
       </div>
 
       <div className="welcome-screen__footer">
-        <div className={`welcome-screen__credit ${showCredit ? 'visible' : ''}`}>
-          <a href="https://rythebibleguy.com/" target="_blank" rel="noopener noreferrer">
+        <div className={`welcome-screen__credit ${showCredit ? 'visible' : ''} ${isExiting ? 'exiting' : ''}`}>
+          <a href="https://rythebibleguy.com/" target="_blank" rel="noopener">
             Made by Rythebibleguy
           </a>
         </div>
