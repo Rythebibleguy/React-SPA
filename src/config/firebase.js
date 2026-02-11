@@ -19,6 +19,12 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
+googleProvider.addScope('email');
+googleProvider.addScope('profile');
+googleProvider.setCustomParameters({
+  prompt: 'select_account',
+  access_type: 'online'
+});
 
 export { 
     db, 

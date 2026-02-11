@@ -138,7 +138,7 @@ export function AuthProvider({ children }) {
    * @property {number} quizzesTaken - Total unique quizzes completed
    * @property {number} totalScore - Sum of all quiz scores
    * @property {number} totalQuestionsAnswered - Total questions across all quizzes
-   * @property {number} currentStreak - Current consecutive days with quiz completion
+   * @property {number} currentStreak - Current consecutive days with quiz completion (calculated from history)
    * @property {number} maxStreak - Highest streak ever achieved
    * @property {Array<Object>} history - Array of completed quizzes:
    *   - {date: string (YYYY-MM-DD), score: number, totalQuestions: number,
@@ -152,7 +152,7 @@ export function AuthProvider({ children }) {
    * @property {string|null} googlePhotoURL - User's profile photo URL from Google
    * @property {string|null} googleName - User's original name from Google profile (not used as display name)
    * @property {string} signUpMethod - How user signed up ("google", "email")
-   * @property {Date} createdAt - Account creation timestamp
+   * @property {string} timezone - User's timezone in UTC±X format (e.g., "UTC-5", "UTC+0")
    * @property {Object} preferences - User preferences and private settings
    */
   
@@ -169,9 +169,11 @@ export function AuthProvider({ children }) {
       const userSnap = await getDoc(userRef)
       
       if (!userSnap.exists()) {
-        const { displayName, email, photoURL } = user
-        const createdOnDate = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
-        const createdAt = new Date()
+        // Try to get email from multiple sources
+        const userEmail = user.email || auth.currentUser?.email || user.providerData?.[0]?.email || null
+        
+        const { displayName, photoURL } = user
+        const createdOnDate = getTodayString() // YYYY-MM-DD format (local timezone)
         
         // Generate random avatar color
         const colors = ['#74b9ff', '#fd79a8', '#fdcb6e', '#6c5ce7', '#a29bfe', '#fd79a8', '#00b894', '#e17055']
@@ -191,21 +193,24 @@ export function AuthProvider({ children }) {
           quizzesTaken: 0,
           totalScore: 0,
           totalQuestionsAnswered: 0,
-          currentStreak: 0,
           maxStreak: 0,
           history: [],
           badges: [],
           friends: [],
+          shares: 0,
           ...additionalData
         }
         
         // Private data (only readable by owner)
+        const timezoneOffset = -new Date().getTimezoneOffset() / 60 // Convert to hours with correct sign
+        const timezoneString = `UTC${timezoneOffset >= 0 ? '+' : ''}${timezoneOffset}`
+        
         const privateData = {
-          email: email || null,
+          email: userEmail,
           googlePhotoURL: photoURL || null,
           googleName: displayName || null,
           signUpMethod: additionalData.signUpMethod || 'google',
-          createdAt,
+          timezone: timezoneString,
           preferences: {}
         }
         

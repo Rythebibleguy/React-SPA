@@ -13,6 +13,7 @@
   align-items: center;
   justify-content: flex-start;
   transform: translateY(25dvh);
+  will-change: transform;
   gap: calc(10 * var(--element-width));
 }
 

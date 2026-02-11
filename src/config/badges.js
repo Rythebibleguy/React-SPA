@@ -330,7 +330,7 @@ export function checkNewlyUnlockedBadges(currentUserData, newStats, dateKey) {
       if (isUnlocked) {
         newlyUnlocked.push({
           id: badge.id,
-          unlockedOn: dateKey || new Date().toISOString().split('T')[0]
+          unlockedOn: dateKey || getTodayString()
         })
       }
     }
@@ -349,19 +349,19 @@ export function calculateCurrentStreakFromHistory(history) {
   const sortedHistory = [...history].sort((a, b) => new Date(b.date) - new Date(a.date))
   
   let streak = 0
-  const today = new Date()
-  let checkDate = new Date(today)
+  let checkDate = getTodayString() // Use local timezone
   
   // Check each consecutive day going backwards
   for (let i = 0; i < sortedHistory.length; i++) {
-    const entryDate = new Date(sortedHistory[i].date)
-    const expectedDate = new Date(checkDate)
-    expectedDate.setHours(0, 0, 0, 0)
-    entryDate.setHours(0, 0, 0, 0)
-    
-    if (entryDate.getTime() === expectedDate.getTime()) {
+    if (sortedHistory[i].date === checkDate) {
       streak++
-      checkDate.setDate(checkDate.getDate() - 1)
+      // Move to previous day
+      const prevDate = new Date(checkDate + 'T00:00:00') // Parse as local date
+      prevDate.setDate(prevDate.getDate() - 1)
+      const year = prevDate.getFullYear()
+      const month = String(prevDate.getMonth() + 1).padStart(2, '0')
+      const day = String(prevDate.getDate()).padStart(2, '0')
+      checkDate = `${year}-${month}-${day}`
     } else {
       break
     }
@@ -370,10 +370,13 @@ export function calculateCurrentStreakFromHistory(history) {
   return streak
 }
 
-// Helper function to get today's date string in YYYY-MM-DD format
+// Helper function to get today's date string in YYYY-MM-DD format (local timezone)
 export function getTodayString() {
-  const today = new Date()
-  return today.toISOString().split('T')[0]
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 // Helper function to get badge categories for organization

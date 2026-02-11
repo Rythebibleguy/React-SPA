@@ -18,13 +18,34 @@ const difficultyLabels = {
 function QuizScreen({ isEntering = false }) {
   const { questions, loading, error } = useQuizData()
   const { stats, loading: statsLoading } = useQuizStats()
-  const { currentUser, completeQuiz } = useAuth()
+  const { currentUser, completeQuiz, userProfile } = useAuth()
   
-  // Load saved state from sessionStorage
+  // Load saved state from sessionStorage or user's history
   const loadSavedState = () => {
     try {
+      // First check sessionStorage
       const saved = sessionStorage.getItem('quizState')
-      return saved ? JSON.parse(saved) : null
+      if (saved) {
+        return JSON.parse(saved)
+      }
+      
+      // If not in sessionStorage, check if user completed today's quiz
+      if (userProfile?.history) {
+        const todayString = getTodayString()
+        const todayEntry = userProfile.history.find(entry => entry.date === todayString)
+        
+        if (todayEntry && todayEntry.answers) {
+          // User already completed today's quiz - load their answers
+          return {
+            currentIndex: 0,
+            selectedAnswers: todayEntry.answers,
+            answerPercentages: {}, // Will be populated by useEffect
+            hasSubmitted: true
+          }
+        }
+      }
+      
+      return null
     } catch (e) {
       return null
     }
@@ -76,6 +97,43 @@ function QuizScreen({ isEntering = false }) {
       }, 200)
     }
   }, [questions.length, selectedAnswers])
+
+  // Calculate answer percentages for pre-loaded answers (when user views completed quiz)
+  useEffect(() => {
+    // Only run if we loaded from history (hasSubmitted but no percentages yet)
+    if (!hasSubmittedRef.current) return
+    if (!stats || statsLoading) return
+    if (!questions.length || !selectedAnswers.length) return
+    if (Object.keys(answerPercentages).length > 0) return // Already have percentages
+    
+    // Calculate percentages for each answered question
+    const newPercentages = {}
+    
+    selectedAnswers.forEach((answerId, qIndex) => {
+      if (answerId === undefined) return
+      
+      const question = questions[qIndex]
+      if (!question) return
+      
+      const questionStats = stats[`q${qIndex}`] || {}
+      
+      // Calculate total votes for this question
+      let totalVotes = 0
+      Object.values(questionStats).forEach(count => totalVotes += count)
+      
+      // Calculate percentages for all answers in this question
+      const percentages = {}
+      question.answers.forEach(answer => {
+        const count = questionStats[answer.id] || 0
+        const percentage = totalVotes === 0 ? 0 : Math.round((count / totalVotes) * 100)
+        percentages[answer.id] = percentage
+      })
+      
+      newPercentages[qIndex] = percentages
+    })
+    
+    setAnswerPercentages(newPercentages)
+  }, [stats, statsLoading, questions, selectedAnswers, hasSubmittedRef.current])
 
   // Restore scroll position on mount
   useEffect(() => {

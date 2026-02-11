@@ -1,7 +1,7 @@
 import './ProfileScreen.css'
 import { Trophy, Award, Flame, LogOut } from 'lucide-react'
 import { useState } from 'react'
-import { getAllBadgesWithProgress } from '../config/badges'
+import { getAllBadgesWithProgress, calculateCurrentStreakFromHistory } from '../config/badges'
 import { useAuth } from '../contexts/AuthContext'
 
 function ProfileScreen() {
@@ -39,22 +39,38 @@ function ProfileScreen() {
     )
   }
 
-  // Use real data from Firebase or defaults for new users
-  const stats = {
-    played: userProfile.totalQuizzesCompleted || 0,
-    perfectPercentage: userProfile.averageScore || 0,
-    currentStreak: userProfile.currentStreak || 0,
-    maxStreak: userProfile.maxStreak || 0
-  }
-
-  // Generate score distribution from user's quiz history or use defaults
-  const scoreDistribution = userProfile.scoreDistribution || [
+  // Use real data from Firebase
+  const played = userProfile.quizzesTaken
+  
+  // Build score distribution from history
+  const history = userProfile.history
+  const scoreDistribution = [
     { score: 4, count: 0, label: 'Perfect' },
     { score: 3, count: 0, label: '3 Right' },
     { score: 2, count: 0, label: '2 Right' },
     { score: 1, count: 0, label: '1 Right' },
     { score: 0, count: 0, label: '0 Right' }
   ]
+  
+  history.forEach(entry => {
+    const scoreItem = scoreDistribution.find(s => s.score === entry.score)
+    if (scoreItem) scoreItem.count++
+  })
+  
+  // Calculate average score
+  const averageScore = userProfile.totalQuestionsAnswered > 0 
+    ? ((userProfile.totalScore / userProfile.totalQuestionsAnswered) * 4).toFixed(1) 
+    : '0.0'
+  
+  // Calculate current streak if not stored (for legacy profiles)
+  const currentStreak = userProfile.currentStreak ?? calculateCurrentStreakFromHistory(history)
+  
+  const stats = {
+    played,
+    averageScore,
+    currentStreak,
+    maxStreak: userProfile.maxStreak
+  }
 
   const maxCount = Math.max(...scoreDistribution.map(s => s.count), 1) // Avoid division by zero
 
@@ -62,10 +78,10 @@ function ProfileScreen() {
   const userData = {
     quizzesTaken: stats.played,
     maxStreak: stats.maxStreak,
-    shares: userProfile.shares || 0,
-    history: userProfile.quizHistory || [],
+    shares: userProfile.shares,
+    history: history,
     perfectQuizzes: scoreDistribution.find(s => s.score === 4)?.count || 0,
-    badges: userProfile.badges || []
+    badges: userProfile.badges
   }
 
   // Get all badges with calculated progress (array order determines display order)
@@ -99,8 +115,8 @@ function ProfileScreen() {
           <div className="profile-screen__stat-label">Played</div>
         </div>
         <div className="profile-screen__stat">
-          <div className="profile-screen__stat-value">{stats.perfectPercentage}%</div>
-          <div className="profile-screen__stat-label">Perfect %</div>
+          <div className="profile-screen__stat-value">{stats.averageScore}</div>
+          <div className="profile-screen__stat-label">Avg Score</div>
         </div>
         <div className="profile-screen__stat">
           <div className="profile-screen__stat-value">{stats.currentStreak}</div>
