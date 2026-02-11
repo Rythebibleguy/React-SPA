@@ -4,11 +4,19 @@
 ## Communication Style
 - Keep it simple: Concise responses, no unnecessary code snippets
 - Ask, don't assume: Clarify anything ambiguous rather than guessing
-- Pitch multiple options: When discussing ways to add or change something, present 3 different approaches with pros/cons so I can choose (when possible). After presenting options, state your recommended option and briefly explain why.
 
-## Before Making Changes
-- **No code changes without explicit approval**: Propose changes, explain the approach, and wait for me to explicitly say "do it", "implement it", or similar before making any edits
-- Reuse existing code: Search for existing functions, patterns, or utilities before writing new code
+## Discussing Changes
+- **Reuse existing code**: Search for existing functions, patterns, or utilities before writing new code
+- **Pitch multiple options**: When discussing ways to add or change something, present 3 different approaches with pros/cons so I can choose (when possible). After presenting options, state your recommended option and briefly explain why.
+
+## 🚨 CRITICAL: Before Making ANY Code Changes
+**STOP AND CONFIRM FIRST** - You must ALWAYS:
+1. Explain what you want to change and why
+2. Show or describe the specific changes you'll make
+3. Wait for explicit approval ("do it", "implement it", "yes", "go ahead", etc.)
+4. NEVER make edits without confirmation, even if the request seems clear
+
+Only after I explicitly approve should you proceed with implementation.
 
 ## React Best Practices
 - **No DOM manipulation**: This is a React project - use state and props, not `querySelector`, `getElementById`, `classList`, etc.
