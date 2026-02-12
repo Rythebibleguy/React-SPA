@@ -55,10 +55,13 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
       // Fetch email from private data
       if (currentUser) {
         getUserPrivateData().then(privateData => {
-          setUserEmail(privateData?.email || '')
+          // Fallback to auth email if private data doesn't exist
+          const email = privateData?.email || currentUser.email || ''
+          setUserEmail(email)
         }).catch(err => {
           console.error('Failed to load private data:', err)
-          setUserEmail('')
+          // Fallback to auth email on error
+          setUserEmail(currentUser.email || '')
         })
       }
     }
