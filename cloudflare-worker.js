@@ -1,15 +1,13 @@
 /**
- * Cloudflare Worker for rythebibleguy.com/quiz*
- * Last Updated: February 12, 2026
- * 
- * Proxies /quiz* traffic to react-spa-57t.pages.dev
- * All other traffic passes through to WordPress
+ * Cloudflare Worker for rythebibleguy.com/quiz
+ * Updated for Relative Pathing & Same-Origin Assets
  */
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname;
+    const pagesHost = 'react-spa-57t.pages.dev';
 
     // 1. Force the trailing slash for the root /quiz path
     if (path === '/quiz') {
@@ -19,10 +17,11 @@ export default {
 
     // 2. Intercept anything under /quiz/
     if (path.startsWith('/quiz/')) {
-      const pagesHost = 'react-spa-57t.pages.dev';
+      // Strip the /quiz prefix to find the file on Pages
+      // Example: /quiz/assets/style.css becomes /assets/style.css
       let targetPath = path.replace('/quiz', '');
 
-      // 3. Default to index.html for the root or sub-routes
+      // 3. Root handling
       if (targetPath === '' || targetPath === '/') {
         targetPath = '/index.html';
       }
@@ -38,13 +37,21 @@ export default {
           redirect: 'follow'
         });
 
-        // 4. THE SPA FALLBACK: If it's a 404 and NOT a file (like .png or .js)
-        // serve index.html so React can take over the routing.
+        // 4. THE SPA FALLBACK
+        // If the file isn't found (404) and it's a "Virtual Route" (no dot),
+        // serve the index.html so React can handle the URL.
         if (pagesResponse.status === 404 && !targetPath.includes('.')) {
-          return fetch(`https://${pagesHost}/index.html`, { headers: newHeaders });
+          return fetch(`https://${pagesHost}/index.html`, { 
+            headers: newHeaders 
+          });
         }
 
-        return pagesResponse;
+        // 5. Asset Security Header (CORS Fix)
+        // Ensure the browser knows this JS/CSS is safe to run on rythebibleguy.com
+        const secureResponse = new Response(pagesResponse.body, pagesResponse);
+        secureResponse.headers.set('Access-Control-Allow-Origin', '*');
+        
+        return secureResponse;
 
       } catch (err) {
         return new Response(`Worker Error: ${err.message}`, { status: 500 });
