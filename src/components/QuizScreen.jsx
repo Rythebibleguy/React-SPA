@@ -422,29 +422,68 @@ function QuizScreen({ isEntering = false }) {
     if (navigator.share) {
       try {
         await navigator.share({
+          title: 'Daily Bible Quiz',
           text: shareText
         })
+        // If share was successful, don't show copied message
+        return
       } catch (error) {
-        // User cancelled or error occurred
-        if (error.name !== 'AbortError') {
-          // Fall back to clipboard
-          copyToClipboard('https://rythebibleguy.com/quiz/')
+        // User cancelled - don't show error
+        if (error.name === 'AbortError') {
+          return
         }
+        // Otherwise fall through to clipboard fallback
       }
-    } else {
-      // Fall back to clipboard for desktop browsers
-      copyToClipboard('https://rythebibleguy.com/quiz/')
     }
+    
+    // Fall back to clipboard for browsers without share API or if share failed
+    copyToClipboard(shareText)
   }
 
   const copyToClipboard = async (text) => {
+    // Try modern Clipboard API first (only if secure context)
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text)
+        setShowCopied(true)
+        setTimeout(() => setShowCopied(false), 2000)
+        return
+      } catch (error) {
+        console.warn("Clipboard API failed, trying execCommand")
+      }
+    }
+
+    // Fallback: execCommand (works in Instagram/restricted browsers)
     try {
-      await navigator.clipboard.writeText(text)
-      setShowCopied(true)
-      setTimeout(() => setShowCopied(false), 2000)
-    } catch (error) {
-      setShowShareFailed(true)
-      setTimeout(() => setShowShareFailed(false), 2000)
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      
+      // Style to be invisible but technically interactable
+      Object.assign(textArea.style, {
+        position: 'fixed',
+        left: '0',
+        top: '0',
+        opacity: '0.01',
+        fontSize: '16px'
+      })
+      
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      textArea.setSelectionRange(0, 99999) // Force selection for mobile
+      
+      const successful = document.execCommand('copy')
+      document.body.removeChild(textArea)
+      
+      if (successful) {
+        setShowCopied(true)
+        setTimeout(() => setShowCopied(false), 2000)
+      } else {
+        throw new Error('Copy failed')
+      }
+    } catch (fallbackError) {
+      // Ultimate fallback: Let user manually copy
+      window.prompt("Copy your results to share:", text)
     }
   }
 
