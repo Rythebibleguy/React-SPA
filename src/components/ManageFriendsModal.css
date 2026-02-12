@@ -1,4 +1,4 @@
-/* Manage Friends Modal – content layout; reuses FriendsScreen list/share styles */
+/* Manage Friends Modal – content layout, share section, and list section */
 .manage-friends-modal__content {
   padding: calc(5 * var(--element-width));
   padding-bottom: calc(12 * var(--element-width));
@@ -7,4 +7,206 @@
 .manage-friends-modal__inner {
   display: flex;
   flex-direction: column;
+}
+
+/* Share section */
+.manage-friends-modal__share {
+  margin-bottom: calc(6 * var(--element-width));
+}
+
+.manage-friends-modal__heading {
+  font-size: calc(3.8 * var(--element-width));
+  font-weight: 600;
+  color: #121212;
+  margin: 0 0 calc(2 * var(--element-width));
+}
+
+.manage-friends-modal__share-text {
+  font-size: calc(3.4 * var(--element-width));
+  color: #666;
+  margin: 0 0 calc(3 * var(--element-width));
+  line-height: 1.4;
+}
+
+.manage-friends-modal__copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(1.5 * var(--element-width));
+  padding: calc(2.4 * var(--element-width)) calc(4 * var(--element-width));
+  font-size: calc(3.4 * var(--element-width));
+  font-weight: 500;
+  color: #121212;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: calc(1.2 * var(--element-width));
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.manage-friends-modal__copy-btn:hover:not(:disabled) {
+  background: #f0f0f0;
+  border-color: #ccc;
+}
+
+.manage-friends-modal__copy-btn:active:not(:disabled) {
+  background: #e8e8e8;
+}
+
+.manage-friends-modal__copy-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* List section */
+.manage-friends-modal__list-section {
+  margin-top: calc(2 * var(--element-width));
+}
+
+.manage-friends-modal__list-section .manage-friends-modal__heading {
+  margin-bottom: calc(2.5 * var(--element-width));
+}
+
+.manage-friends-modal__loading-list {
+  display: flex;
+  align-items: center;
+  gap: calc(2 * var(--element-width));
+  font-size: calc(3.6 * var(--element-width));
+  color: #666;
+}
+
+.manage-friends-modal__spinner {
+  width: calc(5 * var(--element-width));
+  height: calc(5 * var(--element-width));
+  border: 2px solid #e0e0e0;
+  border-top-color: #121212;
+  border-radius: 50%;
+  animation: manage-friends-spin 0.8s linear infinite;
+}
+
+@keyframes manage-friends-spin {
+  to { transform: rotate(360deg); }
+}
+
+.manage-friends-modal__empty {
+  font-size: calc(3.4 * var(--element-width));
+  color: #666;
+  margin: 0;
+}
+
+.manage-friends-modal__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.manage-friends-modal__item {
+  display: flex;
+  align-items: center;
+  gap: calc(3 * var(--element-width));
+  padding: calc(2.8 * var(--element-width)) 0;
+  border-bottom: 1px solid #eee;
+}
+
+.manage-friends-modal__item:last-child {
+  border-bottom: none;
+}
+
+.manage-friends-modal__avatar {
+  width: calc(10 * var(--element-width));
+  height: calc(10 * var(--element-width));
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 calc(0.8 * var(--element-width)) calc(2 * var(--element-width)) rgba(0, 0, 0, 0.1);
+}
+
+.manage-friends-modal__avatar-icon {
+  width: calc(5 * var(--element-width));
+  height: calc(5 * var(--element-width));
+  object-fit: contain;
+}
+
+.manage-friends-modal__avatar-letter {
+  font-size: calc(5 * var(--element-width));
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  line-height: 1;
+}
+
+.manage-friends-modal__name {
+  flex: 1;
+  font-size: calc(3.8 * var(--element-width));
+  color: #121212;
+  min-width: 0;
+}
+
+.manage-friends-modal__remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(8 * var(--element-width));
+  height: calc(8 * var(--element-width));
+  padding: 0;
+  color: #888;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: calc(3 * var(--element-width));
+  font-weight: 500;
+  transition: color 0.15s, background 0.15s;
+}
+
+.manage-friends-modal__remove-btn:hover:not(:disabled) {
+  color: #c62828;
+  background: rgba(198, 40, 40, 0.08);
+}
+
+.manage-friends-modal__remove-btn--confirm {
+  width: auto;
+  min-width: calc(12 * var(--element-width));
+  padding: 0 calc(2.2 * var(--element-width));
+  border-radius: calc(1 * var(--element-width));
+  color: #c62828;
+}
+
+.manage-friends-modal__remove-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.manage-friends-modal__toast {
+  position: fixed;
+  bottom: calc(20 * var(--element-width));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: calc(2.4 * var(--element-width)) calc(4 * var(--element-width));
+  font-size: calc(3.2 * var(--element-width));
+  border-radius: calc(2 * var(--element-width));
+  box-shadow: 0 calc(2 * var(--element-width)) calc(8 * var(--element-width)) rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  animation: manage-friends-toast-in 0.2s ease-out;
+}
+
+.manage-friends-modal__toast--info {
+  background: #121212;
+  color: #fff;
+}
+
+.manage-friends-modal__toast--error {
+  background: #c62828;
+  color: #fff;
+}
+
+@keyframes manage-friends-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }

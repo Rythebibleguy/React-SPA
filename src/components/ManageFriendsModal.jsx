@@ -1,5 +1,4 @@
 import './ManageFriendsModal.css'
-import './FriendsScreen.css'
 import StackedModal from './StackedModal'
 import { useState, useEffect } from 'react'
 import { firestore, doc, getDoc } from '../config/firebase'
@@ -90,46 +89,46 @@ function ManageFriendsModal({ isOpen, onClose, onCloseStart }) {
       contentClassName="manage-friends-modal__content"
     >
       <div className="manage-friends-modal__inner">
-        <section className="friends-screen__share">
-          <h2 className="friends-screen__heading">Add friends</h2>
-          <p className="friends-screen__share-text">Share your link. When they open it and sign in, you’ll be connected.</p>
-          <button type="button" className="friends-screen__copy-btn" onClick={handleCopyLink} disabled={!shareUrl}>
+        <section className="manage-friends-modal__share">
+          <h2 className="manage-friends-modal__heading">Add friends</h2>
+          <p className="manage-friends-modal__share-text">Share your link. When they open it and sign in, you’ll be connected.</p>
+          <button type="button" className="manage-friends-modal__copy-btn" onClick={handleCopyLink} disabled={!shareUrl}>
             <Link2 size={18} />
             {copySuccess ? 'Copied!' : 'Copy link'}
           </button>
         </section>
 
-        <section className="friends-screen__list-section">
-          <h2 className="friends-screen__heading">Friends</h2>
+        <section className="manage-friends-modal__list-section">
+          <h2 className="manage-friends-modal__heading">Friends</h2>
           {loadingFriends && friendUids.length > 0 ? (
-            <div className="friends-screen__loading-list"><span className="friends-screen__spinner" /> Loading…</div>
+            <div className="manage-friends-modal__loading-list"><span className="manage-friends-modal__spinner" /> Loading…</div>
           ) : !hasFriends ? (
-            <p className="friends-screen__empty">No friends yet. Share your link above to connect.</p>
+            <p className="manage-friends-modal__empty">No friends yet. Share your link above to connect.</p>
           ) : (
-            <ul className="friends-screen__list">
+            <ul className="manage-friends-modal__list">
               {friendProfiles.map((friend) => {
                 const color = friend.avatarColor || DEFAULT_AVATAR_COLOR
                 const light = lightenColor(color, 15)
                 const letterColor = color === '#424242' ? 'white' : '#444'
                 const badge = friend.avatarBadge && friend.avatarBadge !== 'letter' ? getBadgeById(friend.avatarBadge) : null
                 return (
-                  <li key={friend.uid} className="friends-screen__item">
+                  <li key={friend.uid} className="manage-friends-modal__item">
                     <div
-                      className="friends-screen__avatar"
+                      className="manage-friends-modal__avatar"
                       style={{ background: `linear-gradient(135deg, ${color} 0%, ${light} 100%)` }}
                     >
                       {badge ? (
-                        <img src={badge.icon} alt="" className="friends-screen__avatar-icon" />
+                        <img src={badge.icon} alt="" className="manage-friends-modal__avatar-icon" />
                       ) : (
-                        <span className="friends-screen__avatar-letter" style={{ color: letterColor }}>
+                        <span className="manage-friends-modal__avatar-letter" style={{ color: letterColor }}>
                           {(friend.displayName || '?').charAt(0).toUpperCase()}
                         </span>
                       )}
                     </div>
-                    <span className="friends-screen__name">{(friend.displayName || 'unknown').toLowerCase()}</span>
+                    <span className="manage-friends-modal__name">{(friend.displayName || 'unknown').toLowerCase()}</span>
                     <button
                       type="button"
-                      className={`friends-screen__remove-btn ${confirmRemoveId === friend.uid ? 'friends-screen__remove-btn--confirm' : ''}`}
+                      className={`manage-friends-modal__remove-btn ${confirmRemoveId === friend.uid ? 'manage-friends-modal__remove-btn--confirm' : ''}`}
                       onClick={() => handleRemoveClick(friend.uid)}
                       disabled={removingId === friend.uid}
                       title={confirmRemoveId === friend.uid ? 'Click again to remove' : 'Remove friend'}
@@ -144,7 +143,7 @@ function ManageFriendsModal({ isOpen, onClose, onCloseStart }) {
         </section>
 
         {message && (
-          <div className={`friends-screen__toast friends-screen__toast--${message.type}`}>{message.text}</div>
+          <div className={`manage-friends-modal__toast manage-friends-modal__toast--${message.type}`}>{message.text}</div>
         )}
       </div>
     </StackedModal>
