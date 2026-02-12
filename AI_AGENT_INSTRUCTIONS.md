@@ -1,43 +1,41 @@
-## 🎯 ALWAYS REFERENCE THESE INSTRUCTIONS
-**CRITICAL**: Read and consider ALL instructions in this file before every single chat response. These guidelines should influence how you:
-- Communicate with me
-- Approach problem-solving  
-- Make code changes
-- Handle requests and questions
+# Session instructions (paste at start)
 
-## Communication Style
-- Keep it simple: Concise responses
-- Don't show code snippets in chat unless critical for explanation
-- Ask, don't assume: Clarify anything ambiguous rather than guessing
+**Project:** React SPA — Bible quiz app (Vite, React, Firebase). Hosted on Cloudflare Pages.
 
-## Discussing Changes
-- **Reuse existing code**: Search for existing functions, patterns, or utilities before writing new code
-- **Pitch multiple options**: When discussing ways to add or change something, present 3 different approaches with pros/cons so I can choose (when possible). After presenting options, state your recommended option and briefly explain why.
-- **Debug persistent bugs**: If we're experiencing bugs and haven't solved them after several code changes, suggest adding debug logs to find the root issue rather than continuing to guess
+---
 
-## 🚨 CRITICAL: Before Making ANY Code Changes
-**STOP AND CONFIRM FIRST** - You must ALWAYS:
-1. Explain what you want to change and why
-2. Show or describe the specific changes you'll make
-3. Wait for explicit approval ("do it", "implement it", "yes", "go ahead", etc.)
-4. NEVER make edits without confirmation, even if the request seems clear
+## How to respond
 
-## Design Guidelines
-- **Primary reference**: NY Times Games - use their UI/UX patterns as design inspiration
+- **Be concise.** Prefer short answers; skip code snippets unless they’re needed to explain.
+- **Ask when unclear.** If something is ambiguous, ask instead of guessing.
+- **Reuse first.** Before adding or changing behavior, search for existing functions, patterns, or utilities and use them.
 
-## Legacy Code
-- `Old Code/` folder contains the original HTML/CSS/JS implementation
-- Use as reference for ideas and approach, not for copy-pasting code directly
-- Only reference this code when explicitly asked to do so
+---
 
-## Hosting Setup
-- Development: 
-  - `npm run dev` → starts server on localhost:5173 + exposes on network for mobile testing
-  - Server automatically accessible from other devices on same WiFi
-  - Mobile access: http://192.168.1.4:5173/
-  - React DevTools browser extension installed for debugging
-- Production: 
-  - Live site: https://react-spa-57t.pages.dev/ (Cloudflare Pages)
-  
-## Session Setup
-- **Always start dev server**: Run `npm run dev` at the beginning of each chat session
+## Before making code changes
+
+1. Say what you’ll change and why.
+2. Briefly describe or show the changes.
+3. Wait for explicit approval (e.g. “do it”, “yes”, “go ahead”) before editing.
+4. Do not edit without confirmation, even if the request seems obvious.
+
+---
+
+## Proposing changes
+
+- When there are several valid approaches, give **3 options** with pros/cons, then say which you recommend and why.
+- If a bug persists after several attempts, suggest **adding debug logs** to find the cause instead of more guesswork.
+
+---
+
+## Design
+
+- Use **NY Times Games** as the main UI/UX reference (patterns, layout, feel).
+
+---
+
+## Project notes
+
+- **Legacy:** `Old Code/` is the original HTML/CSS/JS version. Use for reference only; don’t copy-paste from it unless asked.
+- **Dev server:** Run `npm run dev` at the start of each session. App at `http://localhost:5173/`; same WiFi devices can use the network URL (e.g. `http://192.168.1.4:5173/`).
+- **Production:** https://react-spa-57t.pages.dev/
