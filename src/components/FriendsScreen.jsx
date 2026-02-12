@@ -1,12 +1,36 @@
 import './FriendsScreen.css'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { firestore, doc, getDoc } from '../config/firebase'
-import { BASE_SITE_URL } from '../config'
 import { useAuth } from '../contexts/AuthContext'
 import { getBadgeById } from '../config/badges'
-import { Link2, UserMinus, UserPlus } from 'lucide-react'
+import { getTodayString } from '../utils/csvParser'
+import { UserPlus, ChevronLeft, ChevronRight, ChevronDown, Star } from 'lucide-react'
 
 const DEFAULT_AVATAR_COLOR = '#64B5F6'
+const QUIZ_NAME = 'Daily Bible Quiz'
+
+function formatDateLabel(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00')
+  const weekday = d.toLocaleDateString('en-US', { weekday: 'short' })
+  const day = d.getDate()
+  const month = d.toLocaleDateString('en-US', { month: 'short' })
+  const year = d.getFullYear()
+  return `${weekday}, ${day} ${month} ${year}`
+}
+
+function dateStringToYMD(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00')
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function addDays(dateStr, delta) {
+  const d = new Date(dateStr + 'T12:00:00')
+  d.setDate(d.getDate() + delta)
+  return dateStringToYMD(d)
+}
 
 function lightenColor(color, percent) {
   const num = parseInt(color.replace('#', ''), 16)
@@ -16,68 +40,99 @@ function lightenColor(color, percent) {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
 }
 
-function FriendsScreen() {
-  const { currentUser, userProfile, addFriend, removeFriend } = useAuth()
+function FriendsScreen({ onOpenManageFriends }) {
+  const { currentUser, userProfile } = useAuth()
+  const today = useMemo(() => getTodayString(), [])
+  const [selectedDate, setSelectedDate] = useState(today)
   const [friendProfiles, setFriendProfiles] = useState([])
-  const [loadingFriends, setLoadingFriends] = useState(false)
-  const [message, setMessage] = useState(null)
-  const [copySuccess, setCopySuccess] = useState(false)
-  const [removingId, setRemovingId] = useState(null)
-  const [confirmRemoveId, setConfirmRemoveId] = useState(null)
-  const shareSectionRef = useRef(null)
+  const [loading, setLoading] = useState(true)
 
   const friendUids = userProfile?.friends || []
 
+  // Load current user + all friends' profiles (with history) for scores
   useEffect(() => {
-    if (!friendUids.length) {
-      setFriendProfiles([])
-      return
-    }
+    if (!userProfile || !currentUser) return
     let cancelled = false
-    setLoadingFriends(true)
-    Promise.all(
-      friendUids.map(async (uid) => {
-        const ref = doc(firestore, 'users', uid)
-        const snap = await getDoc(ref)
-        if (!snap.exists() || cancelled) return null
-        const d = snap.data()
-        return { uid, displayName: d.displayName, avatarColor: d.avatarColor || DEFAULT_AVATAR_COLOR, avatarBadge: d.avatarBadge }
+    setLoading(true)
+    const load = async () => {
+      const list = []
+      // Current user
+      list.push({
+        uid: currentUser.uid,
+        displayName: userProfile.displayName || 'You',
+        avatarColor: userProfile.avatarColor || DEFAULT_AVATAR_COLOR,
+        avatarBadge: userProfile.avatarBadge,
+        history: userProfile.history || [],
+        isCurrentUser: true
       })
-    ).then((list) => {
-      if (cancelled) return
-      setFriendProfiles(list.filter(Boolean))
-      setLoadingFriends(false)
-    })
+      // Friends
+      for (const uid of friendUids) {
+        if (cancelled) return
+        try {
+          const snap = await getDoc(doc(firestore, 'users', uid))
+          if (!snap.exists()) continue
+          const d = snap.data()
+          list.push({
+            uid,
+            displayName: d.displayName || 'unknown',
+            avatarColor: d.avatarColor || DEFAULT_AVATAR_COLOR,
+            avatarBadge: d.avatarBadge,
+            history: d.history || [],
+            isCurrentUser: false
+          })
+        } catch {
+          // skip
+        }
+      }
+      if (!cancelled) {
+        setFriendProfiles(list)
+        setLoading(false)
+      }
+    }
+    load()
     return () => { cancelled = true }
-  }, [friendUids.join(',')])
+  }, [currentUser?.uid, userProfile, friendUids.join(',')])
 
-    const shareUrl = currentUser ? `${BASE_SITE_URL}?friend=${currentUser.uid}` : ''
-
-  async function handleCopyLink() {
-    if (!shareUrl) return
-    try {
-      await navigator.clipboard.writeText(shareUrl)
-      setCopySuccess(true)
-      setTimeout(() => setCopySuccess(false), 2000)
-    } catch {
-      setMessage({ text: 'Could not copy', type: 'error' })
-      setTimeout(() => setMessage(null), 2000)
-    }
-  }
-
-  function handleRemoveClick(uid) {
-    if (confirmRemoveId !== uid) {
-      setConfirmRemoveId(uid)
-      return
-    }
-    setConfirmRemoveId(null)
-    setRemovingId(uid)
-    removeFriend(uid).then((result) => {
-      setRemovingId(null)
-      if (result.success) setMessage({ text: 'Friend removed', type: 'info' })
-      else setMessage({ text: result.error || 'Failed to remove', type: 'error' })
-      setTimeout(() => setMessage(null), 2000)
+  const selectedDateEntry = (history) => (history || []).find((e) => e.date === selectedDate)
+  const rows = useMemo(() => {
+    return friendProfiles.map((p) => {
+      const entry = selectedDateEntry(p.history)
+      const score = entry?.score
+      const total = entry?.totalQuestions ?? 4
+      return {
+        ...p,
+        score: score != null ? score : null,
+        total,
+        hasScore: score != null
+      }
+    }).sort((a, b) => {
+      if (a.hasScore && !b.hasScore) return -1
+      if (!a.hasScore && b.hasScore) return 1
+      if (a.hasScore && b.hasScore) return (b.score ?? 0) - (a.score ?? 0)
+      return (a.displayName || '').localeCompare(b.displayName || '')
     })
+  }, [friendProfiles, selectedDate])
+
+  const rankedRows = useMemo(() => {
+    let rank = 0
+    return rows.map((r) => {
+      if (r.hasScore) {
+        rank += 1
+        return { ...r, rank }
+      }
+      return { ...r, rank: null }
+    })
+  }, [rows])
+
+  const canGoNext = selectedDate < today
+  const canGoPrev = true
+
+  const handlePrevDay = () => {
+    setSelectedDate((d) => addDays(d, -1))
+  }
+  const handleNextDay = () => {
+    if (!canGoNext) return
+    setSelectedDate((d) => addDays(d, 1))
   }
 
   if (!userProfile) {
@@ -90,77 +145,82 @@ function FriendsScreen() {
     )
   }
 
-  const hasFriends = friendProfiles.length > 0
-
-  function scrollToAddFriends() {
-    shareSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-
   return (
     <div className="friends-screen">
       <header className="friends-screen__header">
         <h1 className="friends-screen__header-title">Friends</h1>
-        <button type="button" className="friends-screen__header-add-btn" onClick={scrollToAddFriends} title="Add friends">
+        <button type="button" className="friends-screen__header-add-btn" onClick={onOpenManageFriends} title="Add friends">
           <UserPlus size={22} />
         </button>
       </header>
+
       <div className="friends-screen__content">
-        <section className="friends-screen__share" ref={shareSectionRef}>
-          <h2 className="friends-screen__heading">Add friends</h2>
-          <p className="friends-screen__share-text">Share your link. When they open it and sign in, you’ll be connected.</p>
-          <button type="button" className="friends-screen__copy-btn" onClick={handleCopyLink} disabled={!shareUrl}>
-            <Link2 size={18} />
-            {copySuccess ? 'Copied!' : 'Copy link'}
+        <div className="friends-screen__date-row">
+          <button type="button" className="friends-screen__date-nav" onClick={handlePrevDay} aria-label="Previous day">
+            <ChevronLeft size={22} />
           </button>
-        </section>
+          <div className="friends-screen__date-display">
+            <span className="friends-screen__date-text">{formatDateLabel(selectedDate)}</span>
+            <ChevronDown size={18} className="friends-screen__date-chevron" />
+          </div>
+          <button type="button" className="friends-screen__date-nav" onClick={handleNextDay} disabled={!canGoNext} aria-label="Next day">
+            <ChevronRight size={22} />
+          </button>
+        </div>
 
-        <section className="friends-screen__list-section">
-          <h2 className="friends-screen__heading">Friends</h2>
-          {loadingFriends && friendUids.length > 0 ? (
-            <div className="friends-screen__loading-list"><span className="friends-screen__spinner" /> Loading…</div>
-          ) : !hasFriends ? (
-            <p className="friends-screen__empty">No friends yet. Share your link above to connect.</p>
-          ) : (
-            <ul className="friends-screen__list">
-              {friendProfiles.map((friend) => {
-                const color = friend.avatarColor || DEFAULT_AVATAR_COLOR
-                const light = lightenColor(color, 15)
-                const letterColor = color === '#424242' ? 'white' : '#444'
-                const badge = friend.avatarBadge && friend.avatarBadge !== 'letter' ? getBadgeById(friend.avatarBadge) : null
-                return (
-                  <li key={friend.uid} className="friends-screen__item">
-                    <div
-                      className="friends-screen__avatar"
-                      style={{ background: `linear-gradient(135deg, ${color} 0%, ${light} 100%)` }}
-                    >
-                      {badge ? (
-                        <img src={badge.icon} alt="" className="friends-screen__avatar-icon" />
-                      ) : (
-                        <span className="friends-screen__avatar-letter" style={{ color: letterColor }}>
-                          {(friend.displayName || '?').charAt(0).toUpperCase()}
-                        </span>
-                      )}
+        <h2 className="friends-screen__game-title">{QUIZ_NAME}</h2>
+
+        {loading ? (
+          <div className="friends-screen__loading-list">
+            <span className="friends-screen__spinner" /> Loading…
+          </div>
+        ) : (
+          <ul className="friends-screen__score-list">
+            {rankedRows.map((row) => {
+              const color = row.avatarColor || DEFAULT_AVATAR_COLOR
+              const light = lightenColor(color, 15)
+              const letterColor = color === '#424242' ? 'white' : '#444'
+              const badge = row.avatarBadge && row.avatarBadge !== 'letter' ? getBadgeById(row.avatarBadge) : null
+              const scoreLabel = row.hasScore ? `${row.score}/${row.total}` : '—'
+              return (
+                <li key={row.uid} className="friends-screen__score-item">
+                  <div className="friends-screen__score-rank">
+                    {row.rank != null ? row.rank : <span className="friends-screen__score-dot" />}
+                  </div>
+                  <div
+                    className="friends-screen__score-avatar"
+                    style={{ background: `linear-gradient(135deg, ${color} 0%, ${light} 100%)` }}
+                  >
+                    {badge ? (
+                      <img src={badge.icon} alt="" className="friends-screen__score-avatar-icon" />
+                    ) : (
+                      <span className="friends-screen__score-avatar-letter" style={{ color: letterColor }}>
+                        {(row.displayName || '?').charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="friends-screen__score-name-wrap">
+                    <span className="friends-screen__score-name">
+                      {(row.displayName || '').toLowerCase()}
+                      {row.isCurrentUser && <span className="friends-screen__score-you"> (you)</span>}
+                    </span>
+                  </div>
+                  <span className="friends-screen__score-value">{scoreLabel}</span>
+                  {row.hasScore && (
+                    <div className="friends-screen__score-badge" title="Completed">
+                      <Star size={14} strokeWidth={2.5} />
                     </div>
-                    <span className="friends-screen__name">{(friend.displayName || 'unknown').toLowerCase()}</span>
-                    <button
-                      type="button"
-                      className={`friends-screen__remove-btn ${confirmRemoveId === friend.uid ? 'friends-screen__remove-btn--confirm' : ''}`}
-                      onClick={() => handleRemoveClick(friend.uid)}
-                      disabled={removingId === friend.uid}
-                      title={confirmRemoveId === friend.uid ? 'Click again to remove' : 'Remove friend'}
-                    >
-                      {confirmRemoveId === friend.uid ? 'Remove' : <UserMinus size={18} />}
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-        </section>
-
-        {message && (
-          <div className={`friends-screen__toast friends-screen__toast--${message.type}`}>{message.text}</div>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
         )}
+
+        <button type="button" className="friends-screen__manage-btn" onClick={onOpenManageFriends}>
+          <UserPlus size={20} />
+          Manage friends
+        </button>
       </div>
     </div>
   )

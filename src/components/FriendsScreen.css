@@ -56,6 +56,195 @@
   box-sizing: border-box;
 }
 
+/* Date selector */
+.friends-screen__date-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(2 * var(--element-width));
+  margin-bottom: calc(5 * var(--element-width));
+}
+
+.friends-screen__date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(10 * var(--element-width));
+  height: calc(10 * var(--element-width));
+  padding: 0;
+  color: #555;
+  background: #e8e8e8;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.friends-screen__date-nav:hover:not(:disabled) {
+  background: #ddd;
+}
+
+.friends-screen__date-nav:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.friends-screen__date-display {
+  display: flex;
+  align-items: center;
+  gap: calc(1 * var(--element-width));
+  padding: calc(2.4 * var(--element-width)) calc(3.2 * var(--element-width));
+  background: #e8e8e8;
+  border-radius: calc(1.6 * var(--element-width));
+  min-width: calc(40 * var(--element-width));
+  justify-content: center;
+}
+
+.friends-screen__date-text {
+  font-size: calc(3.4 * var(--element-width));
+  font-weight: 600;
+  color: #121212;
+}
+
+.friends-screen__date-chevron {
+  color: #555;
+  flex-shrink: 0;
+}
+
+/* Game title */
+.friends-screen__game-title {
+  font-size: calc(4.4 * var(--element-width));
+  font-weight: 700;
+  color: #121212;
+  text-align: center;
+  margin: 0 0 calc(4 * var(--element-width));
+}
+
+/* Score list */
+.friends-screen__score-list {
+  list-style: none;
+  margin: 0 0 calc(5 * var(--element-width));
+  padding: 0;
+  background: #fff;
+  border-radius: calc(1.6 * var(--element-width));
+  border: 1px solid #eee;
+  overflow: hidden;
+}
+
+.friends-screen__score-item {
+  display: flex;
+  align-items: center;
+  gap: calc(3 * var(--element-width));
+  padding: calc(2.8 * var(--element-width)) calc(4 * var(--element-width));
+  border-bottom: 1px solid #eee;
+}
+
+.friends-screen__score-item:last-child {
+  border-bottom: none;
+}
+
+.friends-screen__score-rank {
+  width: calc(5 * var(--element-width));
+  font-size: calc(3.4 * var(--element-width));
+  font-weight: 600;
+  color: #121212;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.friends-screen__score-dot {
+  display: inline-block;
+  width: calc(1.2 * var(--element-width));
+  height: calc(1.2 * var(--element-width));
+  border-radius: 50%;
+  background: #888;
+}
+
+.friends-screen__score-avatar {
+  width: calc(10 * var(--element-width));
+  height: calc(10 * var(--element-width));
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 calc(0.8 * var(--element-width)) calc(2 * var(--element-width)) rgba(0, 0, 0, 0.1);
+}
+
+.friends-screen__score-avatar-icon {
+  width: calc(5 * var(--element-width));
+  height: calc(5 * var(--element-width));
+  object-fit: contain;
+}
+
+.friends-screen__score-avatar-letter {
+  font-size: calc(5 * var(--element-width));
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  line-height: 1;
+}
+
+.friends-screen__score-name-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.friends-screen__score-name {
+  font-size: calc(3.8 * var(--element-width));
+  color: #121212;
+}
+
+.friends-screen__score-you {
+  font-size: calc(3.2 * var(--element-width));
+  color: #666;
+  font-weight: 400;
+}
+
+.friends-screen__score-value {
+  font-size: calc(3.4 * var(--element-width));
+  color: #121212;
+  flex-shrink: 0;
+}
+
+.friends-screen__score-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(6 * var(--element-width));
+  height: calc(6 * var(--element-width));
+  background: #81c784;
+  color: #fff;
+  border-radius: calc(1 * var(--element-width));
+  flex-shrink: 0;
+}
+
+/* Manage friends button */
+.friends-screen__manage-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(2 * var(--element-width));
+  width: 100%;
+  padding: calc(3 * var(--element-width)) calc(4 * var(--element-width));
+  font-size: calc(3.4 * var(--element-width));
+  font-weight: 500;
+  color: #121212;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: calc(1.4 * var(--element-width));
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.friends-screen__manage-btn:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.friends-screen__manage-btn:active {
+  background: #eee;
+}
+
 .friends-screen__welcome,
 .friends-screen__loading {
   display: flex;

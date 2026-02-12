@@ -1,0 +1,10 @@
+/* Manage Friends Modal – content layout; reuses FriendsScreen list/share styles */
+.manage-friends-modal__content {
+  padding: calc(5 * var(--element-width));
+  padding-bottom: calc(12 * var(--element-width));
+}
+
+.manage-friends-modal__inner {
+  display: flex;
+  flex-direction: column;
+}
