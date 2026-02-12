@@ -209,7 +209,7 @@ export function AuthProvider({ children }) {
         const profileData = {
           displayName: publicDisplayName,
           avatarColor: additionalData.avatarColor || defaultColor,
-          avatarBadge: null, // Badge ID to display in avatar (null = show letter)
+          avatarBadge: 'letter', // Badge ID to display in avatar ('letter' = show initial)
           createdOn: createdOnDate,
           quizzesTaken: 0,
           totalScore: 0,

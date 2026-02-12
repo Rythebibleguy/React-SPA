@@ -67,8 +67,7 @@ function ProfileScreen({ showSettings, setShowSettings }) {
     if (!currentUser || !userProfile) return
     
     try {
-      // If badgeId is 'letter', clear the avatarBadge field
-      await updateUserProfile({ avatarBadge: badgeId === 'letter' ? null : badgeId })
+      await updateUserProfile({ avatarBadge: badgeId === 'letter' ? 'letter' : badgeId })
     } catch (error) {
       console.error('Error setting badge as avatar:', error)
     }
