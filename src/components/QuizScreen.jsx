@@ -416,7 +416,7 @@ function QuizScreen({ isEntering = false }) {
     
     // Create share text with emoji indicators for score
     const squares = '✅'.repeat(score) + '❌'.repeat(questions.length - score)
-    const shareText = `I got ${score}/${questions.length} on Daily Bible Quiz\n${squares}\n\nCan you beat my score?\n${window.location.origin}`
+    const shareText = `I got ${score}/${questions.length} on Daily Bible Quiz\n${squares}\n\nCan you beat my score?\nhttps://rythebibleguy.com/quiz/`
     
     // Try Web Share API first (mobile/modern browsers)
     if (navigator.share) {
@@ -428,12 +428,12 @@ function QuizScreen({ isEntering = false }) {
         // User cancelled or error occurred
         if (error.name !== 'AbortError') {
           // Fall back to clipboard
-          copyToClipboard(window.location.origin)
+          copyToClipboard('https://rythebibleguy.com/quiz/')
         }
       }
     } else {
       // Fall back to clipboard for desktop browsers
-      copyToClipboard(window.location.origin)
+      copyToClipboard('https://rythebibleguy.com/quiz/')
     }
   }
 
