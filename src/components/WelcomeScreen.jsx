@@ -80,6 +80,7 @@ function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieI
 
   return (
     <div className="welcome-screen">
+      <div className="welcome-screen__top-container"></div>
       <div className={`welcome-screen__content ${isExiting ? 'exiting' : ''}`}>
         <div className="welcome-screen__header">
           {animationData && (

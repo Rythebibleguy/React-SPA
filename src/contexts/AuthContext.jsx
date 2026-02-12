@@ -195,7 +195,12 @@ export function AuthProvider({ children }) {
           totalQuestionsAnswered: 0,
           maxStreak: 0,
           history: [],
-          badges: [],
+          badges: [
+            {
+              id: 'avatar-unlocked',
+              unlockedOn: createdOnDate
+            }
+          ],
           friends: [],
           shares: 0,
           ...additionalData
