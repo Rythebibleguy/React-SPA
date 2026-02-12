@@ -1,6 +1,8 @@
 /**
  * Cloudflare Worker for rythebibleguy.com/quiz
  * Updated for Relative Pathing & Same-Origin Assets
+ *
+ * Deploy: Copy this file into the Cloudflare Workers dashboard (pasted, not pulled from repo).
  */
 
 export default {
