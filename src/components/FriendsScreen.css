@@ -187,12 +187,22 @@
   border: none;
   border-radius: 50%;
   cursor: pointer;
+  font-size: calc(3 * var(--element-width));
+  font-weight: 500;
   transition: color 0.15s, background 0.15s;
 }
 
 .friends-screen__remove-btn:hover:not(:disabled) {
   color: #c62828;
   background: rgba(198, 40, 40, 0.08);
+}
+
+.friends-screen__remove-btn--confirm {
+  width: auto;
+  min-width: calc(12 * var(--element-width));
+  padding: 0 calc(2.2 * var(--element-width));
+  border-radius: calc(1 * var(--element-width));
+  color: #c62828;
 }
 
 .friends-screen__remove-btn:disabled {

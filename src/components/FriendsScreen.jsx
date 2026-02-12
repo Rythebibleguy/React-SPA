@@ -23,6 +23,7 @@ function FriendsScreen() {
   const [message, setMessage] = useState(null)
   const [copySuccess, setCopySuccess] = useState(false)
   const [removingId, setRemovingId] = useState(null)
+  const [confirmRemoveId, setConfirmRemoveId] = useState(null)
 
   const friendUids = userProfile?.friends || []
 
@@ -63,13 +64,19 @@ function FriendsScreen() {
     }
   }
 
-  async function handleRemove(uid) {
+  function handleRemoveClick(uid) {
+    if (confirmRemoveId !== uid) {
+      setConfirmRemoveId(uid)
+      return
+    }
+    setConfirmRemoveId(null)
     setRemovingId(uid)
-    const result = await removeFriend(uid)
-    setRemovingId(null)
-    if (result.success) setMessage({ text: 'Friend removed', type: 'info' })
-    else setMessage({ text: result.error || 'Failed to remove', type: 'error' })
-    setTimeout(() => setMessage(null), 2000)
+    removeFriend(uid).then((result) => {
+      setRemovingId(null)
+      if (result.success) setMessage({ text: 'Friend removed', type: 'info' })
+      else setMessage({ text: result.error || 'Failed to remove', type: 'error' })
+      setTimeout(() => setMessage(null), 2000)
+    })
   }
 
   if (!userProfile) {
@@ -126,12 +133,12 @@ function FriendsScreen() {
                     <span className="friends-screen__name">{(friend.displayName || 'unknown').toLowerCase()}</span>
                     <button
                       type="button"
-                      className="friends-screen__remove-btn"
-                      onClick={() => handleRemove(friend.uid)}
+                      className={`friends-screen__remove-btn ${confirmRemoveId === friend.uid ? 'friends-screen__remove-btn--confirm' : ''}`}
+                      onClick={() => handleRemoveClick(friend.uid)}
                       disabled={removingId === friend.uid}
-                      title="Remove friend"
+                      title={confirmRemoveId === friend.uid ? 'Click again to remove' : 'Remove friend'}
                     >
-                      <UserMinus size={18} />
+                      {confirmRemoveId === friend.uid ? 'Remove' : <UserMinus size={18} />}
                     </button>
                   </li>
                 )
