@@ -69,7 +69,6 @@
   align-items: center;
   justify-content: center;
   gap: calc(2 * var(--element-width));
-  margin-bottom: calc(5 * var(--element-width));
 }
 
 .friends-screen__date-nav {
@@ -179,6 +178,7 @@
 .friends-screen__score-name-wrap {
   flex: 1;
   min-width: 0;
+  text-align: left;
 }
 
 .friends-screen__score-name {
@@ -186,27 +186,37 @@
   color: #121212;
 }
 
-.friends-screen__score-you {
-  font-size: calc(3.2 * var(--element-width));
-  color: #666;
-  font-weight: 400;
+.friends-screen__score-right {
+  display: flex;
+  align-items: center;
+  gap: calc(2 * var(--element-width));
+  flex-shrink: 0;
 }
 
 .friends-screen__score-value {
   font-size: calc(3.4 * var(--element-width));
   color: #121212;
+  display: inline-flex;
+  align-items: center;
+}
+
+.friends-screen__score-pending {
+  color: #9e9e9e;
+}
+
+.friends-screen__score-performance {
+  display: flex;
+  align-items: center;
+  gap: calc(0.5 * var(--element-width));
+}
+
+.friends-screen__score-check {
+  color: #2e7d32;
   flex-shrink: 0;
 }
 
-.friends-screen__score-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: calc(6 * var(--element-width));
-  height: calc(6 * var(--element-width));
-  background: #81c784;
-  color: #fff;
-  border-radius: calc(1 * var(--element-width));
+.friends-screen__score-x {
+  color: #c62828;
   flex-shrink: 0;
 }
 

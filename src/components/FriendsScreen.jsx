@@ -4,7 +4,7 @@ import { firestore, doc, getDoc } from '../config/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { getBadgeById } from '../config/badges'
 import { getTodayString } from '../utils/csvParser'
-import { UserPlus, ChevronLeft, ChevronRight, Star } from 'lucide-react'
+import { UserPlus, ChevronLeft, ChevronRight, Check, X, Minus } from 'lucide-react'
 
 const DEFAULT_AVATAR_COLOR = '#64B5F6'
 
@@ -190,7 +190,7 @@ function FriendsScreen({ onOpenManageFriends }) {
               const light = lightenColor(color, 15)
               const letterColor = color === '#424242' ? 'white' : '#444'
               const badge = row.avatarBadge && row.avatarBadge !== 'letter' ? getBadgeById(row.avatarBadge) : null
-              const scoreLabel = row.hasScore ? `${row.score}/${row.total}` : '—'
+              const scoreLabel = row.hasScore ? `${row.score}/${row.total}` : null
               return (
                 <li key={row.uid} className="friends-screen__score-item">
                   <div className="friends-screen__score-rank">
@@ -210,16 +210,25 @@ function FriendsScreen({ onOpenManageFriends }) {
                   </div>
                   <div className="friends-screen__score-name-wrap">
                     <span className="friends-screen__score-name">
-                      {(row.displayName || '').toLowerCase()}
-                      {row.isCurrentUser && <span className="friends-screen__score-you"> (you)</span>}
+                      {row.isCurrentUser ? 'Me' : (row.displayName || '').toLowerCase()}
                     </span>
                   </div>
-                  <span className="friends-screen__score-value">{scoreLabel}</span>
-                  {row.hasScore && (
-                    <div className="friends-screen__score-badge" title="Completed">
-                      <Star size={14} strokeWidth={2.5} />
-                    </div>
-                  )}
+                  <div className="friends-screen__score-right">
+                    <span className="friends-screen__score-value">
+                      {row.hasScore ? scoreLabel : <Minus size={16} className="friends-screen__score-pending" aria-label="Not completed yet" />}
+                    </span>
+                    {row.hasScore && (
+                      <div className="friends-screen__score-performance" aria-label={`${row.score} correct, ${row.total - row.score} wrong`}>
+                        {Array.from({ length: row.total }, (_, i) =>
+                          i < row.score ? (
+                            <Check key={i} size={14} className="friends-screen__score-check" />
+                          ) : (
+                            <X key={i} size={14} className="friends-screen__score-x" />
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </li>
               )
             })}
