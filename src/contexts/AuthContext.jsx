@@ -175,9 +175,8 @@ export function AuthProvider({ children }) {
         const { displayName, photoURL } = user
         const createdOnDate = getTodayString() // YYYY-MM-DD format (local timezone)
         
-        // Generate random avatar color
-        const colors = ['#74b9ff', '#fd79a8', '#fdcb6e', '#6c5ce7', '#a29bfe', '#fd79a8', '#00b894', '#e17055']
-        const randomColor = colors[Math.floor(Math.random() * colors.length)]
+        // Default avatar color (Sky Blue)
+        const defaultColor = '#64B5F6'
         
         // Generate random displayName for Google signups, use provided name for others
         const isGoogleSignup = additionalData.signUpMethod === 'google' || !additionalData.signUpMethod
@@ -188,7 +187,8 @@ export function AuthProvider({ children }) {
         // Public profile data (readable by friends)
         const profileData = {
           displayName: publicDisplayName,
-          avatarColor: additionalData.avatarColor || randomColor,
+          avatarColor: additionalData.avatarColor || defaultColor,
+          avatarBadge: null, // Badge ID to display in avatar (null = show letter)
           createdOn: createdOnDate,
           quizzesTaken: 0,
           totalScore: 0,

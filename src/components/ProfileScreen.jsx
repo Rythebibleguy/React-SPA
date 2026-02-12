@@ -62,6 +62,18 @@ function ProfileScreen({ showSettings, setShowSettings }) {
     }
   }
 
+  // Handle badge selection as avatar
+  async function handleSetBadgeAsAvatar(badgeId) {
+    if (!currentUser || !userProfile) return
+    
+    try {
+      // If badgeId is 'letter', clear the avatarBadge field
+      await updateUserProfile({ avatarBadge: badgeId === 'letter' ? null : badgeId })
+    } catch (error) {
+      console.error('Error setting badge as avatar:', error)
+    }
+  }
+
   // Show different states based on auth status
   if (!currentUser) {
     // User is not logged in - show auth prompt instead of loading
@@ -145,10 +157,12 @@ function ProfileScreen({ showSettings, setShowSettings }) {
   // Get all badges with calculated progress (array order determines display order)
   const badges = getAllBadgesWithProgress(userData)
 
-  // Get current avatar color
+  // Get current avatar color and badge
   const avatarColor = userProfile?.avatarColor || AVATAR_COLORS[0]
   const avatarColorLight = lightenColor(avatarColor, 15)
   const letterColor = avatarColor === '#424242' ? 'white' : '#444'
+  const avatarBadgeId = userProfile?.avatarBadge
+  const avatarBadge = avatarBadgeId ? badges.find(b => b.id === avatarBadgeId && b.unlocked) : null
 
   return (
     <>
@@ -165,9 +179,17 @@ function ProfileScreen({ showSettings, setShowSettings }) {
               onClick={() => setShowColorPalette(!showColorPalette)}
               title="Click to change color"
             >
-              <span className="profile-screen__avatar-letter" style={{ color: letterColor }}>
-                {(userProfile?.displayName?.charAt(0) || currentUser?.email?.charAt(0) || 'U').toUpperCase()}
-              </span>
+              {avatarBadge ? (
+                <img 
+                  src={avatarBadge.icon} 
+                  alt="Avatar badge"
+                  className="profile-screen__avatar-badge-icon"
+                />
+              ) : (
+                <span className="profile-screen__avatar-letter" style={{ color: letterColor }}>
+                  {(userProfile?.displayName?.charAt(0) || currentUser?.email?.charAt(0) || 'U').toUpperCase()}
+                </span>
+              )}
               <div className="profile-screen__avatar-paint-badge">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="13.5" cy="6.5" r=".5"></circle>
@@ -337,6 +359,29 @@ function ProfileScreen({ showSettings, setShowSettings }) {
                 <div className="profile-screen__modal-progress-percent">
                   {Math.round(selectedBadge.progressPercent)}%
                 </div>
+              </div>
+            )}
+
+            {selectedBadge.unlocked && (
+              <div className="profile-screen__modal-actions">
+                {avatarBadgeId === selectedBadge.id ? (
+                  <button 
+                    className="profile-screen__modal-button profile-screen__modal-button--current"
+                    disabled
+                  >
+                    Current Avatar
+                  </button>
+                ) : (
+                  <button 
+                    className="profile-screen__modal-button profile-screen__modal-button--primary"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleSetBadgeAsAvatar(selectedBadge.id)
+                    }}
+                  >
+                    Use as Avatar
+                  </button>
+                )}
               </div>
             )}
           </div>

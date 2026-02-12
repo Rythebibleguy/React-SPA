@@ -61,6 +61,12 @@
   line-height: 1;
 }
 
+.profile-screen__avatar-badge-icon {
+  width: calc(12 * var(--element-width));
+  height: calc(12 * var(--element-width));
+  object-fit: contain;
+}
+
 .profile-screen__avatar-paint-badge {
   position: absolute;
   bottom: calc(0.5 * var(--element-width));
@@ -491,4 +497,48 @@
   font-size: calc(3 * var(--element-width));
   color: #34C759;
   font-weight: 600;
+}
+
+.profile-screen__modal-actions {
+  margin-top: calc(5 * var(--element-width));
+  display: flex;
+  justify-content: center;
+}
+
+.profile-screen__modal-button {
+  padding: calc(2.5 * var(--element-width)) calc(5 * var(--element-width));
+  border: none;
+  border-radius: calc(2 * var(--element-width));
+  font-size: calc(3.6 * var(--element-width));
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.profile-screen__modal-button--primary {
+  background: #5A9FEF;
+  color: white;
+}
+
+.profile-screen__modal-button--primary:active {
+  transform: scale(0.98);
+}
+
+.profile-screen__modal-button--secondary {
+  background: #e1e4e8;
+  color: #24292e;
+}
+
+.profile-screen__modal-button--secondary:active {
+  transform: scale(0.98);
+}
+
+.profile-screen__modal-button--current {
+  background: #34C759;
+  color: white;
+  cursor: default;
+}
+
+.profile-screen__modal-button--current:disabled {
+  opacity: 1;
 }
