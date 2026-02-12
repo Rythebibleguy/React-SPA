@@ -4,13 +4,15 @@ import { firestore, doc, getDoc } from '../config/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { getBadgeById } from '../config/badges'
 import { getTodayString } from '../utils/csvParser'
-import { UserPlus, ChevronLeft, ChevronRight, ChevronDown, Star } from 'lucide-react'
+import { UserPlus, ChevronLeft, ChevronRight, Star } from 'lucide-react'
 
 const DEFAULT_AVATAR_COLOR = '#64B5F6'
 const QUIZ_NAME = 'Daily Bible Quiz'
 
 function formatDateLabel(dateStr) {
+  if (dateStr == null || typeof dateStr !== 'string') return '—'
   const d = new Date(dateStr + 'T12:00:00')
+  if (Number.isNaN(d.getTime())) return dateStr
   const weekday = d.toLocaleDateString('en-US', { weekday: 'short' })
   const day = d.getDate()
   const month = d.toLocaleDateString('en-US', { month: 'short' })
@@ -19,7 +21,9 @@ function formatDateLabel(dateStr) {
 }
 
 function dateStringToYMD(dateStr) {
+  if (dateStr == null || typeof dateStr !== 'string') return dateStr
   const d = new Date(dateStr + 'T12:00:00')
+  if (Number.isNaN(d.getTime())) return dateStr
   const y = d.getFullYear()
   const m = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
@@ -27,9 +31,15 @@ function dateStringToYMD(dateStr) {
 }
 
 function addDays(dateStr, delta) {
+  if (dateStr == null || typeof dateStr !== 'string') return dateStr
   const d = new Date(dateStr + 'T12:00:00')
+  if (Number.isNaN(d.getTime())) return dateStr
   d.setDate(d.getDate() + delta)
-  return dateStringToYMD(d)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const result = `${y}-${m}-${day}`
+  return result
 }
 
 function lightenColor(color, percent) {
@@ -43,7 +53,7 @@ function lightenColor(color, percent) {
 function FriendsScreen({ onOpenManageFriends }) {
   const { currentUser, userProfile } = useAuth()
   const today = useMemo(() => getTodayString(), [])
-  const [selectedDate, setSelectedDate] = useState(today)
+  const [selectedDate, setSelectedDate] = useState(() => getTodayString())
   const [friendProfiles, setFriendProfiles] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -160,8 +170,7 @@ function FriendsScreen({ onOpenManageFriends }) {
             <ChevronLeft size={22} />
           </button>
           <div className="friends-screen__date-display">
-            <span className="friends-screen__date-text">{formatDateLabel(selectedDate)}</span>
-            <ChevronDown size={18} className="friends-screen__date-chevron" />
+            <span className="friends-screen__date-text">{formatDateLabel(selectedDate ?? today)}</span>
           </div>
           <button type="button" className="friends-screen__date-nav" onClick={handleNextDay} disabled={!canGoNext} aria-label="Next day">
             <ChevronRight size={22} />

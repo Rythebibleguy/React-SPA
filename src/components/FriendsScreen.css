@@ -106,11 +106,6 @@
   color: #121212;
 }
 
-.friends-screen__date-chevron {
-  color: #555;
-  flex-shrink: 0;
-}
-
 /* Game title */
 .friends-screen__game-title {
   font-size: calc(4.4 * var(--element-width));
