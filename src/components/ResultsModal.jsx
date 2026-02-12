@@ -27,6 +27,9 @@ function ResultsModal({ score, total, stats, onClose, onShare, showCopied, showS
     <div className="results-modal">
       <div className="results-modal__overlay" onClick={onClose}></div>
       <div className="results-modal__content">
+        <button className="results-modal__close" onClick={onClose} aria-label="Close">
+          <X size={24} />
+        </button>
         <div className="results-modal__score">
           <div className="results-modal__score-number">{score}</div>
           <div className="results-modal__score-divider">/</div>

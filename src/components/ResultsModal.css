@@ -44,6 +44,34 @@
   display: none;
 }
 
+.results-modal__close {
+  position: absolute;
+  top: calc(3 * var(--element-width));
+  right: calc(3 * var(--element-width));
+  background: none;
+  border: none;
+  color: #8a8a8a;
+  cursor: pointer;
+  padding: calc(1 * var(--element-width));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  z-index: 12;
+  opacity: 0;
+  animation: resultsModalCloseButtonIn 0.4s ease-out 2.35s forwards;
+}
+
+.results-modal__close:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #3a3a3a;
+}
+
+.results-modal__close:active {
+  transform: scale(0.95);
+}
+
 /* Giant Score Display */
 .results-modal__score {
   display: flex;
@@ -261,5 +289,15 @@
     transform: translateY(0);
   }
 }
+
+@keyframes resultsModalCloseButtonIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 
 
