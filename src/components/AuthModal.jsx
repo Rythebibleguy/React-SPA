@@ -1,7 +1,7 @@
 import './AuthModal.css'
 import { useAuth } from '../contexts/AuthContext'
 import { useState, useEffect } from 'react'
-import { X } from 'lucide-react'
+import { X, Mail } from 'lucide-react'
 
 function AuthModal({ isOpen, onClose, onCloseStart }) {
   const { signInWithGoogle, signIn, signUp, checkEmailExists, error, setError } = useAuth()
@@ -163,7 +163,7 @@ function AuthModal({ isOpen, onClose, onCloseStart }) {
                 onClick={handleEmailContinue}
                 disabled={loadingAction !== null}
               >
-                {loadingAction === 'email' ? <span className="auth-modal__spinner"></span> : 'Continue with email'}
+                {loadingAction === 'email' ? <span className="auth-modal__spinner"></span> : (<><Mail size={20} /> Continue with email</>)}
               </button>
             )}
           </div>
