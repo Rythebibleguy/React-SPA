@@ -53,7 +53,10 @@
 }
 
 .welcome-screen__header-title {
-  font-size: calc(9 * var(--element-width));
+  font-family: 'Bitter', serif;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  font-size: calc(11 * var(--element-width));
   color: #2B2B2B;
   margin: 0;
   opacity: 0;
@@ -66,9 +69,10 @@
 }
 
 .welcome-screen__header-tagline {
-  font-size: calc(3.8 * var(--element-width));
+  font-size: calc(4.1 * var(--element-width));
   color: #444;
   margin: 0;
+  margin-top: calc(-2 * var(--element-width));
   opacity: 0;
   transform: translateY(calc(1.5 * var(--element-width)));
 }
