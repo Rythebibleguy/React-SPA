@@ -1,13 +1,14 @@
 import './GuestScreen.css'
 import { useState, useEffect } from 'react'
 import Lottie from 'lottie-react'
+import { BASE_DATA_URL } from '../config'
 
 function GuestScreen({ onSignIn }) {
   const [animationData, setAnimationData] = useState(null)
 
   // Load Lottie animation
   useEffect(() => {
-    fetch('/assets/animations/Statistics.json')
+    fetch(`${BASE_DATA_URL}/assets/animations/Statistics.json`)
       .then(res => res.json())
       .then(data => setAnimationData(data))
       .catch(err => console.error('Failed to load animation:', err))

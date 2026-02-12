@@ -1,6 +1,7 @@
 import { ref, get } from 'firebase/database';
 import { db } from '../config/firebase';
 import { getTodayString } from './csvParser';
+import { BASE_DATA_URL } from '../config';
 
 // Cache to store preloaded data
 const cache = {
@@ -19,7 +20,7 @@ export function preloadQuizData() {
 
   // Only start fetch if not already loading/loaded
   if (!cache.questionsPromise) {
-    cache.questionsPromise = fetch('/data/questions.json')
+    cache.questionsPromise = fetch(`${BASE_DATA_URL}/data/questions.json`)
       .then(response => {
         if (!response.ok) throw new Error('Failed to fetch questions');
         return response.json();

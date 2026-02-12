@@ -5,6 +5,7 @@ import QuizTab from './components/QuizTab'
 import FriendsTab from './components/FriendsTab'
 import ProfileTab from './components/ProfileTab'
 import { useViewportUnits } from './hooks/useViewportUnits'
+import { BASE_DATA_URL } from './config'
 
 // Clear quiz state on page load (before any components mount)
 sessionStorage.removeItem('quizState')
@@ -23,7 +24,7 @@ function App() {
 
   // Load Lottie animation once on app mount
   useEffect(() => {
-    fetch('/assets/animations/Book with bookmark.json')
+    fetch(`${BASE_DATA_URL}/assets/animations/Book with bookmark.json`)
       .then(res => res.json())
       .then(data => setAnimationData(data))
       .catch(err => {/* Failed to load animation */})
