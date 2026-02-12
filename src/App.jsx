@@ -18,6 +18,16 @@ function App() {
   const [welcomeAnimated, setWelcomeAnimated] = useState(() => {
     return sessionStorage.getItem('welcomeAnimated') === 'true'
   })
+  const [animationData, setAnimationData] = useState(null)
+  const [lottieInstance, setLottieInstance] = useState(null)
+
+  // Load Lottie animation once on app mount
+  useEffect(() => {
+    fetch('/assets/animations/Book with bookmark.json')
+      .then(res => res.json())
+      .then(data => setAnimationData(data))
+      .catch(err => {/* Failed to load animation */})
+  }, [])
 
   // Start bottom nav animation immediately
   useEffect(() => {
@@ -66,6 +76,9 @@ function App() {
           isTransitioning={isTransitioning} 
           welcomeAnimated={welcomeAnimated}
           setWelcomeAnimated={setWelcomeAnimated}
+          animationData={animationData}
+          lottieInstance={lottieInstance}
+          setLottieInstance={setLottieInstance}
         />
       )}
       {currentScreen === 'friends' && <FriendsTab isTransitioning={isTransitioning} />}

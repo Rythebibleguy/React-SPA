@@ -3,13 +3,11 @@ import './QuizTab.css'
 import WelcomeScreen from './WelcomeScreen'
 import QuizScreen from './QuizScreen'
 
-function QuizTab({ isTransitioning, welcomeAnimated, setWelcomeAnimated }) {
+function QuizTab({ isTransitioning, welcomeAnimated, setWelcomeAnimated, animationData, lottieInstance, setLottieInstance }) {
   const [showWelcome, setShowWelcome] = useState(true)
   const [welcomeAnimationComplete, setWelcomeAnimationComplete] = useState(false)
   const [welcomeExiting, setWelcomeExiting] = useState(false)
   const [quizEntering, setQuizEntering] = useState(false)
-  const [animationData, setAnimationData] = useState(null)
-  const [lottieInstance, setLottieInstance] = useState(null)
 
   // Check sessionStorage on mount to restore state
   useEffect(() => {
@@ -19,14 +17,6 @@ function QuizTab({ isTransitioning, welcomeAnimated, setWelcomeAnimated }) {
     if (savedQuizState) {
       setShowWelcome(false)
     }
-  }, [])
-
-  // Load Lottie animation once on tab mount
-  useEffect(() => {
-    fetch('/assets/animations/Book with bookmark.json')
-      .then(res => res.json())
-      .then(data => setAnimationData(data))
-      .catch(err => {/* Failed to load animation */})
   }, [])
 
   // Set welcomeAnimated when animation completes
