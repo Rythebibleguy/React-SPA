@@ -20,13 +20,21 @@ function App() {
     return sessionStorage.getItem('welcomeAnimated') === 'true'
   })
   const [animationData, setAnimationData] = useState(null)
+  const [statisticsAnimationData, setStatisticsAnimationData] = useState(null)
   const [lottieInstance, setLottieInstance] = useState(null)
 
-  // Load Lottie animation once on app mount
+  // Load Lottie animations once on app mount
   useEffect(() => {
+    // Load Bible animation
     fetch(`${BASE_DATA_URL}/assets/animations/Book with bookmark.json`)
       .then(res => res.json())
       .then(data => setAnimationData(data))
+      .catch(err => {/* Failed to load animation */})
+    
+    // Load Statistics animation for GuestScreen
+    fetch(`${BASE_DATA_URL}/assets/animations/Statistics.json`)
+      .then(res => res.json())
+      .then(data => setStatisticsAnimationData(data))
       .catch(err => {/* Failed to load animation */})
   }, [])
 
@@ -83,7 +91,7 @@ function App() {
         />
       )}
       {currentScreen === 'friends' && <FriendsTab isTransitioning={isTransitioning} />}
-      {currentScreen === 'profile' && <ProfileTab isTransitioning={isTransitioning} />}
+      {currentScreen === 'profile' && <ProfileTab isTransitioning={isTransitioning} statisticsAnimationData={statisticsAnimationData} />}
       <BottomNav currentScreen={currentScreen} onNavigate={handleNavigation} show={showBottomNav} />
     </>
   )

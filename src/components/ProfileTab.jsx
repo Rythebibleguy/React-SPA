@@ -6,7 +6,7 @@ import SettingsModal from './SettingsModal'
 import { useAuth } from '../contexts/AuthContext'
 import { useState } from 'react'
 
-function ProfileTab({ isTransitioning }) {
+function ProfileTab({ isTransitioning, statisticsAnimationData }) {
   const { currentUser, userProfile, updateUserProfile } = useAuth()
   const [showSettings, setShowSettings] = useState(false)
   const [showAuth, setShowAuth] = useState(false)
@@ -24,7 +24,7 @@ function ProfileTab({ isTransitioning }) {
             }} 
           />
         ) : (
-          <GuestScreen onSignIn={() => { setShowAuth(true); setIsModalActive(true); }} />
+          <GuestScreen onSignIn={() => { setShowAuth(true); setIsModalActive(true); }} animationData={statisticsAnimationData} />
         )}
       </div>
 
