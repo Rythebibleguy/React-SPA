@@ -23,6 +23,10 @@
   gap: calc(3 * var(--element-width));
 }
 
+.profile-screen__avatar-wrapper {
+  position: relative;
+}
+
 .profile-screen__avatar {
   width: calc(20 * var(--element-width));
   height: calc(20 * var(--element-width));
@@ -32,12 +36,82 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 calc(1 * var(--element-width)) calc(3 * var(--element-width)) rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  position: relative;
+  transition: opacity 0.2s;
+}
+
+.profile-screen__avatar:active {
+  opacity: 0.9;
 }
 
 .profile-screen__avatar-letter {
-  font-size: calc(9 * var(--element-width));
+  font-size: calc(10 * var(--element-width));
   font-weight: 700;
-  color: white;
+  user-select: none;
+  font-family: 'Times New Roman', Times, serif;
+  line-height: 1;
+}
+
+.profile-screen__avatar-paint-badge {
+  position: absolute;
+  bottom: calc(0.5 * var(--element-width));
+  right: calc(0.5 * var(--element-width));
+  width: calc(6 * var(--element-width));
+  height: calc(6 * var(--element-width));
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 calc(0.4 * var(--element-width)) calc(1.4 * var(--element-width)) rgba(0, 0, 0, 0.15);
+  color: #555;
+  pointer-events: none;
+}
+
+.profile-screen__avatar-paint-badge svg {
+  width: calc(3.8 * var(--element-width));
+  height: calc(3.8 * var(--element-width));
+}
+
+.profile-screen__color-palette {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: calc(3 * var(--element-width));
+  padding: calc(4 * var(--element-width));
+  background: white;
+  border-radius: calc(3 * var(--element-width));
+  box-shadow: 0 calc(0.5 * var(--element-width)) calc(2 * var(--element-width)) rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-2 * var(--element-width)));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-screen__color-swatch {
+  width: calc(10 * var(--element-width));
+  height: calc(10 * var(--element-width));
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.profile-screen__color-swatch:active {
+  transform: scale(0.95);
+}
+
+.profile-screen__color-swatch--selected {
+  box-shadow: 0 0 0 calc(0.6 * var(--element-width)) #2B2B2B;
+  transform: scale(1.1);
 }
 
 .profile-screen__name {
@@ -170,15 +244,15 @@
   border-radius: calc(3 * var(--element-width));
   padding: calc(4 * var(--element-width));
   display: flex;
-  flex-direction: column;
-  gap: calc(2.5 * var(--element-width));
+  flex-direction: row;
+  gap: calc(3 * var(--element-width));
   box-shadow: 0 calc(0.5 * var(--element-width)) calc(2 * var(--element-width)) rgba(0, 0, 0, 0.08);
 }
 
-.profile-screen__distribution-row {
+.profile-screen__scores-column {
   display: flex;
-  align-items: center;
-  gap: calc(3 * var(--element-width));
+  flex-direction: column;
+  gap: calc(2.5 * var(--element-width));
 }
 
 .profile-screen__distribution-score {
@@ -187,6 +261,23 @@
   color: #2B2B2B;
   min-width: calc(5 * var(--element-width));
   text-align: center;
+  height: calc(7 * var(--element-width));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-screen__distribution-divider {
+  width: 1px;
+  background: #e5e5e5;
+  flex-shrink: 0;
+}
+
+.profile-screen__bars-column {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2.5 * var(--element-width));
+  flex: 1;
 }
 
 .profile-screen__distribution-bar-container {

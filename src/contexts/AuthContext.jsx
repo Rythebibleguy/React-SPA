@@ -411,13 +411,20 @@ export function AuthProvider({ children }) {
   async function updateUserProfile(updates) {
     if (!currentUser) return
     
+    // Update local state immediately for instant feedback
+    setUserProfile(prev => ({ ...prev, ...updates }))
+    
+    // Then update Firebase in background
     try {
       const userRef = doc(firestore, 'users', currentUser.uid)
       await updateDoc(userRef, updates)
-      
-      // Update local state
-      setUserProfile(prev => ({ ...prev, ...updates }))
     } catch (error) {
+      // Revert local state on error
+      setUserProfile(prev => {
+        const reverted = { ...prev }
+        Object.keys(updates).forEach(key => delete reverted[key])
+        return reverted
+      })
       throw error
     }
   }
