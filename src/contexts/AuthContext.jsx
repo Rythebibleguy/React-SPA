@@ -473,7 +473,8 @@ export function AuthProvider({ children }) {
     completeQuiz,
     getUserPrivateData,
     updateUserPrivateData,
-    setError
+    setError,
+    isDisplayNameExists
   }
 
   return (

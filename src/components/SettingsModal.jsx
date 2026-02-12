@@ -1,5 +1,6 @@
 import './SettingsModal.css'
 import { useState, useEffect } from 'react'
+import { useAuth } from '../contexts/AuthContext'
 
 // Available avatar colors
 const AVATAR_COLORS = [
@@ -24,7 +25,9 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
   const [isActive, setIsActive] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editedName, setEditedName] = useState('')
-  const [nameError, setNameError] = useState(false)
+  const [nameError, setNameError] = useState('')
+  const [userEmail, setUserEmail] = useState('')
+  const { isDisplayNameExists, getUserPrivateData } = useAuth()
 
   // Trigger slide-up animation when modal opens
   useEffect(() => {
@@ -33,8 +36,18 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
       requestAnimationFrame(() => {
         setIsActive(true)
       })
+      
+      // Fetch email from private data
+      if (currentUser) {
+        getUserPrivateData().then(privateData => {
+          setUserEmail(privateData?.email || '')
+        }).catch(err => {
+          console.error('Failed to load private data:', err)
+          setUserEmail('')
+        })
+      }
     }
-  }, [isOpen])
+  }, [isOpen, currentUser, getUserPrivateData])
 
   const handleCloseSettings = () => {
     setIsActive(false)
@@ -43,38 +56,54 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
       onClose()
       setIsEditing(false)
       setEditedName('')
-      setNameError(false)
+      setNameError('')
     }, 400)
   }
 
   const handleEditName = () => {
     setEditedName(userProfile?.displayName || '')
     setIsEditing(true)
-    setNameError(false)
+    setNameError('')
   }
 
   const handleCancelEdit = () => {
     setIsEditing(false)
     setEditedName('')
-    setNameError(false)
+    setNameError('')
   }
 
   const handleSaveName = async () => {
     const trimmedName = editedName.trim()
     
+    // Validate length
     if (!trimmedName || trimmedName.length > 15) {
-      setNameError(true)
+      setNameError('Name must be 1-15 characters')
       return
     }
 
+    // Check if name is unchanged
+    if (trimmedName === userProfile?.displayName) {
+      setIsEditing(false)
+      setEditedName('')
+      setNameError('')
+      return
+    }
+
+    // Check if name is already taken
     try {
+      const nameExists = await isDisplayNameExists(trimmedName)
+      if (nameExists) {
+        setNameError('This name is already taken')
+        return
+      }
+
       await updateUserProfile({ displayName: trimmedName })
       setIsEditing(false)
       setEditedName('')
-      setNameError(false)
+      setNameError('')
     } catch (error) {
       console.error('Failed to update name:', error)
-      setNameError(true)
+      setNameError('Failed to save name')
     }
   }
 
@@ -85,25 +114,22 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
       className={`settings-modal__overlay ${isActive ? 'settings-modal__overlay--active' : ''}`}
       style={{ pointerEvents: isActive ? 'auto' : 'none' }}
       onClick={(e) => {
-        if (e.target.className.includes('settings-modal__overlay')) {
+        if (e.target === e.currentTarget) {
           handleCloseSettings()
         }
       }}
     >
       <div className="settings-modal__sheet">
-        <div className="settings-modal__header">
-          <button 
-            className="settings-modal__close"
-            onClick={handleCloseSettings}
-            title="Close"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-          <h3 className="settings-modal__title">Settings</h3>
-        </div>
+        <button 
+          className="settings-modal__close"
+          onClick={handleCloseSettings}
+          title="Close"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
         <div className="settings-modal__content">
           {/* Avatar Section */}
           <div className="settings-modal__avatar-section">
@@ -151,18 +177,14 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
                     value={editedName}
                     onChange={(e) => {
                       setEditedName(e.target.value)
-                      setNameError(false)
+                      setNameError('')
                     }}
                     maxLength={15}
                     autoFocus
                   />
                   {nameError && (
                     <div className="settings-modal__input-error">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="15" y1="9" x2="9" y2="15"></line>
-                        <line x1="9" y1="9" x2="15" y2="15"></line>
-                      </svg>
+                      <span className="settings-modal__input-error-text">{nameError}</span>
                     </div>
                   )}
                 </div>
@@ -187,7 +209,7 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
           <div className="settings-modal__field">
             <label className="settings-modal__label">Email</label>
             <div className="settings-modal__value">
-              {currentUser?.email || 'No email'}
+              {userEmail || 'No email'}
             </div>
           </div>
         </div>
