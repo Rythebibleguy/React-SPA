@@ -48,6 +48,7 @@ Format responses so they are easy to scan:
 
 ## Project notes
 
+- **Start the server:** Run `npm run dev` at the start of each session.
 - **Legacy:** `Old Code/` is the original HTML/CSS/JS version. Use for reference only; don’t copy-paste from it unless asked.
-- **Dev server:** Run `npm run dev` at the start of each session. App at `http://localhost:5173/`; same WiFi devices can use the network URL (e.g. `http://192.168.1.4:5173/`).
+- **Dev server:** App at `http://localhost:5173/`; same WiFi devices can use the network URL (e.g. `http://192.168.1.4:5173/`).
 - **Production:** https://react-spa-57t.pages.dev/

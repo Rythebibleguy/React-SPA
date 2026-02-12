@@ -3,19 +3,233 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: #f5f5f5;
 }
 
 .friends-screen__content {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: calc(4.6 * var(--element-width));
+  overflow-y: auto;
+  padding: calc(5 * var(--element-width));
+  padding-bottom: calc(12 * var(--element-width));
+  box-sizing: border-box;
 }
 
-.friends-screen__content p {
-  font-size: calc(4 * var(--element-width));
+.friends-screen__welcome,
+.friends-screen__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60%;
+  padding: calc(5 * var(--element-width));
+  text-align: center;
+}
+
+.friends-screen__welcome-icon {
+  color: #999;
+  margin-bottom: calc(3 * var(--element-width));
+}
+
+.friends-screen__welcome-title {
+  font-size: calc(4.4 * var(--element-width));
+  font-weight: 600;
+  color: #121212;
+  margin: 0 0 calc(2 * var(--element-width));
+}
+
+.friends-screen__welcome-text {
+  font-size: calc(3.6 * var(--element-width));
+  color: #666;
+  margin: 0;
+  max-width: 80%;
+}
+
+.friends-screen__loading-list {
+  display: flex;
+  align-items: center;
+  gap: calc(2 * var(--element-width));
+  font-size: calc(3.6 * var(--element-width));
   color: #666;
 }
 
+.friends-screen__spinner {
+  width: calc(5 * var(--element-width));
+  height: calc(5 * var(--element-width));
+  border: 2px solid #e0e0e0;
+  border-top-color: #121212;
+  border-radius: 50%;
+  animation: friends-spin 0.8s linear infinite;
+}
 
+@keyframes friends-spin {
+  to { transform: rotate(360deg); }
+}
+
+.friends-screen__share {
+  margin-bottom: calc(6 * var(--element-width));
+}
+
+.friends-screen__heading {
+  font-size: calc(3.8 * var(--element-width));
+  font-weight: 600;
+  color: #121212;
+  margin: 0 0 calc(2 * var(--element-width));
+}
+
+.friends-screen__share-text {
+  font-size: calc(3.4 * var(--element-width));
+  color: #666;
+  margin: 0 0 calc(3 * var(--element-width));
+  line-height: 1.4;
+}
+
+.friends-screen__copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(1.5 * var(--element-width));
+  padding: calc(2.4 * var(--element-width)) calc(4 * var(--element-width));
+  font-size: calc(3.4 * var(--element-width));
+  font-weight: 500;
+  color: #121212;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: calc(1.2 * var(--element-width));
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.friends-screen__copy-btn:hover:not(:disabled) {
+  background: #f0f0f0;
+  border-color: #ccc;
+}
+
+.friends-screen__copy-btn:active:not(:disabled) {
+  background: #e8e8e8;
+}
+
+.friends-screen__copy-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.friends-screen__list-section {
+  margin-top: calc(2 * var(--element-width));
+}
+
+.friends-screen__list-section .friends-screen__heading {
+  margin-bottom: calc(2.5 * var(--element-width));
+}
+
+.friends-screen__empty {
+  font-size: calc(3.4 * var(--element-width));
+  color: #666;
+  margin: 0;
+}
+
+.friends-screen__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.friends-screen__item {
+  display: flex;
+  align-items: center;
+  gap: calc(3 * var(--element-width));
+  padding: calc(2.8 * var(--element-width)) 0;
+  border-bottom: 1px solid #eee;
+}
+
+.friends-screen__item:last-child {
+  border-bottom: none;
+}
+
+.friends-screen__avatar {
+  width: calc(10 * var(--element-width));
+  height: calc(10 * var(--element-width));
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 calc(0.8 * var(--element-width)) calc(2 * var(--element-width)) rgba(0, 0, 0, 0.1);
+}
+
+.friends-screen__avatar-icon {
+  width: calc(5 * var(--element-width));
+  height: calc(5 * var(--element-width));
+  object-fit: contain;
+}
+
+.friends-screen__avatar-letter {
+  font-size: calc(5 * var(--element-width));
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  line-height: 1;
+}
+
+.friends-screen__name {
+  flex: 1;
+  font-size: calc(3.8 * var(--element-width));
+  color: #121212;
+  min-width: 0;
+}
+
+.friends-screen__remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(8 * var(--element-width));
+  height: calc(8 * var(--element-width));
+  padding: 0;
+  color: #888;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.friends-screen__remove-btn:hover:not(:disabled) {
+  color: #c62828;
+  background: rgba(198, 40, 40, 0.08);
+}
+
+.friends-screen__remove-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.friends-screen__toast {
+  position: fixed;
+  bottom: calc(20 * var(--element-width));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: calc(2.4 * var(--element-width)) calc(4 * var(--element-width));
+  font-size: calc(3.2 * var(--element-width));
+  border-radius: calc(2 * var(--element-width));
+  box-shadow: 0 calc(2 * var(--element-width)) calc(8 * var(--element-width)) rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  animation: friends-toast-in 0.2s ease-out;
+}
+
+.friends-screen__toast--info {
+  background: #121212;
+  color: #fff;
+}
+
+.friends-screen__toast--error {
+  background: #c62828;
+  color: #fff;
+}
+
+@keyframes friends-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}

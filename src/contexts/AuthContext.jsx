@@ -455,6 +455,50 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // Add friend (mutual). Call after validating not self and not already friends.
+  async function addFriend(friendUid) {
+    if (!currentUser || !userProfile) return { success: false, error: 'Not logged in' }
+    if (friendUid === currentUser.uid) return { success: false, error: "Can't add yourself" }
+    const currentFriends = userProfile.friends || []
+    if (currentFriends.includes(friendUid)) return { success: false, error: 'Already friends' }
+    try {
+      const currentUserRef = doc(firestore, 'users', currentUser.uid)
+      const friendUserRef = doc(firestore, 'users', friendUid)
+      await Promise.all([
+        updateDoc(currentUserRef, { friends: arrayUnion(friendUid) }),
+        updateDoc(friendUserRef, { friends: arrayUnion(currentUser.uid) })
+      ])
+      await loadUserProfile(currentUser)
+      if (window.clarity) window.clarity('event', 'friendship_created')
+      return { success: true }
+    } catch (error) {
+      return { success: false, error: error.message }
+    }
+  }
+
+  // Remove friend (mutual).
+  async function removeFriend(friendUid) {
+    if (!currentUser || !userProfile) return { success: false, error: 'Not logged in' }
+    const currentFriends = (userProfile.friends || []).filter(uid => uid !== friendUid)
+    if (currentFriends.length === userProfile.friends?.length) return { success: false, error: 'Not friends' }
+    try {
+      const currentUserRef = doc(firestore, 'users', currentUser.uid)
+      await updateDoc(currentUserRef, { friends: currentFriends })
+      const friendRef = doc(firestore, 'users', friendUid)
+      const friendSnap = await getDoc(friendRef)
+      if (friendSnap.exists()) {
+        const friendData = friendSnap.data()
+        const friendUpdated = (friendData.friends || []).filter(uid => uid !== currentUser.uid)
+        await updateDoc(friendRef, { friends: friendUpdated })
+      }
+      await loadUserProfile(currentUser)
+      if (window.clarity) window.clarity('event', 'friendship_removed')
+      return { success: true }
+    } catch (error) {
+      return { success: false, error: error.message }
+    }
+  }
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       // Cancel any pending requests
@@ -497,6 +541,8 @@ export function AuthProvider({ children }) {
     logout,
     checkEmailExists,
     updateUserProfile,
+    addFriend,
+    removeFriend,
     completeQuiz,
     getUserPrivateData,
     updateUserPrivateData,

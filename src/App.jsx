@@ -5,6 +5,7 @@ import QuizTab from './components/QuizTab'
 import FriendsTab from './components/FriendsTab'
 import ProfileTab from './components/ProfileTab'
 import { useViewportUnits } from './hooks/useViewportUnits'
+import { useAuth } from './contexts/AuthContext'
 import { BASE_DATA_URL } from './config'
 
 // Clear quiz state on page load (before any components mount)
@@ -13,6 +14,7 @@ sessionStorage.removeItem('welcomeAnimated')
 
 function App() {
   useViewportUnits()
+  const { currentUser, userProfile, addFriend } = useAuth()
   const [currentScreen, setCurrentScreen] = useState('quiz')
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [showBottomNav, setShowBottomNav] = useState(false)
@@ -44,6 +46,25 @@ function App() {
       setShowBottomNav(true)
     }
   }, [lottieInstance])
+
+  // Handle ?friend=uid in URL: add friend when user is signed in, then clear param
+  useEffect(() => {
+    if (!currentUser || !userProfile) return
+    const params = new URLSearchParams(window.location.search)
+    const friendUid = params.get('friend')
+    if (!friendUid || friendUid === currentUser.uid) {
+      if (friendUid !== null) {
+        const url = new URL(window.location.href)
+        url.searchParams.delete('friend')
+        window.history.replaceState({}, document.title, url.pathname + url.search)
+      }
+      return
+    }
+    const url = new URL(window.location.href)
+    url.searchParams.delete('friend')
+    window.history.replaceState({}, document.title, url.pathname + url.search)
+    addFriend(friendUid)
+  }, [currentUser, userProfile, addFriend])
 
   // Prevent pinch zoom on mobile
   useEffect(() => {
@@ -92,7 +113,7 @@ function App() {
           setLottieInstance={setLottieInstance}
         />
       )}
-      {currentScreen === 'friends' && <FriendsTab isTransitioning={isTransitioning} />}
+      {currentScreen === 'friends' && <FriendsTab isTransitioning={isTransitioning} statisticsAnimationData={statisticsAnimationData} />}
       {currentScreen === 'profile' && <ProfileTab isTransitioning={isTransitioning} statisticsAnimationData={statisticsAnimationData} />}
       <BottomNav currentScreen={currentScreen} onNavigate={handleNavigation} show={showBottomNav} />
     </>
