@@ -38,9 +38,13 @@ function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieI
     }
   }, [skipAnimations, animationData, lottieInstance, animationComplete])
 
-  // Run animations only if not skipping
+  // Run animations only if not skipping, and only once Lottie DOM is ready
   useEffect(() => {
     if (skipAnimations) return
+    if (!lottieInstance) return
+
+    // Start Lottie playback now that the DOM is ready
+    lottieInstance.play()
 
     // Run animation sequence
     const creditTimer = setTimeout(() => setShowCredit(true), 500)
@@ -88,7 +92,7 @@ function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieI
               lottieRef={lottieRef}
               animationData={animationData}
               loop={false}
-              autoplay={!skipAnimations}
+              autoplay={false}
               onDOMLoaded={() => {
                 if (lottieRef.current) {
                   setLottieInstance(lottieRef.current)

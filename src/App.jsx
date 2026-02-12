@@ -38,10 +38,12 @@ function App() {
       .catch(err => {/* Failed to load animation */})
   }, [])
 
-  // Start bottom nav animation immediately
+  // Show bottom nav once Lottie DOM is ready (syncs with welcome animation start)
   useEffect(() => {
-    setShowBottomNav(true)
-  }, [])
+    if (lottieInstance) {
+      setShowBottomNav(true)
+    }
+  }, [lottieInstance])
 
   // Prevent pinch zoom on mobile
   useEffect(() => {
