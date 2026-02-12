@@ -67,7 +67,7 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
     }
   }, [isOpen, currentUser, getUserPrivateData])
 
-  const handleCloseSettings = () => {
+  const handleCloseSettings = (afterClose) => {
     setIsActive(false)
     onCloseStart?.()
     setTimeout(() => {
@@ -75,6 +75,7 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
       setIsEditing(false)
       setEditedName('')
       setNameError('')
+      afterClose?.()
     }, 400)
   }
 
@@ -125,13 +126,10 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
     }
   }
 
-  const handleLogout = async () => {
-    try {
-      await logout()
-      handleCloseSettings()
-    } catch (error) {
-      console.error('Logout failed:', error)
-    }
+  const handleLogout = () => {
+    handleCloseSettings(() => {
+      logout().catch((error) => console.error('Logout failed:', error))
+    })
   }
 
   if (!isOpen) return null
