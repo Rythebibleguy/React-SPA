@@ -1,40 +1,30 @@
 import './AuthModal.css'
+import StackedModal from './StackedModal'
 import { useAuth } from '../contexts/AuthContext'
-import { useState, useEffect } from 'react'
-import { X, Mail } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Mail } from 'lucide-react'
 
 function AuthModal({ isOpen, onClose, onCloseStart }) {
   const { signInWithGoogle, signIn, signUp, checkEmailExists, error, setError } = useAuth()
-  const [isActive, setIsActive] = useState(false)
   const [loadingAction, setLoadingAction] = useState(null) // 'email', 'google', 'login', 'signup'
   const [showLogin, setShowLogin] = useState(false)
   const [showSignup, setShowSignup] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
+  const modalRef = useRef(null)
 
-  // Trigger slide-up animation when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      requestAnimationFrame(() => {
-        setIsActive(true)
-      })
-    }
-  }, [isOpen])
+  const resetForm = () => {
+    setShowLogin(false)
+    setShowSignup(false)
+    setEmail('')
+    setPassword('')
+    setDisplayName('')
+    setError(null)
+  }
 
   const handleClose = () => {
-    setIsActive(false)
-    onCloseStart?.()
-    setTimeout(() => {
-      onClose()
-      // Reset form
-      setShowLogin(false)
-      setShowSignup(false)
-      setEmail('')
-      setPassword('')
-      setDisplayName('')
-      setError(null)
-    }, 400)
+    modalRef.current?.close()
   }
 
   const handleGoogleSignIn = async () => {
@@ -115,28 +105,14 @@ function AuthModal({ isOpen, onClose, onCloseStart }) {
     }
   }
 
-  if (!isOpen) return null
-
   return (
-    <div 
-      className={`auth-modal__overlay ${isActive ? 'auth-modal__overlay--active' : ''}`}
-      style={{ pointerEvents: isActive ? 'auto' : 'none' }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          handleClose()
-        }
-      }}
+    <StackedModal
+      ref={modalRef}
+      isOpen={isOpen}
+      onClose={() => { resetForm(); onClose() }}
+      onCloseStart={onCloseStart}
     >
-      <div className="auth-modal__sheet">
-        <button 
-          className="auth-modal__close"
-          onClick={handleClose}
-          title="Close"
-        >
-          <X size={20} />
-        </button>
-
-        <div className="auth-modal__content">
+      <div className="auth-modal__content">
           <h2 className="auth-modal__title">Log in or create an account</h2>
           <p className="auth-modal__subtitle">
             By continuing, you agree to the{' '}
@@ -253,9 +229,8 @@ function AuthModal({ isOpen, onClose, onCloseStart }) {
               </div>
             </>
           )}
-        </div>
       </div>
-    </div>
+    </StackedModal>
   )
 }
 

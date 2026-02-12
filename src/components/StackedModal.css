@@ -1,0 +1,95 @@
+/* Base stacked modal – shared by Auth, Settings, Manage Friends, etc. */
+.stacked-modal__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: stacked-modal-fadeIn 0.2s ease;
+}
+
+.stacked-modal__sheet {
+  background: white;
+  width: 100%;
+  max-width: calc(100 * var(--app-width));
+  border-radius: calc(3.8 * var(--element-width)) calc(3.8 * var(--element-width)) 0 0;
+  box-shadow: 0 calc(-1.8 * var(--element-width)) calc(7.4 * var(--element-width)) rgba(0, 0, 0, 0.25);
+  height: 92dvh;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stacked-modal__overlay--active .stacked-modal__sheet {
+  transform: translateY(0);
+}
+
+.stacked-modal__close {
+  position: absolute;
+  right: calc(3 * var(--element-width));
+  top: calc(3 * var(--element-width));
+  z-index: 10;
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  width: calc(8.2 * var(--element-width));
+  height: calc(8.2 * var(--element-width));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  padding: 0;
+}
+
+.stacked-modal__close svg {
+  width: calc(5.8 * var(--element-width));
+  height: calc(5.8 * var(--element-width));
+}
+
+.stacked-modal__close:active {
+  transform: scale(0.9);
+  transition: none;
+}
+
+.stacked-modal__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: calc(6.8 * var(--element-width));
+  margin-top: calc(10 * var(--element-width));
+  width: 100%;
+  max-width: calc(100 * var(--app-width));
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+.stacked-modal__content::-webkit-scrollbar {
+  width: calc(1.2 * var(--element-width));
+}
+
+.stacked-modal__content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.stacked-modal__content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: calc(1 * var(--element-width));
+}
+
+.stacked-modal__footer {
+  flex-shrink: 0;
+  padding: calc(5 * var(--element-width));
+  background: white;
+}
+
+@keyframes stacked-modal-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

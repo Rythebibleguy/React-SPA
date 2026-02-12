@@ -1,6 +1,7 @@
 import './SettingsModal.css'
-import { useState, useEffect } from 'react'
-import { LogOut, Edit, X } from 'lucide-react'
+import StackedModal from './StackedModal'
+import { useState, useEffect, useRef } from 'react'
+import { LogOut, Edit } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { getAllBadgesWithProgress } from '../config/badges'
 
@@ -24,8 +25,9 @@ function lightenColor(color, percent) {
 }
 
 function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser, updateUserProfile }) {
-  const [isActive, setIsActive] = useState(false)
-  
+  const modalRef = useRef(null)
+  const afterCloseRef = useRef(null)
+
   // Get avatar badge info
   const userData = {
     quizzesTaken: userProfile?.quizzesTaken || 0,
@@ -44,39 +46,26 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
   const [userEmail, setUserEmail] = useState('')
   const { isDisplayNameExists, getUserPrivateData, logout } = useAuth()
 
-  // Trigger slide-up animation when modal opens
   useEffect(() => {
-    if (isOpen) {
-      // Wait a frame for DOM to update, then activate
-      requestAnimationFrame(() => {
-        setIsActive(true)
-      })
-      
-      // Fetch email from private data
-      if (currentUser) {
-        getUserPrivateData().then(privateData => {
-          // Fallback to auth email if private data doesn't exist
-          const email = privateData?.email || currentUser.email || ''
-          setUserEmail(email)
-        }).catch(err => {
-          console.error('Failed to load private data:', err)
-          // Fallback to auth email on error
-          setUserEmail(currentUser.email || '')
-        })
-      }
+    if (isOpen && currentUser) {
+      getUserPrivateData().then(privateData => {
+        const email = privateData?.email || currentUser.email || ''
+        setUserEmail(email)
+      }).catch(() => setUserEmail(currentUser.email || ''))
     }
   }, [isOpen, currentUser, getUserPrivateData])
 
-  const handleCloseSettings = (afterClose) => {
-    setIsActive(false)
-    onCloseStart?.()
-    setTimeout(() => {
-      onClose()
-      setIsEditing(false)
-      setEditedName('')
-      setNameError('')
-      afterClose?.()
-    }, 400)
+  const handleCloseSettings = () => {
+    modalRef.current?.close()
+  }
+
+  const handleStackedClose = () => {
+    setIsEditing(false)
+    setEditedName('')
+    setNameError('')
+    onClose()
+    afterCloseRef.current?.()
+    afterCloseRef.current = null
   }
 
   const handleEditName = () => {
@@ -127,32 +116,29 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
   }
 
   const handleLogout = () => {
-    handleCloseSettings(() => {
-      logout().catch((error) => console.error('Logout failed:', error))
-    })
+    afterCloseRef.current = () => logout().catch((err) => console.error('Logout failed:', err))
+    handleCloseSettings()
   }
 
-  if (!isOpen) return null
-
   return (
-    <div 
-      className={`settings-modal__overlay ${isActive ? 'settings-modal__overlay--active' : ''}`}
-      style={{ pointerEvents: isActive ? 'auto' : 'none' }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          handleCloseSettings()
-        }
-      }}
-    >
-      <div className="settings-modal__sheet">
-        <button 
-          className="settings-modal__close"
-          onClick={handleCloseSettings}
-          title="Close"
+    <StackedModal
+      ref={modalRef}
+      isOpen={isOpen}
+      onClose={handleStackedClose}
+      onCloseStart={onCloseStart}
+      contentClassName="settings-modal__stacked-content"
+      footer={
+        <button
+          type="button"
+          className="settings-modal__logout-btn"
+          onClick={handleLogout}
         >
-          <X size={20} />
+          <LogOut size={16} />
+          Sign Out
         </button>
-        <div className="settings-modal__content">
+      }
+    >
+      <div className="settings-modal__content">
           {/* Avatar Section */}
           <div className="settings-modal__avatar-section">
             <div className="settings-modal__avatar-wrapper">
@@ -239,19 +225,8 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
               {userEmail || 'No email'}
             </div>
           </div>
-        </div>
-
-        <div className="settings-modal__logout-section">
-          <button 
-            className="settings-modal__logout-btn"
-            onClick={handleLogout}
-          >
-            <LogOut size={16} />
-            Sign Out
-          </button>
-        </div>
       </div>
-    </div>
+    </StackedModal>
   )
 }
 

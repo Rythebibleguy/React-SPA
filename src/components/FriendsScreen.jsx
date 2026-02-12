@@ -1,10 +1,10 @@
 import './FriendsScreen.css'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { firestore, doc, getDoc } from '../config/firebase'
 import { BASE_SITE_URL } from '../config'
 import { useAuth } from '../contexts/AuthContext'
 import { getBadgeById } from '../config/badges'
-import { Link2, UserMinus } from 'lucide-react'
+import { Link2, UserMinus, UserPlus } from 'lucide-react'
 
 const DEFAULT_AVATAR_COLOR = '#64B5F6'
 
@@ -24,6 +24,7 @@ function FriendsScreen() {
   const [copySuccess, setCopySuccess] = useState(false)
   const [removingId, setRemovingId] = useState(null)
   const [confirmRemoveId, setConfirmRemoveId] = useState(null)
+  const shareSectionRef = useRef(null)
 
   const friendUids = userProfile?.friends || []
 
@@ -91,10 +92,20 @@ function FriendsScreen() {
 
   const hasFriends = friendProfiles.length > 0
 
+  function scrollToAddFriends() {
+    shareSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <div className="friends-screen">
+      <header className="friends-screen__header">
+        <h1 className="friends-screen__header-title">Friends</h1>
+        <button type="button" className="friends-screen__header-add-btn" onClick={scrollToAddFriends} title="Add friends">
+          <UserPlus size={22} />
+        </button>
+      </header>
       <div className="friends-screen__content">
-        <section className="friends-screen__share">
+        <section className="friends-screen__share" ref={shareSectionRef}>
           <h2 className="friends-screen__heading">Add friends</h2>
           <p className="friends-screen__share-text">Share your link. When they open it and sign in, you’ll be connected.</p>
           <button type="button" className="friends-screen__copy-btn" onClick={handleCopyLink} disabled={!shareUrl}>
