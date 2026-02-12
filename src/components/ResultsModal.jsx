@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { Check, X, Send } from 'lucide-react'
 import './ResultsModal.css'
 
 function ResultsModal({ score, total, stats, onClose, onShare, showCopied, showShareFailed }) {
@@ -79,25 +80,17 @@ function ResultsModal({ score, total, stats, onClose, onShare, showCopied, showS
           <button className="results-modal__btn" onClick={onShare}>
             {showCopied ? (
               <>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
+                <Check size={20} />
                 Copied!
               </>
             ) : showShareFailed ? (
               <>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+                <X size={20} />
                 Share Failed
               </>
             ) : (
               <>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 2L11 13"></path>
-                  <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
-                </svg>
+                <Send size={20} />
                 Send Challenge
               </>
             )}

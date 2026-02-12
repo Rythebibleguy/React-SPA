@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { Lock, Book, ChevronLeft, List, ChevronRight } from 'lucide-react'
 import { ref, runTransaction } from 'firebase/database'
 import { db } from '../config/firebase'
 import './QuizScreen.css'
@@ -516,10 +517,7 @@ function QuizScreen({ isEntering = false }) {
                       <div className="quiz-screen__lock-overlay">
                         <div className="quiz-screen__lock-box">
                           <div className="quiz-screen__lock-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                            </svg>
+                            <Lock size={20} color="#555" />
                           </div>
                           <div className="quiz-screen__lock-text">Complete previous question<br />to unlock</div>
                         </div>
@@ -531,9 +529,7 @@ function QuizScreen({ isEntering = false }) {
                   <div className={`quiz-screen__card-back quiz-screen__question ${question.difficulty}`}>
                     <div className="quiz-screen__reference-display">
                       <div className="quiz-screen__reference-header">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
-                        </svg>
+                        <Book size={20} />
                         <h3>{question.referenceCitation}</h3>
                       </div>
                       <p className="quiz-screen__reference-text">{question.referenceVerse}</p>
@@ -550,38 +546,25 @@ function QuizScreen({ isEntering = false }) {
       <div className={`quiz-screen__actions ${isEntering ? 'entering' : ''}`}>
         <div className="quiz-screen__actions-buttons">
             <button className={`quiz-screen__prev-button ${currentIndex === 0 || selectedAnswers[currentIndex] === undefined ? 'hidden' : ''}`} onClick={handlePrev}>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
+              <ChevronLeft size={20} />
               <span>Prev</span>
             </button>
             <button className={`quiz-screen__reference-button ${selectedAnswers[currentIndex] === undefined ? 'hidden' : ''}`} onClick={handleToggleReference}>
               {!showReference ? (
                 <>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
-                  </svg>
+                  <Book size={20} />
                   Show Reference
                 </>
               ) : (
                 <>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="8" y1="6" x2="21" y2="6"></line>
-                    <line x1="8" y1="12" x2="21" y2="12"></line>
-                    <line x1="8" y1="18" x2="21" y2="18"></line>
-                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                  </svg>
+                  <List size={20} />
                   Back to Question
                 </>
               )}
             </button>
             <button className={`quiz-screen__next-button ${currentIndex === questions.length - 1 || selectedAnswers[currentIndex] === undefined ? 'hidden' : ''}`} onClick={handleNext}>
               <span>Next</span>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
+              <ChevronRight size={20} />
             </button>
           </div>
         </div>

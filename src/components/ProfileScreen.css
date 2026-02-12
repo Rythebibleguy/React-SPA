@@ -21,8 +21,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: calc(2 * var(--element-width));
-  padding: 0 calc(1 * var(--element-width));
 }
 
 .profile-screen__header-left {
@@ -125,7 +123,8 @@ span.profile-screen__avatar-icon {
 
 .profile-screen__header-buttons {
   display: flex;
-  gap: calc(2 * var(--element-width));
+  gap: calc(1 * var(--element-width));
+  margin-top: calc(1 * var(--element-width));
 }
 
 .profile-screen__header-button {
