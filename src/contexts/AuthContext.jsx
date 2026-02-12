@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
       const result = await createUserWithEmailAndPassword(auth, email, password)
       
       // Create user profile in Firestore
-      await createUserProfile(result.user, { displayName })
+      await createUserProfile(result.user, { displayName, signUpMethod: 'email' })
       
       // Track email signup
       if (window.clarity) {

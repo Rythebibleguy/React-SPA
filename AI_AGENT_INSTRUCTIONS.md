@@ -12,6 +12,18 @@
 
 ---
 
+## Readability
+
+Format responses so they are easy to scan:
+
+- **Short blocks** — 2–3 lines per paragraph; avoid walls of text.
+- **Lists** — Use bullets or numbers when listing multiple points or steps.
+- **Headings** — Use small section headers when the answer has several parts.
+- **Highlight** — Use **bold** for the main takeaway or key terms.
+- **Breaks** — Add a blank line between sections.
+
+---
+
 ## Before making code changes
 
 1. Say what you’ll change and why.
