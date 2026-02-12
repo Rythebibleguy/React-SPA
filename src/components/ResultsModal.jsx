@@ -2,7 +2,92 @@ import { useState, useEffect, useMemo } from 'react'
 import { Check, X, Send } from 'lucide-react'
 import './ResultsModal.css'
 
-function ResultsModal({ score, total, stats, onClose, onShare, showCopied, showShareFailed }) {
+function ResultsModal({ score, total, stats, onClose }) {
+  const [showCopied, setShowCopied] = useState(false)
+  const [showShareFailed, setShowShareFailed] = useState(false)
+  const [showShareLoading, setShowShareLoading] = useState(false)
+
+  const handleShareChallenge = async () => {
+    // Track share button click
+    if (window.clarity) {
+      window.clarity("event", "share_clicked")
+    }
+    
+    // Create share text with emoji indicators for score
+    const squares = '✅'.repeat(score) + '❌'.repeat(total - score)
+    const shareText = `I got ${score}/${total} on Daily Bible Quiz\n${squares}\n\nCan you beat my score?\nhttps://rythebibleguy.com/quiz/`
+    
+    // Try Web Share API first (mobile/modern browsers)
+    if (navigator.share) {
+      try {
+        setShowShareLoading(true)
+        await navigator.share({
+          title: 'Daily Bible Quiz',
+          text: shareText
+        })
+        // If share was successful, don't show copied message
+        return
+      } catch (error) {
+        // User cancelled - don't show error
+        if (error.name === 'AbortError') {
+          return
+        }
+        // Otherwise fall through to clipboard fallback
+      } finally {
+        setShowShareLoading(false)
+      }
+    }
+    
+    // Fall back to clipboard for browsers without share API or if share failed
+    copyToClipboard(shareText)
+  }
+
+  const copyToClipboard = async (text) => {
+    // Try modern Clipboard API first (only if secure context)
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text)
+        setShowCopied(true)
+        setTimeout(() => setShowCopied(false), 2000)
+        return
+      } catch (error) {
+        console.warn("Clipboard API failed, trying execCommand")
+      }
+    }
+
+    // Fallback: execCommand (works in Instagram/restricted browsers)
+    try {
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      
+      // Style to be invisible but technically interactable
+      Object.assign(textArea.style, {
+        position: 'fixed',
+        left: '0',
+        top: '0',
+        opacity: '0.01',
+        fontSize: '16px'
+      })
+      
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      textArea.setSelectionRange(0, 99999) // Force selection for mobile
+      
+      const successful = document.execCommand('copy')
+      document.body.removeChild(textArea)
+      
+      if (successful) {
+        setShowCopied(true)
+        setTimeout(() => setShowCopied(false), 2000)
+      } else {
+        throw new Error('Copy failed')
+      }
+    } catch (fallbackError) {
+      // Ultimate fallback: Let user manually copy
+      window.prompt("Copy your results to share:", text)
+    }
+  }
 
   // Calculate score distribution from stats
   const scoreDistribution = useMemo(() => {
@@ -80,8 +165,10 @@ function ResultsModal({ score, total, stats, onClose, onShare, showCopied, showS
         </div>
 
         <div className="results-modal__action">
-          <button className="results-modal__btn" onClick={onShare}>
-            {showCopied ? (
+          <button className="results-modal__btn" onClick={handleShareChallenge} disabled={showShareLoading}>
+            {showShareLoading ? (
+              <span className="results-modal__spinner"></span>
+            ) : showCopied ? (
               <>
                 <Check size={20} />
                 Copied!

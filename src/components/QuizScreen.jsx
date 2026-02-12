@@ -59,8 +59,6 @@ function QuizScreen({ isEntering = false }) {
   const [answerPercentages, setAnswerPercentages] = useState(savedState?.answerPercentages ?? {})
   const [showReference, setShowReference] = useState(false)
   const [showResultsModal, setShowResultsModal] = useState(false)
-  const [showCopied, setShowCopied] = useState(false)
-  const [showShareFailed, setShowShareFailed] = useState(false)
   const containerRef = useRef(null)
   const cardsRef = useRef([])
   const hasSubmittedRef = useRef(savedState?.hasSubmitted ?? false)
@@ -405,88 +403,6 @@ function QuizScreen({ isEntering = false }) {
     setShowResultsModal(false)
   }
 
-  const handleShareChallenge = async () => {
-    // Track share button click
-    if (window.clarity) {
-      window.clarity("event", "share_clicked")
-    }
-    
-    const score = calculateScore()
-    const todayDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-    
-    // Create share text with emoji indicators for score
-    const squares = '✅'.repeat(score) + '❌'.repeat(questions.length - score)
-    const shareText = `I got ${score}/${questions.length} on Daily Bible Quiz\n${squares}\n\nCan you beat my score?\nhttps://rythebibleguy.com/quiz/`
-    
-    // Try Web Share API first (mobile/modern browsers)
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Daily Bible Quiz',
-          text: shareText
-        })
-        // If share was successful, don't show copied message
-        return
-      } catch (error) {
-        // User cancelled - don't show error
-        if (error.name === 'AbortError') {
-          return
-        }
-        // Otherwise fall through to clipboard fallback
-      }
-    }
-    
-    // Fall back to clipboard for browsers without share API or if share failed
-    copyToClipboard(shareText)
-  }
-
-  const copyToClipboard = async (text) => {
-    // Try modern Clipboard API first (only if secure context)
-    if (navigator.clipboard && window.isSecureContext) {
-      try {
-        await navigator.clipboard.writeText(text)
-        setShowCopied(true)
-        setTimeout(() => setShowCopied(false), 2000)
-        return
-      } catch (error) {
-        console.warn("Clipboard API failed, trying execCommand")
-      }
-    }
-
-    // Fallback: execCommand (works in Instagram/restricted browsers)
-    try {
-      const textArea = document.createElement('textarea')
-      textArea.value = text
-      
-      // Style to be invisible but technically interactable
-      Object.assign(textArea.style, {
-        position: 'fixed',
-        left: '0',
-        top: '0',
-        opacity: '0.01',
-        fontSize: '16px'
-      })
-      
-      document.body.appendChild(textArea)
-      textArea.focus()
-      textArea.select()
-      textArea.setSelectionRange(0, 99999) // Force selection for mobile
-      
-      const successful = document.execCommand('copy')
-      document.body.removeChild(textArea)
-      
-      if (successful) {
-        setShowCopied(true)
-        setTimeout(() => setShowCopied(false), 2000)
-      } else {
-        throw new Error('Copy failed')
-      }
-    } catch (fallbackError) {
-      // Ultimate fallback: Let user manually copy
-      window.prompt("Copy your results to share:", text)
-    }
-  }
-
   const calculateScore = () => {
     if (!questions || questions.length === 0) return 0
     let correct = 0
@@ -625,9 +541,6 @@ function QuizScreen({ isEntering = false }) {
           total={questions.length}
           stats={stats}
           onClose={handleCloseResults}
-          onShare={handleShareChallenge}
-          showCopied={showCopied}
-          showShareFailed={showShareFailed}
         />
       )}
 
