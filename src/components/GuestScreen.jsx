@@ -17,7 +17,7 @@ function GuestScreen({ onSignIn, animationData }) {
         )}
 
         <h2 className="guest-screen__title">
-          Ready to track your Bible knowledge?
+          Ready to track your Bible progress?
         </h2>
         
         <p className="guest-screen__description">
