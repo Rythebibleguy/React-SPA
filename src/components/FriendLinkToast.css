@@ -1,0 +1,61 @@
+.friend-link-toast {
+  position: fixed;
+  bottom: calc(10 * var(--element-width));
+  left: 50%;
+  transform: translateX(-50%) translateY(calc(20 * var(--element-width)));
+  padding: calc(3.2 * var(--element-width)) calc(5 * var(--element-width));
+  border-radius: calc(2 * var(--element-width));
+  font-size: calc(3.8 * var(--element-width));
+  font-weight: 500;
+  color: white;
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 calc(1 * var(--element-width)) calc(3 * var(--element-width)) rgba(0, 0, 0, 0.3);
+  max-width: calc(80 * var(--element-width));
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(2 * var(--element-width));
+}
+
+.friend-link-toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.friend-link-toast--persistent {
+  cursor: pointer;
+}
+
+.friend-link-toast--success {
+  background: #28a745;
+}
+
+.friend-link-toast--error {
+  background: #dc3545;
+}
+
+.friend-link-toast--info {
+  background: #007bff;
+}
+
+.friend-link-toast--loading {
+  background: #6c757d;
+}
+
+.friend-link-toast__spinner {
+  display: inline-block;
+  width: calc(4.2 * var(--element-width));
+  height: calc(4.2 * var(--element-width));
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: friend-link-toast-spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes friend-link-toast-spin {
+  to { transform: rotate(360deg); }
+}

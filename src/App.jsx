@@ -4,9 +4,19 @@ import BottomNav from './components/BottomNav'
 import QuizTab from './components/QuizTab'
 import FriendsTab from './components/FriendsTab'
 import ProfileTab from './components/ProfileTab'
+import FriendLinkToast from './components/FriendLinkToast'
 import { useViewportUnits } from './hooks/useViewportUnits'
 import { useAuth } from './contexts/AuthContext'
 import { BASE_DATA_URL } from './config'
+
+const PENDING_FRIEND_KEY = 'pendingFriendUid'
+
+function clearFriendParam() {
+  const url = new URL(window.location.href)
+  url.searchParams.delete('friend')
+  window.history.replaceState({}, document.title, url.pathname + url.search)
+  sessionStorage.removeItem(PENDING_FRIEND_KEY)
+}
 
 // Clear quiz state on page load (before any components mount)
 sessionStorage.removeItem('quizState')
@@ -15,7 +25,11 @@ sessionStorage.removeItem('welcomeAnimated')
 function App() {
   useViewportUnits()
   const { currentUser, userProfile, addFriend } = useAuth()
-  const [currentScreen, setCurrentScreen] = useState('quiz')
+  const [currentScreen, setCurrentScreen] = useState(() => {
+    if (typeof window === 'undefined') return 'quiz'
+    const hasFriend = new URLSearchParams(window.location.search).get('friend') || sessionStorage.getItem(PENDING_FRIEND_KEY)
+    return hasFriend ? 'friends' : 'quiz'
+  })
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [showBottomNav, setShowBottomNav] = useState(false)
   const [welcomeAnimated, setWelcomeAnimated] = useState(() => {
@@ -24,6 +38,7 @@ function App() {
   const [animationData, setAnimationData] = useState(null)
   const [statisticsAnimationData, setStatisticsAnimationData] = useState(null)
   const [lottieInstance, setLottieInstance] = useState(null)
+  const [friendToast, setFriendToast] = useState(null)
 
   // Load Lottie animations once on app mount
   useEffect(() => {
@@ -47,23 +62,51 @@ function App() {
     }
   }, [lottieInstance])
 
-  // Handle ?friend=uid in URL: add friend when user is signed in, then clear param
+  // Handle ?friend=uid in URL: show toasts and add friend when signed in
   useEffect(() => {
-    if (!currentUser || !userProfile) return
-    const params = new URLSearchParams(window.location.search)
-    const friendUid = params.get('friend')
-    if (!friendUid || friendUid === currentUser.uid) {
-      if (friendUid !== null) {
-        const url = new URL(window.location.href)
-        url.searchParams.delete('friend')
-        window.history.replaceState({}, document.title, url.pathname + url.search)
-      }
+    const friendUid = new URLSearchParams(window.location.search).get('friend') || sessionStorage.getItem(PENDING_FRIEND_KEY)
+    if (!friendUid || !friendUid.trim()) return
+
+    if (window.clarity) window.clarity('event', 'friend_link_clicked')
+
+    if (!currentUser) {
+      sessionStorage.setItem(PENDING_FRIEND_KEY, friendUid)
+      setFriendToast({ message: 'Sign in to connect with your friend!', type: 'info', persistent: true })
+      setCurrentScreen('friends')
       return
     }
-    const url = new URL(window.location.href)
-    url.searchParams.delete('friend')
-    window.history.replaceState({}, document.title, url.pathname + url.search)
-    addFriend(friendUid)
+
+    if (!userProfile) return
+
+    if (friendUid === currentUser.uid) {
+      setFriendToast({ message: "You can't add yourself as a friend!", type: 'error' })
+      clearFriendParam()
+      return
+    }
+
+    const currentFriends = userProfile.friends || []
+    if (currentFriends.includes(friendUid)) {
+      setFriendToast({ message: "You're already friends!", type: 'info' })
+      clearFriendParam()
+      return
+    }
+
+    if (!friendUid || friendUid.length === 0) {
+      setFriendToast({ message: 'Invalid friend link', type: 'error' })
+      clearFriendParam()
+      return
+    }
+
+    clearFriendParam()
+    setFriendToast({ message: 'Adding friend...', type: 'loading', persistent: true })
+
+    addFriend(friendUid).then((result) => {
+      if (result.success) {
+        setFriendToast({ message: 'Friend added successfully!', type: 'success' })
+      } else {
+        setFriendToast({ message: result.error || 'Failed to add friend. Please try again.', type: 'error' })
+      }
+    })
   }, [currentUser, userProfile, addFriend])
 
   // Prevent pinch zoom on mobile
@@ -103,6 +146,12 @@ function App() {
 
   return (
     <>
+      <FriendLinkToast
+        message={friendToast?.message}
+        type={friendToast?.type}
+        persistent={friendToast?.persistent}
+        onDismiss={() => setFriendToast(null)}
+      />
       {currentScreen === 'quiz' && (
         <QuizTab 
           isTransitioning={isTransitioning} 

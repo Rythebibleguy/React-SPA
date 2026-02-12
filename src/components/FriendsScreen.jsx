@@ -1,6 +1,7 @@
 import './FriendsScreen.css'
 import { useState, useEffect } from 'react'
 import { firestore, doc, getDoc } from '../config/firebase'
+import { BASE_SITE_URL } from '../config'
 import { useAuth } from '../contexts/AuthContext'
 import { getBadgeById } from '../config/badges'
 import { Link2, UserMinus } from 'lucide-react'
@@ -48,7 +49,7 @@ function FriendsScreen() {
     return () => { cancelled = true }
   }, [friendUids.join(',')])
 
-  const shareUrl = currentUser ? `${typeof window !== 'undefined' ? window.location.origin : ''}/?friend=${currentUser.uid}` : ''
+    const shareUrl = currentUser ? `${BASE_SITE_URL}?friend=${currentUser.uid}` : ''
 
   async function handleCopyLink() {
     if (!shareUrl) return

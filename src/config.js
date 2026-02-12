@@ -6,3 +6,6 @@
 export const BASE_DATA_URL = import.meta.env.PROD 
   ? '/quiz' 
   : '';
+
+// Canonical app URL for share links (friends, results, etc.)
+export const BASE_SITE_URL = 'https://rythebibleguy.com/quiz/';
