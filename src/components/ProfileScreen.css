@@ -62,8 +62,8 @@
 }
 
 .profile-screen__avatar-badge-icon {
-  width: calc(12 * var(--element-width));
-  height: calc(12 * var(--element-width));
+  width: calc(10 * var(--element-width));
+  height: calc(10 * var(--element-width));
   object-fit: contain;
 }
 
@@ -380,9 +380,17 @@
 }
 
 .profile-screen__badge-icon {
-  width: calc(10 * var(--element-width));
-  height: calc(10 * var(--element-width));
+  width: calc(12 * var(--element-width));
+  height: calc(12 * var(--element-width));
   object-fit: contain;
+}
+
+.profile-screen__badge-letter {
+  font-size: calc(12 * var(--element-width));
+  font-weight: 700;
+  color: #444;
+  font-family: 'Times New Roman', Times, serif;
+  user-select: none;
 }
 
 .profile-screen__badge-lock {

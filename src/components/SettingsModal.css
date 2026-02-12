@@ -95,6 +95,13 @@
   font-family: 'Times New Roman', Times, serif;
   font-weight: 700;
   line-height: 1;
+  user-select: none;
+}
+
+.settings-modal__avatar-badge-icon {
+  width: calc(17 * var(--element-width));
+  height: calc(17 * var(--element-width));
+  object-fit: contain;
 }
 
 .settings-modal__field {

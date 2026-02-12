@@ -179,7 +179,7 @@ function ProfileScreen({ showSettings, setShowSettings }) {
               onClick={() => setShowColorPalette(!showColorPalette)}
               title="Click to change color"
             >
-              {avatarBadge ? (
+              {avatarBadge && avatarBadge.id !== 'avatar-unlocked' ? (
                 <img 
                   src={avatarBadge.icon} 
                   alt="Avatar badge"
@@ -319,11 +319,17 @@ function ProfileScreen({ showSettings, setShowSettings }) {
                   }`}
                   onClick={() => setSelectedBadge(badge)}
                 >
-                  <img 
-                    src={badge.icon} 
-                    alt={badge.name}
-                    className="profile-screen__badge-icon"
-                  />
+                  {badge.id === 'avatar-unlocked' ? (
+                    <span className="profile-screen__badge-letter">
+                      {(userProfile?.displayName?.charAt(0) || currentUser?.email?.charAt(0) || 'U').toUpperCase()}
+                    </span>
+                  ) : (
+                    <img 
+                      src={badge.icon} 
+                      alt={badge.name}
+                      className="profile-screen__badge-icon"
+                    />
+                  )}
                 </div>
               ))}
             </div>

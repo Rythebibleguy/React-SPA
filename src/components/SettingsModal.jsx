@@ -1,6 +1,7 @@
 import './SettingsModal.css'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { getAllBadgesWithProgress } from '../config/badges'
 
 // Available avatar colors
 const AVATAR_COLORS = [
@@ -23,6 +24,19 @@ function lightenColor(color, percent) {
 
 function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser, updateUserProfile }) {
   const [isActive, setIsActive] = useState(false)
+  
+  // Get avatar badge info
+  const userData = {
+    quizzesTaken: userProfile?.quizzesTaken || 0,
+    maxStreak: userProfile?.maxStreak || 0,
+    currentStreak: userProfile?.currentStreak || 0,
+    history: userProfile?.history || [],
+    shares: userProfile?.shares || 0,
+    badges: userProfile?.badges || []
+  }
+  const badges = getAllBadgesWithProgress(userData)
+  const avatarBadgeId = userProfile?.avatarBadge
+  const avatarBadge = avatarBadgeId ? badges.find(b => b.id === avatarBadgeId && b.unlocked) : null
   const [isEditing, setIsEditing] = useState(false)
   const [editedName, setEditedName] = useState('')
   const [nameError, setNameError] = useState('')
@@ -140,12 +154,20 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
                   background: `linear-gradient(135deg, ${userProfile?.avatarColor || AVATAR_COLORS[0]} 0%, ${lightenColor(userProfile?.avatarColor || AVATAR_COLORS[0], 15)} 100%)`
                 }}
               >
-                <span 
-                  className="settings-modal__avatar-letter"
-                  style={{ color: (userProfile?.avatarColor || AVATAR_COLORS[0]) === '#424242' ? 'white' : '#444' }}
-                >
-                  {(userProfile?.displayName?.charAt(0) || currentUser?.email?.charAt(0) || 'U').toUpperCase()}
-                </span>
+                {avatarBadge && avatarBadge.id !== 'avatar-unlocked' ? (
+                  <img 
+                    src={avatarBadge.icon} 
+                    alt="Avatar badge"
+                    className="settings-modal__avatar-badge-icon"
+                  />
+                ) : (
+                  <span 
+                    className="settings-modal__avatar-letter"
+                    style={{ color: (userProfile?.avatarColor || AVATAR_COLORS[0]) === '#424242' ? 'white' : '#444' }}
+                  >
+                    {(userProfile?.displayName?.charAt(0) || currentUser?.email?.charAt(0) || 'U').toUpperCase()}
+                  </span>
+                )}
               </div>
             </div>
           </div>
