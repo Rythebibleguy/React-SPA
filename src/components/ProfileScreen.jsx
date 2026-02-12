@@ -98,7 +98,7 @@ function ProfileScreen({ showSettings, setShowSettings }) {
     return (
       <div className="profile-screen">
         <div className="profile-screen__loading">
-          <div>Loading profile...</div>
+          <span className="profile-screen__spinner"></span>
         </div>
       </div>
     )
