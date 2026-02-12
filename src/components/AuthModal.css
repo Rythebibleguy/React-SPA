@@ -62,17 +62,19 @@
   flex: 1;
   overflow-y: auto;
   padding: calc(6.8 * var(--element-width));
-  margin-top: calc(5 * var(--element-width));
+  margin-top: calc(10 * var(--element-width));
   text-align: center;
   width: 100%;
   max-width: calc(100 * var(--app-width));
   margin-left: auto;
   margin-right: auto;
+  box-sizing: border-box;
 }
 
 .auth-modal__title {
+  font-family: 'Bitter', serif;
   font-size: calc(6.6 * var(--element-width));
-  font-weight: 700;
+  font-weight: 800;
   color: #2B2B2B;
   margin: 0 0 calc(3.8 * var(--element-width)) 0;
   line-height: 1.2;
@@ -133,6 +135,7 @@
 
 .auth-modal__btn {
   width: 100%;
+  height: calc(12 * var(--element-width));
   padding: calc(3.4 * var(--element-width)) calc(3.8 * var(--element-width));
   font-size: calc(3.8 * var(--element-width));
   font-weight: 600;
@@ -158,13 +161,13 @@
 }
 
 .auth-modal__btn--primary {
-  background: #2B2B2B;
+  background: #000;
   color: white;
   box-shadow: 0 calc(0.4 * var(--element-width)) calc(1.8 * var(--element-width)) rgba(0, 0, 0, 0.15);
 }
 
 .auth-modal__btn--primary:active {
-  background: #4a4a4a;
+  background: #1a1a1a;
   box-shadow: 0 calc(0.2 * var(--element-width)) calc(1 * var(--element-width)) rgba(0, 0, 0, 0.2);
 }
 
@@ -195,6 +198,10 @@
   display: flex;
   flex-direction: column;
   margin-top: 0;
+}
+
+.auth-modal__auth-container .auth-modal__btn {
+  margin-top: calc(1 * var(--element-width));
 }
 
 .auth-modal__divider {
@@ -235,4 +242,29 @@
   text-align: center;
   border: 1px solid #fcc;
   margin-top: calc(2.8 * var(--element-width));
+}
+
+/* Spinner */
+.auth-modal__spinner {
+  display: inline-block;
+  width: calc(4.2 * var(--element-width));
+  height: calc(4.2 * var(--element-width));
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top-color: black;
+  border-radius: 50%;
+  animation: spinnerRotation 0.6s linear infinite;
+}
+
+.auth-modal__btn--primary .auth-modal__spinner {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+}
+
+.auth-modal__btn--outline.auth-modal__btn--loading .auth-modal__spinner {
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top-color: black;
+}
+
+@keyframes spinnerRotation {
+  to { transform: rotate(360deg); }
 }

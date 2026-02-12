@@ -8,6 +8,7 @@ import {
   createUserWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
+  fetchSignInMethodsForEmail,
   doc,
   setDoc,
   getDoc,
@@ -90,6 +91,16 @@ export function AuthProvider({ children }) {
       return result
     } catch (error) {
       setError(error.message)
+      throw error
+    }
+  }
+
+  // Check if email already exists
+  async function checkEmailExists(email) {
+    try {
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email)
+      return signInMethods.length > 0
+    } catch (error) {
       throw error
     }
   }
@@ -474,6 +485,7 @@ export function AuthProvider({ children }) {
     signIn,
     signInWithGoogle,
     logout,
+    checkEmailExists,
     updateUserProfile,
     completeQuiz,
     getUserPrivateData,
