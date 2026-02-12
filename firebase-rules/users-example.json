@@ -1,0 +1,27 @@
+{
+  "displayName": "username",
+  "avatarColor": "#64B5F6",
+  "avatarBadge": "letter",
+  "createdOn": "2026-02-12",
+  "quizzesTaken": 0,
+  "totalScore": 0,
+  "totalQuestionsAnswered": 0,
+  "maxStreak": 0,
+  "currentStreak": 0,
+  "history": [
+    {
+      "date": "2026-02-12",
+      "score": 1,
+      "totalQuestions": 4,
+      "timestamp": "14:11",
+      "duration": 3,
+      "answers": [3, 0, 1, 3],
+      "shared": false
+    }
+  ],
+  "badges": [
+    { "id": "avatar-unlocked", "unlockedOn": "2026-02-12" }
+  ],
+  "friends": [],
+  "shares": 0
+}

@@ -92,16 +92,16 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
   }
 
   const handleSaveName = async () => {
-    const trimmedName = editedName.trim()
+    const normalizedName = editedName.trim().toLowerCase()
     
     // Validate length
-    if (!trimmedName || trimmedName.length > 15) {
+    if (!normalizedName || normalizedName.length > 15) {
       setNameError('Name must be 1-15 characters')
       return
     }
 
     // Check if name is unchanged
-    if (trimmedName === userProfile?.displayName) {
+    if (normalizedName === (userProfile?.displayName || '').toLowerCase()) {
       setIsEditing(false)
       setEditedName('')
       setNameError('')
@@ -110,13 +110,13 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
 
     // Check if name is already taken
     try {
-      const nameExists = await isDisplayNameExists(trimmedName)
+      const nameExists = await isDisplayNameExists(normalizedName)
       if (nameExists) {
         setNameError('This name is already taken')
         return
       }
 
-      await updateUserProfile({ displayName: trimmedName })
+      await updateUserProfile({ displayName: normalizedName })
       setIsEditing(false)
       setEditedName('')
       setNameError('')
@@ -185,7 +185,7 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
             {!isEditing ? (
               <div className="settings-modal__name-container">
                 <div className="settings-modal__value">
-                  <span>{userProfile?.displayName || currentUser?.displayName || 'User'}</span>
+                  <span>{(userProfile?.displayName || currentUser?.displayName || 'User').toLowerCase()}</span>
                   <button 
                     className="settings-modal__edit-btn"
                     onClick={handleEditName}

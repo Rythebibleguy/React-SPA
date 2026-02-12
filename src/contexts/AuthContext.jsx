@@ -115,11 +115,12 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Check if displayName already exists
+  // Check if displayName already exists (comparison is case-insensitive; we store lowercase)
   async function isDisplayNameExists(displayName) {
     try {
+      const normalized = (displayName || '').trim().toLowerCase()
       const usersRef = collection(firestore, 'users')
-      const q = query(usersRef, where('displayName', '==', displayName))
+      const q = query(usersRef, where('displayName', '==', normalized))
       const querySnapshot = await getDocs(q)
       return !querySnapshot.empty
     } catch (error) {
@@ -199,11 +200,10 @@ export function AuthProvider({ children }) {
         // Default avatar color (Sky Blue)
         const defaultColor = '#64B5F6'
         
-        // Generate random displayName for Google signups, use provided name for others
+        // Generate random displayName for Google signups, use provided name for others (stored lowercase)
         const isGoogleSignup = additionalData.signUpMethod === 'google' || !additionalData.signUpMethod
-        const publicDisplayName = isGoogleSignup ? 
-          await generateRandomDisplayName() : 
-          (additionalData.displayName || displayName || 'Anonymous')
+        const rawName = isGoogleSignup ? await generateRandomDisplayName() : (additionalData.displayName || displayName || 'Anonymous')
+        const publicDisplayName = rawName.trim().toLowerCase()
         
         // Public profile data (readable by friends)
         const profileData = {

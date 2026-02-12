@@ -195,7 +195,7 @@ function ProfileScreen({ showSettings, setShowSettings }) {
             </div>
           </div>
           <h2 className="profile-screen__name">
-            {userProfile?.displayName || currentUser?.displayName || 'User'}
+            {(userProfile?.displayName || currentUser?.displayName || 'User').toLowerCase()}
           </h2>
         </div>
         <div className="profile-screen__header-buttons">
