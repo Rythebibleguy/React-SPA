@@ -1,6 +1,7 @@
 import './AuthModal.css'
 import { useAuth } from '../contexts/AuthContext'
 import { useState, useEffect } from 'react'
+import { X } from 'lucide-react'
 
 function AuthModal({ isOpen, onClose, onCloseStart }) {
   const { signInWithGoogle, signIn, signUp, checkEmailExists, error, setError } = useAuth()
