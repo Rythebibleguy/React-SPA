@@ -1,7 +1,8 @@
 // src/config.js
 
 // This checks if the app is running in production (on Cloudflare)
-// If yes, it uses the hard link. If no (local dev), it uses a relative path.
+// In production, use /quiz path so everything is served through rythebibleguy.com
+// The Cloudflare Worker proxies these requests to Pages behind the scenes
 export const BASE_DATA_URL = import.meta.env.PROD 
-  ? 'https://react-spa-57t.pages.dev' 
+  ? '/quiz' 
   : '';

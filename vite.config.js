@@ -5,10 +5,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
-    // If we are building for production, use the absolute URL. 
-    // Otherwise (dev mode), use the standard local path.
+    // Use /quiz/ as base path so all assets are served through rythebibleguy.com
+    // The Cloudflare Worker proxies these requests to Pages behind the scenes
     base: mode === 'production' 
-      ? 'https://react-spa-57t.pages.dev/' 
+      ? '/quiz/' 
       : '/',
     server: {
       host: '0.0.0.0',
