@@ -36,8 +36,8 @@
 }
 
 .profile-screen__avatar {
-  width: calc(20 * var(--element-width));
-  height: calc(20 * var(--element-width));
+  width: calc(14 * var(--element-width));
+  height: calc(14 * var(--element-width));
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
@@ -53,26 +53,26 @@
   opacity: 0.9;
 }
 
-.profile-screen__avatar-letter {
-  font-size: calc(10 * var(--element-width));
+img.profile-screen__avatar-icon {
+  width: calc(7 * var(--element-width));
+  height: calc(7 * var(--element-width));
+  object-fit: contain;
+}
+
+span.profile-screen__avatar-icon {
+  font-size: calc(7 * var(--element-width));
   font-weight: 700;
   user-select: none;
   font-family: 'Times New Roman', Times, serif;
   line-height: 1;
 }
 
-.profile-screen__avatar-badge-icon {
-  width: calc(10 * var(--element-width));
-  height: calc(10 * var(--element-width));
-  object-fit: contain;
-}
-
 .profile-screen__avatar-paint-badge {
   position: absolute;
-  bottom: calc(0.5 * var(--element-width));
-  right: calc(0.5 * var(--element-width));
-  width: calc(6 * var(--element-width));
-  height: calc(6 * var(--element-width));
+  bottom: calc(-0.5 * var(--element-width));
+  right: calc(-0.5 * var(--element-width));
+  width: calc(5.1 * var(--element-width));
+  height: calc(5.1 * var(--element-width));
   background: white;
   border-radius: 50%;
   display: flex;
@@ -84,8 +84,8 @@
 }
 
 .profile-screen__avatar-paint-badge svg {
-  width: calc(3.8 * var(--element-width));
-  height: calc(3.8 * var(--element-width));
+  width: calc(3.23 * var(--element-width));
+  height: calc(3.23 * var(--element-width));
 }
 
 .profile-screen__color-palette {
@@ -97,18 +97,6 @@
   background: white;
   border-radius: calc(3 * var(--element-width));
   box-shadow: 0 calc(0.5 * var(--element-width)) calc(2 * var(--element-width)) rgba(0, 0, 0, 0.08);
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(calc(-2 * var(--element-width)));
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .profile-screen__color-swatch {

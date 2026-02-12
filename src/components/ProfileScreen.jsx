@@ -183,10 +183,10 @@ function ProfileScreen({ showSettings, setShowSettings }) {
                 <img 
                   src={avatarBadge.icon} 
                   alt="Avatar badge"
-                  className="profile-screen__avatar-badge-icon"
+                  className="profile-screen__avatar-icon"
                 />
               ) : (
-                <span className="profile-screen__avatar-letter" style={{ color: letterColor }}>
+                <span className="profile-screen__avatar-icon" style={{ color: letterColor }}>
                   {(userProfile?.displayName?.charAt(0) || currentUser?.email?.charAt(0) || 'U').toUpperCase()}
                 </span>
               )}
