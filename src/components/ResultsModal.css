@@ -37,7 +37,7 @@
   box-sizing: border-box;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  animation: resultsModalContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: resultsModalContentIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
 }
 
 .results-modal__content::-webkit-scrollbar {
@@ -50,7 +50,7 @@
   align-items: baseline;
   justify-content: center;
   gap: calc(2 * var(--element-width));
-  animation: resultsModalScoreIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: resultsModalScoreIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
 }
 
 .results-modal__score-number {
@@ -82,7 +82,7 @@
   border-radius: calc(2.5 * var(--element-width));
   box-sizing: border-box;
   margin-top: calc(5 * var(--element-width));
-  animation: resultsModalSlideUp 0.5s ease-out 0.5s both;
+  animation: resultsModalSlideUp 0.5s ease-out 0.65s both;
 }
 .results-modal__global-header {
   font-size: calc(3 * var(--element-width));
@@ -177,7 +177,7 @@
 .results-modal__action {
   width: 100%;
   margin-top: calc(7.5 * var(--element-width));
-  animation: resultsModalButtonIn 0.5s ease-out 0.8s both;
+  animation: resultsModalButtonIn 0.5s ease-out 0.85s both;
 }
 
 .results-modal__btn {

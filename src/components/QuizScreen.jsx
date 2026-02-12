@@ -94,7 +94,7 @@ function QuizScreen({ isEntering = false }) {
     if (isQuizComplete && hasSubmittedRef.current) {
       setTimeout(() => {
         setShowResultsModal(true)
-      }, 200)
+      }, 100)
     }
   }, [questions.length, selectedAnswers])
 
