@@ -47,6 +47,11 @@ export function AuthProvider({ children }) {
       // Create user profile in Firestore
       await createUserProfile(result.user, { displayName })
       
+      // Track email signup
+      if (window.clarity) {
+        window.clarity("event", "signup_email")
+      }
+      
       return result
     } catch (error) {
       setError(error.message)
@@ -74,6 +79,11 @@ export function AuthProvider({ children }) {
       
       // Create user profile if needed
       await createUserProfile(result.user)
+      
+      // Track Google signup (new users only, but tracking all for simplicity)
+      if (window.clarity) {
+        window.clarity("event", "signup_google")
+      }
       
       return result
     } catch (error) {

@@ -335,6 +335,11 @@ function QuizScreen({ isEntering = false }) {
       
       // Submit results to Firebase first
       submitQuizResults().then(() => {
+        // Track quiz completion
+        if (window.clarity) {
+          window.clarity("event", "quiz_completed")
+        }
+        
         // Small delay for better UX
         setTimeout(() => {
           setShowResultsModal(true)
@@ -401,6 +406,11 @@ function QuizScreen({ isEntering = false }) {
   }
 
   const handleShareChallenge = async () => {
+    // Track share button click
+    if (window.clarity) {
+      window.clarity("event", "share_clicked")
+    }
+    
     const score = calculateScore()
     const todayDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     

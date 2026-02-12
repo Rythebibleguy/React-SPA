@@ -38,6 +38,11 @@ if (import.meta.env.DEV) {
   })
 }
 
+// Track page load
+if (window.clarity) {
+  window.clarity("event", "page_loaded")
+}
+
 createRoot(document.getElementById('root')).render(
   <AuthProvider>
     <App />
