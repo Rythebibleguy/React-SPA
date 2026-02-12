@@ -1,5 +1,5 @@
 import './ProfileScreen.css'
-import { Trophy, Award, Flame, LogOut } from 'lucide-react'
+import { Trophy, Award, Flame, LogOut, Settings } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { getAllBadgesWithProgress, calculateCurrentStreakFromHistory, getTodayString } from '../config/badges'
 import { useAuth } from '../contexts/AuthContext'
@@ -23,7 +23,7 @@ function lightenColor(color, percent) {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
 }
 
-function ProfileScreen() {
+function ProfileScreen({ showSettings, setShowSettings }) {
   const { logout, currentUser, userProfile, updateUserProfile } = useAuth()
   // Badge details modal state
   const [selectedBadge, setSelectedBadge] = useState(null)
@@ -151,7 +151,8 @@ function ProfileScreen() {
   const letterColor = avatarColor === '#424242' ? 'white' : '#444'
 
   return (
-    <div className="profile-screen">
+    <>
+      <div className="profile-screen">
       <div className="profile-screen__header">
         <div className="profile-screen__header-left">
           <div className="profile-screen__avatar-wrapper">
@@ -182,13 +183,22 @@ function ProfileScreen() {
             {userProfile?.displayName || currentUser?.displayName || 'User'}
           </h2>
         </div>
-        <button 
-          className="profile-screen__sign-out"
-          onClick={logout}
-          title="Sign Out"
-        >
-          <LogOut size={20} />
-        </button>
+        <div className="profile-screen__header-buttons">
+          <button 
+            className="profile-screen__header-button"
+            onClick={() => setShowSettings(true)}
+            title="Settings"
+          >
+            <Settings size={20} />
+          </button>
+          <button 
+            className="profile-screen__header-button"
+            onClick={logout}
+            title="Sign Out"
+          >
+            <LogOut size={20} />
+          </button>
+        </div>
       </div>
 
       {showColorPalette && (
@@ -332,7 +342,9 @@ function ProfileScreen() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+
+    </>
   )
 }
 

@@ -5,7 +5,6 @@
   margin: 0 auto;;
   padding-bottom: var(--bottom-nav-height); /* Space for bottom nav */
   text-align: center;
-  background: linear-gradient(180deg, var(--brown-primary) 0%, var(--brown-secondary) 100%);
   position: relative;
   box-sizing: border-box;
   overflow: hidden;

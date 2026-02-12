@@ -7,7 +7,17 @@
   justify-content: center;
   overflow-y: auto;
   background: linear-gradient(180deg, var(--brown-primary) 0%, var(--brown-secondary) 100%);
-  transition: opacity 20ms ease-in-out;
+  transition: opacity 20ms ease-in-out, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center bottom;
+}
+
+.profile-tab--stacked-modal-active {
+  transform: scale(0.96);
+  filter: brightness(0.7);
+  border-radius: calc(3.8 * var(--element-width)) calc(3.8 * var(--element-width)) 0 0;
+  overflow: hidden;
+  box-shadow: 0 calc(1.8 * var(--element-width)) calc(7.4 * var(--element-width)) rgba(0, 0, 0, 0.3);
+  pointer-events: none;
 }
 
 .profile-tab.fade-in {
@@ -16,4 +26,91 @@
 
 .profile-tab.fade-out {
   opacity: 0;
+}
+
+/* Settings Modal */
+.profile-tab__settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.profile-tab__settings-sheet {
+  background: white;
+  width: 100%;
+  max-width: calc(100 * var(--app-width));
+  border-radius: calc(3.8 * var(--element-width)) calc(3.8 * var(--element-width)) 0 0;
+  box-shadow: 0 calc(-1.8 * var(--element-width)) calc(7.4 * var(--element-width)) rgba(0, 0, 0, 0.25);
+  height: 92dvh;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-tab__settings-overlay--active .profile-tab__settings-sheet {
+  transform: translateY(0);
+}
+
+.profile-tab__settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(11.2 * var(--element-width));
+  padding: 0 calc(5.8 * var(--element-width));
+  border-bottom: 1px solid #555;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-tab__settings-title {
+  font-size: calc(6.7 * var(--element-width));
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+  line-height: 1;
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+}
+
+.profile-tab__settings-close {
+  position: absolute;
+  right: calc(1.4 * var(--element-width));
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  width: calc(8.2 * var(--element-width));
+  height: calc(8.2 * var(--element-width));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  padding: 0;
+}
+
+.profile-tab__settings-close svg {
+  width: calc(5.8 * var(--element-width));
+  height: calc(5.8 * var(--element-width));
+}
+
+.profile-tab__settings-close:active {
+  transform: translateY(-50%) scale(0.9);
+  transition: none;
+}
+
+.profile-tab__settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: calc(5 * var(--element-width));
 }

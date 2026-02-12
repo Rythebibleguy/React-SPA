@@ -7,6 +7,14 @@
   box-sizing: border-box;
   overflow-y: auto;
   gap: calc(6 * var(--element-width));
+  
+  /* Hide scrollbar */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.profile-screen::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
 }
 
 .profile-screen__header {
@@ -119,6 +127,33 @@
   font-size: calc(6 * var(--element-width));
   font-weight: 700;
   color: #2B2B2B;
+}
+
+.profile-screen__header-buttons {
+  display: flex;
+  gap: calc(2 * var(--element-width));
+}
+
+.profile-screen__header-button {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: calc(2 * var(--element-width));
+  border-radius: calc(2 * var(--element-width));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.profile-screen__header-button:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.profile-screen__header-button:active {
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(0.95);
 }
 
 .profile-screen__sign-out {
@@ -457,5 +492,3 @@
   color: #34C759;
   font-weight: 600;
 }
-
-
