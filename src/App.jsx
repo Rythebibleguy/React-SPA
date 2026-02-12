@@ -37,6 +37,7 @@ function App() {
   })
   const [animationData, setAnimationData] = useState(null)
   const [statisticsAnimationData, setStatisticsAnimationData] = useState(null)
+  const [friendsAnimationData, setFriendsAnimationData] = useState(null)
   const [lottieInstance, setLottieInstance] = useState(null)
   const [friendToast, setFriendToast] = useState(null)
 
@@ -48,10 +49,15 @@ function App() {
       .then(data => setAnimationData(data))
       .catch(err => {/* Failed to load animation */})
     
-    // Load Statistics animation for GuestScreen
+    // Load Statistics animation for Profile GuestScreen
     fetch(`${BASE_DATA_URL}/assets/animations/Statistics.json`)
       .then(res => res.json())
       .then(data => setStatisticsAnimationData(data))
+      .catch(err => {/* Failed to load animation */})
+    // Load Girl animation for Friends tab GuestScreen
+    fetch(`${BASE_DATA_URL}/assets/animations/Girl chatting with online friends..json`)
+      .then(res => res.json())
+      .then(data => setFriendsAnimationData(data))
       .catch(err => {/* Failed to load animation */})
   }, [])
 
@@ -162,7 +168,7 @@ function App() {
           setLottieInstance={setLottieInstance}
         />
       )}
-      {currentScreen === 'friends' && <FriendsTab isTransitioning={isTransitioning} statisticsAnimationData={statisticsAnimationData} />}
+      {currentScreen === 'friends' && <FriendsTab isTransitioning={isTransitioning} animationData={friendsAnimationData} />}
       {currentScreen === 'profile' && <ProfileTab isTransitioning={isTransitioning} statisticsAnimationData={statisticsAnimationData} />}
       <BottomNav currentScreen={currentScreen} onNavigate={handleNavigation} show={showBottomNav} />
     </>

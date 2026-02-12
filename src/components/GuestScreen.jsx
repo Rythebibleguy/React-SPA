@@ -19,7 +19,7 @@ function GuestScreen({ onSignIn, animationData, variant = 'profile' }) {
     <div className="guest-screen">
       <div className="guest-screen__content">
         {animationData && (
-          <div className="guest-screen__animation">
+          <div className={`guest-screen__animation guest-screen__animation--${variant}`}>
             <Lottie
               animationData={animationData}
               loop={true}

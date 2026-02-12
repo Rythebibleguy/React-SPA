@@ -5,7 +5,7 @@ import FriendsScreen from './FriendsScreen'
 import { useAuth } from '../contexts/AuthContext'
 import { useState } from 'react'
 
-function FriendsTab({ isTransitioning, statisticsAnimationData }) {
+function FriendsTab({ isTransitioning, animationData }) {
   const { currentUser } = useAuth()
   const [showAuth, setShowAuth] = useState(false)
   const [closeStarted, setCloseStarted] = useState(false)
@@ -20,7 +20,7 @@ function FriendsTab({ isTransitioning, statisticsAnimationData }) {
           <GuestScreen
             variant="friends"
             onSignIn={() => { setShowAuth(true); setCloseStarted(false); }}
-            animationData={statisticsAnimationData}
+            animationData={animationData}
           />
         )}
       </div>
