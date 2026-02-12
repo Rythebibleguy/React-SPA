@@ -5,9 +5,6 @@
 - Make code changes
 - Handle requests and questions
 
-## Session Setup
-- **Always start dev server**: Run `npm run dev` at the beginning of each chat session
-
 ## Communication Style
 - Keep it simple: Concise responses
 - Don't show code snippets in chat unless critical for explanation
@@ -25,9 +22,8 @@
 3. Wait for explicit approval ("do it", "implement it", "yes", "go ahead", etc.)
 4. NEVER make edits without confirmation, even if the request seems clear
 
-## React Best Practices
-- **No DOM manipulation**: This is a React project - use state and props, not `querySelector`, `getElementById`, `classList`, etc.
-- Keep components declarative and let React handle the DOM
+## Design Guidelines
+- **Primary reference**: NY Times Games - use their UI/UX patterns as design inspiration
 
 ## Legacy Code
 - `Old Code/` folder contains the original HTML/CSS/JS implementation
@@ -42,3 +38,6 @@
   - React DevTools browser extension installed for debugging
 - Production: 
   - Live site: https://react-spa-57t.pages.dev/ (Cloudflare Pages)
+  
+## Session Setup
+- **Always start dev server**: Run `npm run dev` at the beginning of each chat session

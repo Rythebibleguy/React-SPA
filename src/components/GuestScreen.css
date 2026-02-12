@@ -1,0 +1,103 @@
+.guest-screen {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(6 * var(--element-width));
+  background: var(--background-color);
+  box-sizing: border-box;
+  
+  /* Hide scrollbar */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.guest-screen::-webkit-scrollbar {
+  display: none;
+}
+
+.guest-screen__content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: calc(4 * var(--element-width));
+}
+
+.guest-screen__animation {
+  width: 100%;
+  margin-top: calc(-5 * var(--element-width));
+  margin-bottom: calc(-15 * var(--element-width));
+}
+
+.guest-screen__title {
+  font-family: 'Bitter', serif;
+  font-size: calc(8 * var(--element-width));
+  font-weight: 800;
+  color: #000;
+  margin: 0;
+  line-height: 1.2;
+  max-width: calc(120 * var(--element-width));
+}
+
+.guest-screen__description {
+  font-size: calc(4.2 * var(--element-width));
+  color: #000;
+  margin: 0;
+  line-height: 1.5;
+  max-width: calc(110 * var(--element-width));
+}
+
+.guest-screen__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(3 * var(--element-width));
+  width: 100%;
+  max-width: calc(90 * var(--element-width));
+  margin-top: calc(2 * var(--element-width));
+}
+
+.guest-screen__primary-btn {
+  padding: calc(4.5 * var(--element-width)) calc(8 * var(--element-width));
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: calc(12.5 * var(--element-width));
+  font-size: calc(4.2 * var(--element-width));
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.guest-screen__primary-btn:hover {
+  background: #1a1a1a;
+}
+
+.guest-screen__primary-btn:active {
+  transform: scale(0.98);
+}
+
+.guest-screen__secondary-btn {
+  background: none;
+  border: none;
+  color: #000;
+  font-size: calc(4 * var(--element-width));
+  font-weight: 500;
+  cursor: pointer;
+  padding: calc(2 * var(--element-width)) calc(4 * var(--element-width));
+  transition: color 0.2s ease;
+}
+
+.guest-screen__secondary-btn:hover {
+  color: var(--text-secondary);
+}
+
+.guest-screen__secondary-btn:active {
+  opacity: 0.7;
+}
