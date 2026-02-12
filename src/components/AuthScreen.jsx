@@ -131,14 +131,9 @@ function AuthScreen() {
 
   return (
     <div className="auth-screen">
-      <div className="auth-screen__header">
-        <h2 className="auth-screen__title">Sign up to save your progress</h2>
-        <p className="auth-screen__subtitle">Create a free account in seconds</p>
-      </div>
-      
       <div className="auth-screen__features">
-        <div className="auth-screen__hero-card">
-          <div className="auth-screen__hero-card-content">
+        <div className="auth-screen__hero-score">
+          <div className="auth-screen__hero-score-content">
             <div className="auth-screen__hero-stat">
               <div className="auth-screen__hero-percentage">87%</div>
               <div className="auth-screen__hero-label">Average Score</div>
@@ -158,19 +153,6 @@ function AuthScreen() {
               <TrendingUp size={16} strokeWidth={2.5} />
               <span>+15% this week</span>
             </div>
-          </div>
-          
-          <div className="auth-screen__hero-badge">
-            🔒 Unlock by signing up
-          </div>
-        </div>
-        
-        <div className="auth-screen__feature-badges">
-          <div className="auth-screen__badge auth-screen__badge--blue">
-            👥 Add Friends
-          </div>
-          <div className="auth-screen__badge auth-screen__badge--purple">
-            📊 View History
           </div>
         </div>
       </div>
@@ -198,14 +180,14 @@ function AuthScreen() {
           </svg>
           Continue with Email
         </button>
-        
-        <p className="auth-screen__terms">
-          By continuing, you agree to our{' '}
-          <a href="https://rythebibleguy.com/terms/" target="_blank" rel="noopener noreferrer">Terms</a>
-          {' '}and{' '}
-          <a href="https://rythebibleguy.com/privacy/" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-        </p>
       </div>
+      
+      <p className="auth-screen__terms">
+        By continuing, you agree to our{' '}
+        <a href="https://rythebibleguy.com/terms/" target="_blank" rel="noopener noreferrer">Terms</a>
+        {' '}and{' '}
+        <a href="https://rythebibleguy.com/privacy/" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+      </p>
     </div>
   )
 }

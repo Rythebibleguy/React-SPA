@@ -3,8 +3,8 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: calc(6 * var(--element-width));
+  position: relative;
+  padding: calc(5 * var(--element-width));
   box-sizing: border-box;
 }
 
@@ -39,7 +39,7 @@
   gap: calc(5 * var(--element-width));
 }
 
-.auth-screen__hero-card {
+.auth-screen__hero-score {
   position: relative;
   width: 100%;
   background: linear-gradient(135deg, #FFB84D 0%, #FF9500 100%);
@@ -49,9 +49,10 @@
     0 calc(2 * var(--element-width)) calc(4 * var(--element-width)) rgba(255, 149, 0, 0.2),
     0 calc(8 * var(--element-width)) calc(16 * var(--element-width)) rgba(255, 149, 0, 0.15);
   overflow: hidden;
+  box-sizing: border-box;
 }
 
-.auth-screen__hero-card::before {
+.auth-screen__hero-score::before {
   content: '';
   position: absolute;
   top: 0;
@@ -62,7 +63,7 @@
   pointer-events: none;
 }
 
-.auth-screen__hero-card-content {
+.auth-screen__hero-score-content {
   position: relative;
   z-index: 1;
   display: flex;
@@ -179,6 +180,10 @@
 }
 
 .auth-screen__actions {
+  position: absolute;
+  bottom: calc(5 * var(--element-width));
+  left: calc(5 * var(--element-width));
+  right: calc(5 * var(--element-width));
   display: flex;
   flex-direction: column;
   gap: calc(3 * var(--element-width));
@@ -237,11 +242,14 @@
 }
 
 .auth-screen__terms {
+  position: absolute;
+  bottom: calc(18 * var(--element-width));
+  left: calc(5 * var(--element-width));
+  right: calc(5 * var(--element-width));
   margin: 0;
   font-size: calc(2.8 * var(--element-width));
   color: #999;
   text-align: center;
-  line-height: 1.4;
 }
 
 .auth-screen__terms a {

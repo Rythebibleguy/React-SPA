@@ -45,5 +45,5 @@ body {
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
-  background: linear-gradient(180deg, var(--brown-primary) 0%, var(--brown-secondary) 100%);
+  background: #f5f5f5;
 }
