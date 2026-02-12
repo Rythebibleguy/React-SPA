@@ -55,12 +55,12 @@ function App() {
       .catch(err => {/* Failed to load animation */})
   }, [])
 
-  // Show bottom nav once Lottie DOM is ready (syncs with welcome animation start)
+  // Show bottom nav once Lottie DOM is ready (Quiz flow), or immediately when starting on Friends/Profile (e.g. friend link)
   useEffect(() => {
-    if (lottieInstance) {
+    if (lottieInstance || currentScreen === 'friends' || currentScreen === 'profile') {
       setShowBottomNav(true)
     }
-  }, [lottieInstance])
+  }, [lottieInstance, currentScreen])
 
   // Handle ?friend=uid in URL: show toasts and add friend when signed in
   useEffect(() => {
