@@ -18,7 +18,8 @@
 }
 
 .friends-screen__header-title {
-  font-size: calc(4.4 * var(--element-width));
+  font-family: 'Bitter', serif;
+  font-size: calc(5.6 * var(--element-width));
   font-weight: 600;
   color: #121212;
   margin: 0;
@@ -28,32 +29,38 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: calc(10 * var(--element-width));
-  height: calc(10 * var(--element-width));
-  padding: 0;
+  padding: calc(2 * var(--element-width));
   color: #121212;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 50%;
+  background: none;
+  border: none;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: color 0.15s, opacity 0.15s;
 }
 
 .friends-screen__header-add-btn:hover {
-  background: #f0f0f0;
-  border-color: #ccc;
+  opacity: 0.8;
 }
 
 .friends-screen__header-add-btn:active {
-  background: #e8e8e8;
+  opacity: 0.6;
 }
 
 .friends-screen__content {
   flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   padding: calc(5 * var(--element-width));
-  padding-bottom: calc(12 * var(--element-width));
   box-sizing: border-box;
+}
+
+.friends-screen__loading-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Date selector */
@@ -107,23 +114,13 @@
 }
 
 /* Game title */
-.friends-screen__game-title {
-  font-size: calc(4.4 * var(--element-width));
-  font-weight: 700;
-  color: #121212;
-  text-align: center;
-  margin: 0 0 calc(4 * var(--element-width));
-}
-
 /* Score list */
 .friends-screen__score-list {
   list-style: none;
-  margin: 0 0 calc(5 * var(--element-width));
   padding: 0;
   background: #fff;
   border-radius: calc(1.6 * var(--element-width));
   border: 1px solid #eee;
-  overflow: hidden;
 }
 
 .friends-screen__score-item {
@@ -224,20 +221,18 @@
   font-size: calc(3.4 * var(--element-width));
   font-weight: 500;
   color: #121212;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: calc(1.4 * var(--element-width));
+  background: none;
+  border: none;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: opacity 0.15s;
 }
 
 .friends-screen__manage-btn:hover {
-  background: #f5f5f5;
-  border-color: #ccc;
+  opacity: 0.8;
 }
 
 .friends-screen__manage-btn:active {
-  background: #eee;
+  opacity: 0.6;
 }
 
 .friends-screen__welcome,
@@ -272,6 +267,7 @@
 
 .friends-screen__loading-list {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: calc(2 * var(--element-width));
   font-size: calc(3.6 * var(--element-width));

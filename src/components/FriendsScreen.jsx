@@ -7,7 +7,6 @@ import { getTodayString } from '../utils/csvParser'
 import { UserPlus, ChevronLeft, ChevronRight, Star } from 'lucide-react'
 
 const DEFAULT_AVATAR_COLOR = '#64B5F6'
-const QUIZ_NAME = 'Daily Bible Quiz'
 
 function formatDateLabel(dateStr) {
   if (dateStr == null || typeof dateStr !== 'string') return '—'
@@ -134,7 +133,8 @@ function FriendsScreen({ onOpenManageFriends }) {
     })
   }, [rows])
 
-  const canGoNext = selectedDate < today
+  const tomorrow = addDays(today, 1)
+  const canGoNext = selectedDate < tomorrow
   const canGoPrev = true
 
   const handlePrevDay = () => {
@@ -177,11 +177,11 @@ function FriendsScreen({ onOpenManageFriends }) {
           </button>
         </div>
 
-        <h2 className="friends-screen__game-title">{QUIZ_NAME}</h2>
-
         {loading ? (
-          <div className="friends-screen__loading-list">
-            <span className="friends-screen__spinner" /> Loading…
+          <div className="friends-screen__loading-wrap">
+            <div className="friends-screen__loading-list">
+              <span className="friends-screen__spinner" /> Loading…
+            </div>
           </div>
         ) : (
           <ul className="friends-screen__score-list">
@@ -226,10 +226,12 @@ function FriendsScreen({ onOpenManageFriends }) {
           </ul>
         )}
 
-        <button type="button" className="friends-screen__manage-btn" onClick={onOpenManageFriends}>
-          <UserPlus size={20} />
-          Manage friends
-        </button>
+        {!loading && (
+          <button type="button" className="friends-screen__manage-btn" onClick={onOpenManageFriends}>
+            <UserPlus size={20} />
+            Manage friends
+          </button>
+        )}
       </div>
     </div>
   )
