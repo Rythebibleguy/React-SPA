@@ -7,5 +7,8 @@ export const BASE_DATA_URL = import.meta.env.PROD
   ? '/quiz' 
   : '';
 
-// Canonical app URL for share links (friends, results, etc.)
-export const BASE_SITE_URL = 'https://rythebibleguy.com/quiz/';
+// App URL (Cloudflare enforces HTTPS)
+export const BASE_SITE_URL = 'rythebibleguy.com/quiz/';
+
+// Share URL
+export const BASE_SHARE_URL = 'rythebibleguy.com/quiz';

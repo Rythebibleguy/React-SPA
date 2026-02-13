@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Check, X, Send } from 'lucide-react'
-import { BASE_SITE_URL } from '../config'
+import { BASE_SHARE_URL } from '../config'
 import './ResultsModal.css'
 
 function ResultsModal({ score, total, stats, onClose }) {
@@ -16,7 +16,7 @@ function ResultsModal({ score, total, stats, onClose }) {
     
     // Create share text with emoji indicators for score
     const squares = '✅'.repeat(score) + '❌'.repeat(total - score)
-    const shareText = `I got ${score}/${total} on Daily Bible Quiz\n${squares}\n\nCan you beat my score?\n${BASE_SITE_URL}`
+    const shareText = `I got ${score}/${total} on Daily Bible Quiz\n${squares}\n\nCan you beat my score?\n${BASE_SHARE_URL}`
     
     // Try Web Share API first (mobile/modern browsers)
     if (navigator.share) {
