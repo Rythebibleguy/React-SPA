@@ -9,14 +9,15 @@ import { X } from 'lucide-react'
  *
  * Ref exposes close() so parents can trigger the same close animation (e.g. after sign-in).
  *
+ * Callers must pass a single content container as children (with flex: 1, overflow-y: auto, etc.).
+ *
  * @param {boolean} isOpen
  * @param {() => void} onClose - called after close animation
  * @param {() => void} [onCloseStart] - called when close is triggered (e.g. to set stacked state false)
- * @param {React.ReactNode} children - main scrollable content
+ * @param {React.ReactNode} children - main content (one scrollable container)
  * @param {React.ReactNode} [footer] - optional fixed bottom content (e.g. Sign Out)
- * @param {string} [contentClassName] - optional class for the content wrapper (e.g. different padding)
  */
-const StackedModal = forwardRef(function StackedModal({ isOpen, onClose, onCloseStart, children, footer, contentClassName }, ref) {
+const StackedModal = forwardRef(function StackedModal({ isOpen, onClose, onCloseStart, children, footer }, ref) {
   const [isActive, setIsActive] = useState(false)
   const onCloseRef = useRef(onClose)
   const onCloseStartRef = useRef(onCloseStart)
@@ -59,9 +60,7 @@ const StackedModal = forwardRef(function StackedModal({ isOpen, onClose, onClose
         >
           <X size={20} />
         </button>
-        <div className={`stacked-modal__content ${contentClassName ?? ''}`.trim()}>
-          {children}
-        </div>
+        {children}
         {footer != null && <div className="stacked-modal__footer">{footer}</div>}
       </div>
     </div>

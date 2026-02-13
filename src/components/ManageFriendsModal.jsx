@@ -5,7 +5,7 @@ import { firestore, doc, getDoc } from '../config/firebase'
 import { BASE_SITE_URL } from '../config'
 import { useAuth } from '../contexts/AuthContext'
 import { getBadgeById } from '../config/badges'
-import { Link2, UserMinus } from 'lucide-react'
+import { Share2, UserMinus, Check, X } from 'lucide-react'
 
 const DEFAULT_AVATAR_COLOR = '#64B5F6'
 
@@ -23,6 +23,8 @@ function ManageFriendsModal({ isOpen, onClose, onCloseStart }) {
   const [loadingFriends, setLoadingFriends] = useState(false)
   const [message, setMessage] = useState(null)
   const [copySuccess, setCopySuccess] = useState(false)
+  const [showShareLoading, setShowShareLoading] = useState(false)
+  const [showShareFailed, setShowShareFailed] = useState(false)
   const [removingId, setRemovingId] = useState(null)
   const [confirmRemoveId, setConfirmRemoveId] = useState(null)
 
@@ -52,16 +54,64 @@ function ManageFriendsModal({ isOpen, onClose, onCloseStart }) {
     return () => { cancelled = true }
   }, [isOpen, friendUids.join(',')])
 
-  async function handleCopyLink() {
+  const handleShareLink = async () => {
     if (!shareUrl) return
+    if (window.clarity) window.clarity('event', 'friend_link_shared')
+
+    const shareText = `Add me on Daily Bible Quiz – open this link and sign in to connect.\n${shareUrl}`
+
+    if (navigator.share) {
+      try {
+        setShowShareLoading(true)
+        setShowShareFailed(false)
+        await navigator.share({
+          title: 'Daily Bible Quiz',
+          text: shareText
+        })
+        return
+      } catch (error) {
+        if (error.name === 'AbortError') return
+        setShowShareFailed(true)
+        setTimeout(() => setShowShareFailed(false), 2000)
+      } finally {
+        setShowShareLoading(false)
+      }
+    }
+
+    copyToClipboard(shareUrl)
+  }
+
+  const copyToClipboard = async (text) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text)
+        setCopySuccess(true)
+        setTimeout(() => setCopySuccess(false), 2000)
+        return
+      } catch {
+        // fall through
+      }
+    }
     try {
-      await navigator.clipboard.writeText(shareUrl)
-      if (window.clarity) window.clarity('event', 'friend_link_shared')
-      setCopySuccess(true)
-      setTimeout(() => setCopySuccess(false), 2000)
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      Object.assign(textArea.style, {
+        position: 'fixed', left: '0', top: '0', opacity: '0.01', fontSize: '16px'
+      })
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      textArea.setSelectionRange(0, 99999)
+      const successful = document.execCommand('copy')
+      document.body.removeChild(textArea)
+      if (successful) {
+        setCopySuccess(true)
+        setTimeout(() => setCopySuccess(false), 2000)
+      } else {
+        throw new Error('Copy failed')
+      }
     } catch {
-      setMessage({ text: 'Could not copy', type: 'error' })
-      setTimeout(() => setMessage(null), 2000)
+      window.prompt('Copy your friend link:', text)
     }
   }
 
@@ -87,24 +137,14 @@ function ManageFriendsModal({ isOpen, onClose, onCloseStart }) {
       isOpen={isOpen}
       onClose={onClose}
       onCloseStart={onCloseStart}
-      contentClassName="manage-friends-modal__content"
     >
-      <div className="manage-friends-modal__inner">
-        <section className="manage-friends-modal__share">
-          <h2 className="manage-friends-modal__heading">Add friends</h2>
-          <p className="manage-friends-modal__share-text">Share your link. When they open it and sign in, you’ll be connected.</p>
-          <button type="button" className="manage-friends-modal__copy-btn" onClick={handleCopyLink} disabled={!shareUrl}>
-            <Link2 size={18} />
-            {copySuccess ? 'Copied!' : 'Copy link'}
-          </button>
-        </section>
-
+      <div className="manage-friends-modal__content">
+        <h2 className="manage-friends-modal__heading">Friends</h2>
         <section className="manage-friends-modal__list-section">
-          <h2 className="manage-friends-modal__heading">Friends</h2>
           {loadingFriends && friendUids.length > 0 ? (
             <div className="manage-friends-modal__loading-list"><span className="manage-friends-modal__spinner" /> Loading…</div>
           ) : !hasFriends ? (
-            <p className="manage-friends-modal__empty">No friends yet. Share your link above to connect.</p>
+            <p className="manage-friends-modal__empty">No friends yet. Share your link below to connect.</p>
           ) : (
             <ul className="manage-friends-modal__list">
               {friendProfiles.map((friend) => {
@@ -141,6 +181,29 @@ function ManageFriendsModal({ isOpen, onClose, onCloseStart }) {
               })}
             </ul>
           )}
+        </section>
+
+        <section className="manage-friends-modal__share">
+          <button type="button" className="manage-friends-modal__copy-btn" onClick={handleShareLink} disabled={!shareUrl || showShareLoading}>
+            {showShareLoading ? (
+              <span className="manage-friends-modal__share-spinner" aria-hidden />
+            ) : copySuccess ? (
+              <>
+                <Check size={18} />
+                Copied!
+              </>
+            ) : showShareFailed ? (
+              <>
+                <X size={18} />
+                Share failed
+              </>
+            ) : (
+              <>
+                <Share2 size={18} />
+                Add friends
+              </>
+            )}
+          </button>
         </section>
 
         {message && (

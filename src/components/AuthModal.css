@@ -1,6 +1,29 @@
 /* Auth Modal – content only; chrome from StackedModal */
 .auth-modal__content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: calc(6.8 * var(--element-width));
+  margin-top: calc(10 * var(--element-width));
+  width: 100%;
+  max-width: calc(100 * var(--app-width));
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
   text-align: center;
+}
+
+.auth-modal__content::-webkit-scrollbar {
+  width: calc(1.2 * var(--element-width));
+}
+
+.auth-modal__content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.auth-modal__content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: calc(1 * var(--element-width));
 }
 
 .auth-modal__title {

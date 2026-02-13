@@ -1,7 +1,23 @@
 /* Settings Modal – content only; chrome from StackedModal */
 .settings-modal__stacked-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   margin-top: calc(5 * var(--element-width));
   padding: calc(5 * var(--element-width));
+}
+
+.settings-modal__stacked-content::-webkit-scrollbar {
+  width: calc(1.2 * var(--element-width));
+}
+
+.settings-modal__stacked-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.settings-modal__stacked-content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: calc(1 * var(--element-width));
 }
 
 .settings-modal__content {

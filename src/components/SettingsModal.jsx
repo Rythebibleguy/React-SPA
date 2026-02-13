@@ -126,7 +126,6 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
       isOpen={isOpen}
       onClose={handleStackedClose}
       onCloseStart={onCloseStart}
-      contentClassName="settings-modal__stacked-content"
       footer={
         <button
           type="button"
@@ -138,7 +137,8 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
         </button>
       }
     >
-      <div className="settings-modal__content">
+      <div className="settings-modal__stacked-content">
+        <div className="settings-modal__content">
           {/* Avatar Section */}
           <div className="settings-modal__avatar-section">
             <div className="settings-modal__avatar-wrapper">
@@ -225,6 +225,7 @@ function SettingsModal({ isOpen, onClose, onCloseStart, userProfile, currentUser
               {userEmail || 'No email'}
             </div>
           </div>
+        </div>
       </div>
     </StackedModal>
   )

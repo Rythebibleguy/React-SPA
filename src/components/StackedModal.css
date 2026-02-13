@@ -58,31 +58,6 @@
   transition: none;
 }
 
-.stacked-modal__content {
-  flex: 1;
-  overflow-y: auto;
-  padding: calc(6.8 * var(--element-width));
-  margin-top: calc(10 * var(--element-width));
-  width: 100%;
-  max-width: calc(100 * var(--app-width));
-  margin-left: auto;
-  margin-right: auto;
-  box-sizing: border-box;
-}
-
-.stacked-modal__content::-webkit-scrollbar {
-  width: calc(1.2 * var(--element-width));
-}
-
-.stacked-modal__content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.stacked-modal__content::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: calc(1 * var(--element-width));
-}
-
 .stacked-modal__footer {
   flex-shrink: 0;
   padding: calc(5 * var(--element-width));

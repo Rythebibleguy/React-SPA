@@ -1,24 +1,39 @@
 /* Manage Friends Modal – content layout, share section, and list section */
 .manage-friends-modal__content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin-top: calc(5 * var(--element-width));
   padding: calc(5 * var(--element-width));
   padding-bottom: calc(12 * var(--element-width));
-}
-
-.manage-friends-modal__inner {
   display: flex;
   flex-direction: column;
 }
 
-/* Share section */
+.manage-friends-modal__content::-webkit-scrollbar {
+  width: calc(1.2 * var(--element-width));
+}
+
+.manage-friends-modal__content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.manage-friends-modal__content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: calc(1 * var(--element-width));
+}
+
+/* Share section (below list) */
 .manage-friends-modal__share {
-  margin-bottom: calc(6 * var(--element-width));
+  margin-top: calc(3 * var(--element-width));
 }
 
 .manage-friends-modal__heading {
-  font-size: calc(3.8 * var(--element-width));
+  font-family: 'Bitter', serif;
+  font-size: calc(6 * var(--element-width));
   font-weight: 600;
   color: #121212;
-  margin: 0 0 calc(2 * var(--element-width));
+  margin: 0;
 }
 
 .manage-friends-modal__share-text {
@@ -28,42 +43,59 @@
   line-height: 1.4;
 }
 
+/* Share button – matches Continue with email (auth-modal__btn--primary) */
 .manage-friends-modal__copy-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: calc(1.5 * var(--element-width));
-  padding: calc(2.4 * var(--element-width)) calc(4 * var(--element-width));
-  font-size: calc(3.4 * var(--element-width));
-  font-weight: 500;
-  color: #121212;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: calc(1.2 * var(--element-width));
+  width: 100%;
+  height: calc(12 * var(--element-width));
+  padding: calc(3.4 * var(--element-width)) calc(3.8 * var(--element-width));
+  font-size: calc(3.8 * var(--element-width));
+  font-weight: 600;
+  border: none;
+  border-radius: calc(2 * var(--element-width));
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(2.8 * var(--element-width));
+  font-family: inherit;
+  background: #000;
+  color: white;
+  box-shadow: 0 calc(0.4 * var(--element-width)) calc(1.8 * var(--element-width)) rgba(0, 0, 0, 0.15);
 }
 
 .manage-friends-modal__copy-btn:hover:not(:disabled) {
-  background: #f0f0f0;
-  border-color: #ccc;
+  background: #1a1a1a;
 }
 
 .manage-friends-modal__copy-btn:active:not(:disabled) {
-  background: #e8e8e8;
+  background: #1a1a1a;
+  box-shadow: 0 calc(0.2 * var(--element-width)) calc(1 * var(--element-width)) rgba(0, 0, 0, 0.2);
 }
 
 .manage-friends-modal__copy-btn:disabled {
-  opacity: 0.6;
-  cursor: default;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* List section */
-.manage-friends-modal__list-section {
-  margin-top: calc(2 * var(--element-width));
+.manage-friends-modal__copy-btn svg {
+  width: calc(4.6 * var(--element-width));
+  height: calc(4.6 * var(--element-width));
+  flex-shrink: 0;
 }
 
-.manage-friends-modal__list-section .manage-friends-modal__heading {
-  margin-bottom: calc(2.5 * var(--element-width));
+.manage-friends-modal__share-spinner {
+  display: inline-block;
+  width: calc(4.2 * var(--element-width));
+  height: calc(4.2 * var(--element-width));
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: manage-friends-modal-spin 0.6s linear infinite;
+}
+
+@keyframes manage-friends-modal-spin {
+  to { transform: rotate(360deg); }
 }
 
 .manage-friends-modal__loading-list {
