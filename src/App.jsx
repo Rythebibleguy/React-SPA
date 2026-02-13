@@ -73,7 +73,7 @@ function App() {
     const friendUid = new URLSearchParams(window.location.search).get('friend') || sessionStorage.getItem(PENDING_FRIEND_KEY)
     if (!friendUid || !friendUid.trim()) return
 
-    if (window.clarity) window.clarity('event', 'friend_link_clicked')
+    if (window.clarity) window.clarity('event', 'friend_link_opened')
 
     if (!currentUser) {
       sessionStorage.setItem(PENDING_FRIEND_KEY, friendUid)

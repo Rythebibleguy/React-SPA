@@ -56,6 +56,7 @@ function ManageFriendsModal({ isOpen, onClose, onCloseStart }) {
     if (!shareUrl) return
     try {
       await navigator.clipboard.writeText(shareUrl)
+      if (window.clarity) window.clarity('event', 'friend_link_shared')
       setCopySuccess(true)
       setTimeout(() => setCopySuccess(false), 2000)
     } catch {
