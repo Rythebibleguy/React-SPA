@@ -8,6 +8,9 @@ import { UserPlus, ChevronLeft, ChevronRight, Check, X, Minus } from 'lucide-rea
 
 const DEFAULT_AVATAR_COLOR = '#64B5F6'
 
+// Cache friend profiles (by friend UIDs) so we don't refetch every time the tab is opened.
+let friendProfilesCache = { key: null, profiles: [] }
+
 function formatDateLabel(dateStr) {
   if (dateStr == null || typeof dateStr !== 'string') return '—'
   const d = new Date(dateStr + 'T12:00:00')
@@ -57,38 +60,54 @@ function FriendsScreen({ onOpenManageFriends }) {
   const [loading, setLoading] = useState(true)
 
   const friendUids = userProfile?.friends || []
+  const cacheKey = friendUids.join(',')
 
-  // Load current user + all friends' profiles (with history) for scores
+  function buildCurrentUserRow() {
+    if (!currentUser || !userProfile) return null
+    return {
+      uid: currentUser.uid,
+      displayName: userProfile.displayName || 'You',
+      avatarColor: userProfile.avatarColor || DEFAULT_AVATAR_COLOR,
+      avatarBadge: userProfile.avatarBadge,
+      history: userProfile.history || [],
+      isCurrentUser: true
+    }
+  }
+
+  // Load current user + all friends' profiles (with history). Use cache when reopening tab.
   useEffect(() => {
     if (!userProfile || !currentUser) return
+    const currentUserRow = buildCurrentUserRow()
+    if (!currentUserRow) return
+
+    // Cache hit: same friend list as last load — use cached friend profiles and fresh current user
+    if (friendProfilesCache.key === cacheKey && friendProfilesCache.profiles.length >= 0) {
+      setFriendProfiles([currentUserRow, ...friendProfilesCache.profiles])
+      setLoading(false)
+      return
+    }
+
     let cancelled = false
     setLoading(true)
     const load = async () => {
-      const list = []
-      // Current user
-      list.push({
-        uid: currentUser.uid,
-        displayName: userProfile.displayName || 'You',
-        avatarColor: userProfile.avatarColor || DEFAULT_AVATAR_COLOR,
-        avatarBadge: userProfile.avatarBadge,
-        history: userProfile.history || [],
-        isCurrentUser: true
-      })
-      // Friends
+      const list = [currentUserRow]
+      const friendOnly = []
       for (const uid of friendUids) {
         if (cancelled) return
         try {
           const snap = await getDoc(doc(firestore, 'users', uid))
           if (!snap.exists()) continue
           const d = snap.data()
-          list.push({
+          const profile = {
             uid,
             displayName: d.displayName || 'unknown',
             avatarColor: d.avatarColor || DEFAULT_AVATAR_COLOR,
             avatarBadge: d.avatarBadge,
             history: d.history || [],
             isCurrentUser: false
-          })
+          }
+          list.push(profile)
+          friendOnly.push(profile)
         } catch {
           // skip
         }
@@ -96,11 +115,12 @@ function FriendsScreen({ onOpenManageFriends }) {
       if (!cancelled) {
         setFriendProfiles(list)
         setLoading(false)
+        friendProfilesCache = { key: cacheKey, profiles: friendOnly }
       }
     }
     load()
     return () => { cancelled = true }
-  }, [currentUser?.uid, userProfile, friendUids.join(',')])
+  }, [currentUser?.uid, userProfile, cacheKey])
 
   const selectedDateEntry = (history) => (history || []).find((e) => e.date === selectedDate)
   const rows = useMemo(() => {
