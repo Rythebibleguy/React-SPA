@@ -1,0 +1,278 @@
+/* Friends modal content (inside BaseSlideUpModal) */
+.friends-modal__content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.friends-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.friends-modal__scroll {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.friends-modal__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.friends-modal__loading-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.friends-modal__date-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(2 * var(--element-width));
+}
+
+.friends-modal__date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(10 * var(--element-width));
+  height: calc(10 * var(--element-width));
+  padding: 0;
+  color: var(--text-muted);
+  background: var(--surface-raised);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.friends-modal__date-nav:hover:not(:disabled) {
+  background: var(--surface-disabled);
+}
+
+.friends-modal__date-nav:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.friends-modal__date-display {
+  display: flex;
+  align-items: center;
+  gap: calc(1 * var(--element-width));
+  padding: calc(2.4 * var(--element-width)) calc(3.2 * var(--element-width));
+  background: var(--surface-raised);
+  border-radius: calc(1.6 * var(--element-width));
+  min-width: calc(40 * var(--element-width));
+  justify-content: center;
+}
+
+.friends-modal__date-text {
+  font-size: calc(3.4 * var(--element-width));
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.friends-modal__score-list {
+  list-style: none;
+  padding: 0;
+  background: var(--surface);
+  border-radius: calc(1.6 * var(--element-width));
+  border: 1px solid var(--border);
+}
+
+.friends-modal__score-item {
+  display: flex;
+  align-items: center;
+  gap: calc(3 * var(--element-width));
+  padding: calc(2.8 * var(--element-width)) calc(4 * var(--element-width));
+  border-bottom: 1px solid var(--border);
+}
+
+.friends-modal__score-item:last-child {
+  border-bottom: none;
+}
+
+.friends-modal__score-rank {
+  width: calc(3 * var(--element-width));
+  font-size: calc(4 * var(--element-width));
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.friends-modal__score-dot {
+  display: inline-block;
+  width: calc(1 * var(--element-width));
+  height: calc(1 * var(--element-width));
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.friends-modal__score-avatar {
+  width: calc(10 * var(--element-width));
+  height: calc(10 * var(--element-width));
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 calc(0.8 * var(--element-width)) calc(2 * var(--element-width)) var(--shadow-light);
+}
+
+.friends-modal__score-avatar-icon {
+  width: calc(5 * var(--element-width));
+  height: calc(5 * var(--element-width));
+  object-fit: contain;
+}
+
+.friends-modal__score-avatar-letter {
+  font-size: calc(5 * var(--element-width));
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  line-height: 1;
+}
+
+.friends-modal__score-name-wrap {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.friends-modal__score-name {
+  font-size: calc(3.8 * var(--element-width));
+  color: var(--text-primary);
+}
+
+.friends-modal__score-right {
+  display: flex;
+  align-items: center;
+  gap: calc(2 * var(--element-width));
+  flex-shrink: 0;
+}
+
+.friends-modal__score-value {
+  font-size: calc(3.4 * var(--element-width));
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+}
+
+.friends-modal__score-pending {
+  color: var(--text-muted);
+}
+
+.friends-modal__score-performance {
+  display: flex;
+  align-items: center;
+  gap: calc(0.5 * var(--element-width));
+}
+
+.friends-modal__score-check {
+  color: var(--success);
+  flex-shrink: 0;
+}
+
+.friends-modal__score-x {
+  color: var(--error);
+  flex-shrink: 0;
+}
+
+.friends-modal__share {
+  padding-bottom: calc(2 * var(--element-width));
+}
+
+.friends-modal__share-btn {
+  width: 100%;
+  height: calc(12 * var(--element-width));
+  padding: calc(3.4 * var(--element-width)) calc(3.8 * var(--element-width));
+  font-size: calc(3.8 * var(--element-width));
+  font-weight: 600;
+  border: none;
+  border-radius: calc(2 * var(--element-width));
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(2.8 * var(--element-width));
+  font-family: inherit;
+  background: var(--text-primary);
+  color: var(--text-on-dark);
+  box-shadow: 0 calc(0.4 * var(--element-width)) calc(1.8 * var(--element-width)) var(--shadow);
+}
+
+.friends-modal__share-btn:hover:not(:disabled) {
+  background: var(--surface-raised);
+}
+
+.friends-modal__share-btn:active:not(:disabled) {
+  background: var(--surface-raised);
+  box-shadow: 0 calc(0.2 * var(--element-width)) calc(1 * var(--element-width)) var(--shadow);
+}
+
+.friends-modal__share-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.friends-modal__share-btn svg {
+  width: calc(4.6 * var(--element-width));
+  height: calc(4.6 * var(--element-width));
+  flex-shrink: 0;
+}
+
+.friends-modal__share-spinner {
+  display: inline-block;
+  width: calc(4.2 * var(--element-width));
+  height: calc(4.2 * var(--element-width));
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--text-on-dark);
+  border-radius: 50%;
+  animation: friends-modal-share-spin 0.6s linear infinite;
+}
+
+@keyframes friends-modal-share-spin {
+  to { transform: rotate(360deg); }
+}
+
+.friends-modal__loading,
+.friends-modal__loading-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(2 * var(--element-width));
+  font-size: calc(3.6 * var(--element-width));
+  color: var(--text-muted);
+}
+
+.friends-modal__loading {
+  min-height: 60%;
+  padding: var(--content-padding);
+  text-align: center;
+}
+
+.friends-modal__spinner {
+  width: calc(5 * var(--element-width));
+  height: calc(5 * var(--element-width));
+  border: 2px solid var(--border);
+  border-top-color: var(--text-primary);
+  border-radius: 50%;
+  animation: friends-modal-spin 0.8s linear infinite;
+}
+
+@keyframes friends-modal-spin {
+  to { transform: rotate(360deg); }
+}

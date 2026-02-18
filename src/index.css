@@ -4,19 +4,65 @@
   font-weight: 400;
 
   color-scheme: light;
-  color: #213547;
+  color: var(--text-primary);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Colors */
-  --brown-primary: #e3d5c5;
-  --brown-secondary: #f0e5d8;
+  /* Flip: black in light, white in dark – use with --flip-contrast for text/icon */
+  --flip: #000000;
+  --flip-contrast: #ffffff;
+  /* Colors – light theme */
+  --bg-page: #f5f5f5;
+  --text-primary: #2d2d2d;
+  --text-secondary: #333;
+  --text-muted: #555;
+  --text-on-dark: #ffffff;
+  --surface: #ffffff;
+  --surface-raised: #f0f0f0;
+  --surface-disabled: #e9ecef;
+  --border: #e0e0e0;
+  --border-strong: #555;
+  --accent: #5A9FEF;
+  --accent-hover: #4a8fdf;
+  --success: #34C759;
+  --success-bg: #d4edda;
+  --error: #dc3545;
+  --error-bg: #f8d7da;
+  --overlay: rgba(0, 0, 0, 0.7);
+  --overlay-light: rgba(255, 255, 255, 0.5);
+  --hover: rgba(0, 0, 0, 0.06);
+  --hover-strong: rgba(0, 0, 0, 0.1);
+  --input-bg: #f5f5f5;
+  --input-border: #555;
+  --input-focus: #74b9ff;
+  --button-secondary-bg: #e1e4e8;
+  --button-secondary-text: #24292e;
+  --toggle-track: #ccc;
+  --toggle-track-hover: #bbb;
+  --shadow: rgba(0, 0, 0, 0.15);
+  --shadow-light: rgba(0, 0, 0, 0.08);
+  --scrollbar-thumb: #ccc;
+  /* Quiz difficulty (semantic, keep for clarity) */
+  --difficulty-easy: #27ae60;
+  --difficulty-medium: #2196f3;
+  --difficulty-hard: #c0392b;
+  --difficulty-impossible: #000000;
+  --results-bar-bg: #e0e0e0;
 
-  /* Bottom nav height - single source of truth */
-  --bottom-nav-height: calc(16 * var(--element-width));
+  /* Modal animation – sheet slide and overlay fade (used by BaseSlideUpModal, BaseSlideLeftModal) */
+  --modal-duration: 0.3s;
+  --modal-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --modal-overlay-fade: 0.2s;
+
+  /* Layout – standard content padding (--element-width set by useViewportUnits) */
+  --content-padding: calc(5 * var(--element-width));
+  --header-height: calc(15 * var(--element-width));
+  --header-font-size: calc(6 * var(--element-width));
+  --header-icon-size: calc(6 * var(--element-width));
+  --header-icon-stroke-width: 2.5;
 }
 
 button, input, select, textarea {
@@ -45,5 +91,79 @@ body {
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
-  background: #f5f5f5;
+  background: var(--bg-page);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --flip: #ffffff;
+  --flip-contrast: #000000;
+  --bg-page: #1a1a1a;
+  --text-primary: #e8e8e8;
+  --text-secondary: #d0d0d0;
+  --text-muted: #999;
+  --text-on-dark: #ffffff;
+  --text-on-light: #213547;
+  --surface: #2d2d2d;
+  --surface-raised: #3a3a3a;
+  --surface-disabled: #404040;
+  --border: #404040;
+  --border-strong: #555;
+  --accent: #6baeff;
+  --accent-hover: #7ebdff;
+  --success: #34C759;
+  --success-bg: #1e3d28;
+  --error: #e57373;
+  --error-bg: #3d2020;
+  --overlay: rgba(0, 0, 0, 0.85);
+  --overlay-light: rgba(0, 0, 0, 0.4);
+  --hover: rgba(255, 255, 255, 0.08);
+  --hover-strong: rgba(255, 255, 255, 0.12);
+  --input-bg: #404040;
+  --input-border: #555;
+  --input-focus: #74b9ff;
+  --button-secondary-bg: #404040;
+  --button-secondary-text: #e8e8e8;
+  --toggle-track: #555;
+  --toggle-track-hover: #666;
+  --shadow: rgba(0, 0, 0, 0.4);
+  --shadow-light: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb: #555;
+  --difficulty-easy: #27ae60;
+  --difficulty-medium: #2196f3;
+  --difficulty-hard: #c0392b;
+  --difficulty-impossible: #666;
+  --results-bar-bg: #4a4a4a;
+}
+
+[data-theme="dark"] body {
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .base-slide-up-modal__sheet,
+[data-theme="dark"] .base-slide-up-modal__header {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .base-slide-up-modal__title {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .quiz-screen {
+  background: var(--bg-page);
+}
+
+[data-theme="dark"] .quiz-screen__header {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .quiz-screen__header-title {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .quiz-screen__options label.wrong .quiz-screen__percent-bar {
+  background-color: rgba(229, 115, 115, 0.45) !important;
 }

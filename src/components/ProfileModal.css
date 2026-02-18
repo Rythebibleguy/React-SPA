@@ -1,0 +1,226 @@
+/* Profile Modal – content only; chrome from BaseSlideUpModal */
+.profile-modal__content {
+  display: flex;
+  flex-direction: column;
+  gap: calc(4.6 * var(--element-width));
+  margin-top: calc(5 * var(--element-width));
+}
+
+.profile-modal__avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: calc(2 * var(--element-width));
+}
+
+.profile-modal__avatar-wrapper {
+  position: relative;
+}
+
+.profile-modal__avatar {
+  width: calc(30 * var(--element-width));
+  height: calc(30 * var(--element-width));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 calc(1 * var(--element-width)) calc(3 * var(--element-width)) var(--shadow);
+  position: relative;
+}
+
+.profile-modal__avatar-letter {
+  font-size: calc(17 * var(--element-width));
+  font-family: 'Times New Roman', Times, serif;
+  font-weight: 700;
+  line-height: 1;
+  user-select: none;
+}
+
+.profile-modal__avatar-badge-icon {
+  width: calc(17 * var(--element-width));
+  height: calc(17 * var(--element-width));
+  object-fit: contain;
+}
+
+.profile-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: calc(1.4 * var(--element-width));
+}
+
+.profile-modal__label {
+  font-size: calc(3.4 * var(--element-width));
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.profile-modal__name-container {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2.2 * var(--element-width));
+}
+
+.profile-modal__value {
+  font-size: calc(3.8 * var(--element-width));
+  color: var(--text-primary);
+  padding: calc(2.8 * var(--element-width)) calc(3.8 * var(--element-width));
+  background: var(--surface-raised);
+  border-radius: calc(2 * var(--element-width));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1;
+  position: relative;
+}
+
+.profile-modal__edit-btn {
+  position: absolute;
+  right: calc(2.8 * var(--element-width));
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: calc(1.4 * var(--element-width));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: calc(1.2 * var(--element-width));
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+  opacity: 0.7;
+  z-index: 1;
+}
+
+.profile-modal__edit-btn svg {
+  width: calc(4.2 * var(--element-width));
+  height: calc(4.2 * var(--element-width));
+}
+
+.profile-modal__edit-btn:active {
+  transform: translateY(-50%) scale(0.98);
+  transition: none;
+}
+
+.profile-modal__edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2.2 * var(--element-width));
+  margin-top: calc(2 * var(--element-width));
+  width: 100%;
+  max-width: 100%;
+}
+
+.profile-modal__input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.profile-modal__input {
+  width: 100%;
+  max-width: 100%;
+  padding: calc(2.2 * var(--element-width)) calc(2.8 * var(--element-width));
+  border: 2px solid var(--border);
+  border-radius: calc(2 * var(--element-width));
+  font-size: max(16px, calc(3.4 * var(--element-width)));
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.profile-modal__input:focus {
+  outline: none;
+  border-color: var(--input-focus);
+}
+
+.profile-modal__input-wrapper:has(.profile-modal__input-error) .profile-modal__input {
+  border-color: var(--error);
+}
+
+.profile-modal__input-error {
+  margin-top: calc(1 * var(--element-width));
+  color: var(--error);
+  font-size: calc(3 * var(--element-width));
+  font-weight: 500;
+  animation: slideDown 0.2s ease;
+}
+
+.profile-modal__input-error-text {
+  display: block;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--element-width)));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-modal__edit-actions {
+  display: flex;
+  gap: calc(2 * var(--element-width));
+}
+
+.profile-modal__action-btn {
+  flex: 1;
+  padding: calc(2 * var(--element-width)) calc(3.8 * var(--element-width));
+  border: none;
+  border-radius: calc(1.4 * var(--element-width));
+  font-size: calc(3.4 * var(--element-width));
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-modal__action-btn--save {
+  background: var(--accent);
+  color: var(--text-on-dark);
+}
+
+.profile-modal__action-btn--save:active {
+  transform: scale(0.98);
+  transition: none;
+}
+
+.profile-modal__action-btn--cancel {
+  background: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+}
+
+.profile-modal__action-btn--cancel:active {
+  transform: scale(0.98);
+  transition: none;
+}
+
+.profile-modal__logout-btn {
+  width: 100%;
+  padding: calc(3 * var(--element-width)) calc(4 * var(--element-width));
+  border: none;
+  border-radius: calc(1.4 * var(--element-width));
+  font-size: calc(3.4 * var(--element-width));
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease;
+  background: var(--flip);
+  color: var(--flip-contrast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(2 * var(--element-width));
+}
+
+.profile-modal__logout-btn:hover {
+  filter: brightness(0.92);
+}
+
+.profile-modal__logout-btn:active {
+  filter: brightness(0.88);
+  transform: scale(0.98);
+  transition: none;
+}

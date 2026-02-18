@@ -3,10 +3,6 @@ import { useEffect } from 'react'
 export function useViewportUnits() {
   useEffect(() => {
     function calculateViewportUnits() {
-      // Store full viewport dimensions for reference
-      document.documentElement.style.setProperty('--viewport-width', window.screen.width + 'px')
-      document.documentElement.style.setProperty('--viewport-height', window.screen.height + 'px')
-
       // Use window.innerHeight and window.innerWidth directly
       const actualHeight = window.innerHeight
       const actualWidth = window.innerWidth

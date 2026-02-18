@@ -6,18 +6,13 @@
   text-align: center;
 }
 
-.welcome-screen__top-container {
-  width: 100%;
-  height: 25dvh;
-  flex-shrink: 0;
-}
-
 .welcome-screen__content {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  padding-top: 25dvh;
   will-change: transform;
   gap: calc(10 * var(--element-width));
 }
@@ -57,7 +52,7 @@
   font-weight: 800;
   letter-spacing: 0.02em;
   font-size: calc(10.5 * var(--element-width));
-  color: #2B2B2B;
+  color: var(--text-primary);
   margin: 0;
   opacity: 0;
   margin-top: calc(-8 * var(--element-width));
@@ -70,7 +65,7 @@
 
 .welcome-screen__header-tagline {
   font-size: calc(4.1 * var(--element-width));
-  color: #444;
+  color: var(--text-secondary);
   margin: 0;
   margin-top: calc(-2 * var(--element-width));
   opacity: 0;
@@ -93,11 +88,11 @@
   padding: calc(3.8 * var(--element-width)) calc(11.4 * var(--element-width));
   font-size: calc(4.6 * var(--element-width));
   font-weight: bold;
-  background: linear-gradient(90deg, #d4c5b3 0%, #c4b5a3 50%, #d4c5b3 100%);
+  background: linear-gradient(90deg, var(--surface-raised) 0%, var(--surface) 50%, var(--surface-raised) 100%);
   border: none;
   border-radius: calc(6.8 * var(--element-width));
   overflow: hidden;
-  box-shadow: 0 calc(1 * var(--element-width)) calc(3.4 * var(--element-width)) rgba(0,0,0,0.2);
+  box-shadow: 0 calc(1 * var(--element-width)) calc(3.4 * var(--element-width)) var(--shadow);
   margin-bottom: calc(1.2 * var(--element-width));
   cursor: default;
   opacity: 0;
@@ -129,8 +124,8 @@
 }
 
 .welcome-screen__ready-btn {
-  background-color: #000000;
-  color: white;
+  background-color: var(--flip);
+  color: var(--flip-contrast);
   border: none;
   padding: calc(3.8 * var(--element-width)) calc(11.4 * var(--element-width));
   font-size: calc(4.6 * var(--element-width));
@@ -138,7 +133,7 @@
   cursor: pointer;
   font-weight: bold;
   transition: transform 0.2s;
-  box-shadow: 0 calc(1 * var(--element-width)) calc(3.4 * var(--element-width)) rgba(0,0,0,0.2);
+  box-shadow: 0 calc(1 * var(--element-width)) calc(3.4 * var(--element-width)) var(--shadow);
   margin-bottom: calc(1.2 * var(--element-width));
   opacity: 0;
   transform: scale(0.8);
@@ -154,7 +149,7 @@
 .welcome-screen__ready-date {
   display: block;
   text-align: center;
-  color: #555;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 1px;
   flex-shrink: 0;
@@ -166,7 +161,7 @@
 
 .welcome-screen__credit {
   font-size: calc(2.6 * var(--element-width));
-  color: #333;
+  color: var(--text-secondary);
   opacity: 0;
 }
 

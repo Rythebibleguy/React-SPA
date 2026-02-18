@@ -2,12 +2,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './contexts/AuthContext'
-import eruda from 'eruda'
-
-// Initialize eruda for mobile debugging in development
-if (import.meta.env.DEV) {
-  eruda.init()
-}
+import { ThemeProvider } from './contexts/ThemeContext'
 
 // Suppress Firebase AbortError warnings in development
 if (import.meta.env.DEV) {
@@ -38,13 +33,15 @@ if (import.meta.env.DEV) {
   })
 }
 
-// Track page load
+// Track page load (Clarity stub is in index.html head and queues events)
 if (window.clarity) {
   window.clarity("event", "page_loaded")
 }
 
 createRoot(document.getElementById('root')).render(
   <AuthProvider>
-    <App />
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
   </AuthProvider>
 )

@@ -1,8 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
-import { Lock, Book, ChevronLeft, List, ChevronRight } from 'lucide-react'
+import { Lock, Book, ChevronLeft, List, ChevronRight, BarChart2, UserCircle, Settings } from 'lucide-react'
 import { ref, runTransaction } from 'firebase/database'
 import { db } from '../config/firebase'
 import './QuizScreen.css'
+import StatsModal from './StatsModal'
+import GuestModal from './GuestModal'
+import ProfileModal from './ProfileModal'
+import SettingsModal from './SettingsModal'
 import { useQuizData } from '../hooks/useQuizData'
 import { useQuizStats } from '../hooks/useQuizStats'
 import { useAuth } from '../contexts/AuthContext'
@@ -16,10 +20,24 @@ const difficultyLabels = {
   impossible: 'Impossible'
 }
 
-function QuizScreen({ isEntering = false }) {
+function QuizScreen({
+  statisticsAnimationData
+}) {
   const { questions, loading, error } = useQuizData()
   const { stats, loading: statsLoading } = useQuizStats()
-  const { currentUser, completeQuiz, userProfile } = useAuth()
+  const { currentUser, completeQuiz, userProfile, updateUserProfile } = useAuth()
+
+  const [quizEntering, setQuizEntering] = useState(false)
+  const [headerModal, setHeaderModal] = useState(null)
+
+  useEffect(() => {
+    setQuizEntering(true)
+    const t = setTimeout(() => setQuizEntering(false), 1100)
+    return () => clearTimeout(t)
+  }, [])
+
+  const closeHeaderModal = () => setHeaderModal(null)
+
   
   // Load saved state from sessionStorage or user's history
   const loadSavedState = () => {
@@ -414,21 +432,37 @@ function QuizScreen({ isEntering = false }) {
     return correct
   }
 
-  if (!questions || questions.length === 0) {
-    return null
-  }
-
   const isQuizComplete = questions.length === 4 && selectedAnswers.length === 4 && !selectedAnswers.includes(undefined)
+  const hasQuestions = questions && questions.length > 0
 
   return (
-    <div className="quiz-screen">
-      {isQuizComplete && (
-        <button className="quiz-screen__open-results" onClick={() => setShowResultsModal(true)}>
-          Show Results
-        </button>
-      )}
-      <div className="quiz-screen__actions-counter-buffer"></div>
-      <div className={`quiz-screen__cards ${isEntering ? 'entering' : ''}`} ref={containerRef}>
+    <>
+      <div className="quiz-screen">
+        <header className="quiz-screen__header">
+          <h1 className="quiz-screen__header-title">Daily Bible Quiz</h1>
+          <div className="quiz-screen__header-actions">
+            <button type="button" className="quiz-screen__header-icon-btn" onClick={() => setHeaderModal('stats')} aria-label="Stats">
+              <BarChart2 className="quiz-screen__header-icon" aria-hidden />
+            </button>
+            <button type="button" className="quiz-screen__header-icon-btn" onClick={() => setHeaderModal('profile')} aria-label="Profile">
+              <UserCircle className="quiz-screen__header-icon" aria-hidden />
+            </button>
+            <button type="button" className="quiz-screen__header-icon-btn" onClick={() => setHeaderModal('settings')} aria-label="Settings">
+              <Settings className="quiz-screen__header-icon" aria-hidden />
+            </button>
+          </div>
+        </header>
+        {!hasQuestions ? null : (
+          <>
+      <div className="quiz-screen__content">
+        <div className="quiz-screen__actions-counter-buffer">
+          {isQuizComplete && (
+            <button type="button" className="quiz-screen__show-results-btn" onClick={() => setShowResultsModal(true)}>
+              Show Results
+            </button>
+          )}
+        </div>
+        <div className={`quiz-screen__cards ${quizEntering ? 'entering' : ''}`} ref={containerRef}>
           {questions.map((question, qIndex) => {
           const isQuestionLocked = qIndex > 0 && selectedAnswers[qIndex - 1] === undefined
           const isAnswered = selectedAnswers[qIndex] !== undefined
@@ -482,7 +516,7 @@ function QuizScreen({ isEntering = false }) {
                       <div className="quiz-screen__lock-overlay">
                         <div className="quiz-screen__lock-box">
                           <div className="quiz-screen__lock-icon">
-                            <Lock size={20} color="#555" />
+                            <Lock size={20} color="var(--border-strong)" />
                           </div>
                           <div className="quiz-screen__lock-text">Complete previous question<br />to unlock</div>
                         </div>
@@ -505,10 +539,10 @@ function QuizScreen({ isEntering = false }) {
             </div>
           )
         })}
-      </div>
+        </div>
 
-      {/* Action Buttons */}
-      <div className={`quiz-screen__actions ${isEntering ? 'entering' : ''}`}>
+        {/* Action Buttons */}
+        <div className={`quiz-screen__actions ${quizEntering ? 'entering' : ''}`}>
         <div className="quiz-screen__actions-buttons">
             <button className={`quiz-screen__prev-button ${currentIndex === 0 || selectedAnswers[currentIndex] === undefined ? 'hidden' : ''}`} onClick={handlePrev}>
               <ChevronLeft size={20} />
@@ -533,19 +567,25 @@ function QuizScreen({ isEntering = false }) {
             </button>
           </div>
         </div>
+      </div>
 
       {/* Results Modal */}
       {showResultsModal && (
         <ResultsModal 
           score={calculateScore()} 
           total={questions.length}
+          questionResults={questions.map((q, i) => {
+            const answerId = selectedAnswers[i]
+            const answer = q?.answers?.find(a => a.id === answerId)
+            return !!answer?.isCorrect
+          })}
           stats={stats}
           onClose={handleCloseResults}
         />
       )}
 
       {/* Difficulty Dots */}
-      <div className={`quiz-screen__difficulty-dots ${isEntering ? 'entering' : ''}`}>
+      <div className={`quiz-screen__difficulty-dots ${quizEntering ? 'entering' : ''}`}>
         {['easy', 'medium', 'hard', 'impossible'].map((difficulty, index) => {
           const question = questions[index]
           return (
@@ -559,7 +599,61 @@ function QuizScreen({ isEntering = false }) {
           )
         })}
       </div>
-    </div>
+        </>
+        )}
+      </div>
+
+      {headerModal === 'stats' && (
+        currentUser ? (
+          <StatsModal
+            isOpen
+            onClose={closeHeaderModal}
+            onCloseStart={null}
+            title="Stats"
+            onOpenProfile={() => setHeaderModal('profile')}
+          />
+        ) : (
+          <GuestModal
+            isOpen
+            onClose={closeHeaderModal}
+            onCloseStart={null}
+            title="Stats"
+            variant="profile"
+            animationData={statisticsAnimationData}
+          />
+        )
+      )}
+
+      {headerModal === 'settings' && (
+        <SettingsModal
+          isOpen
+          onClose={closeHeaderModal}
+          onCloseStart={null}
+        />
+      )}
+
+      {headerModal === 'profile' && (
+        currentUser ? (
+          <ProfileModal
+            isOpen
+            onClose={closeHeaderModal}
+            onCloseStart={null}
+            userProfile={userProfile}
+            currentUser={currentUser}
+            updateUserProfile={updateUserProfile}
+          />
+        ) : (
+          <GuestModal
+            isOpen
+            onClose={closeHeaderModal}
+            onCloseStart={null}
+            title="Profile"
+            variant="profile"
+            animationData={statisticsAnimationData}
+          />
+        )
+      )}
+    </>
   )
 }
 

@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Check, X, Send } from 'lucide-react'
+import { Check, X, Share2 } from 'lucide-react'
 import { BASE_SHARE_URL } from '../config'
 import './ResultsModal.css'
 
-function ResultsModal({ score, total, stats, onClose }) {
+function ResultsModal({ score, total, questionResults, stats, onClose }) {
   const [showCopied, setShowCopied] = useState(false)
   const [showShareFailed, setShowShareFailed] = useState(false)
   const [showShareLoading, setShowShareLoading] = useState(false)
@@ -14,9 +14,11 @@ function ResultsModal({ score, total, stats, onClose }) {
       window.clarity("event", "share_clicked")
     }
     
-    // Create share text with emoji indicators for score
-    const squares = '✅'.repeat(score) + '❌'.repeat(total - score)
-    const shareText = `I got ${score}/${total} on Daily Bible Quiz\n${squares}\n\nCan you beat my score?\n${BASE_SHARE_URL}`
+    // Create share text with emoji indicators in order (correct question = ✅, wrong = ❌)
+    const squares = Array.isArray(questionResults) && questionResults.length > 0
+      ? questionResults.map(correct => correct ? '✅' : '❌').join('')
+      : '✅'.repeat(score) + '❌'.repeat(total - score)
+    const shareText = `I got ${score}/${total} on Daily Bible Quiz\n${squares}\n\nGo try\n${BASE_SHARE_URL}`
     
     // Try Web Share API first (mobile/modern browsers)
     if (navigator.share) {
@@ -181,8 +183,8 @@ function ResultsModal({ score, total, stats, onClose }) {
               </>
             ) : (
               <>
-                <Send size={20} />
-                Send Challenge
+                <Share2 size={20} />
+                Share Results
               </>
             )}
           </button>

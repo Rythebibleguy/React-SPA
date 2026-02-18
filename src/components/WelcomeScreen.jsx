@@ -76,15 +76,16 @@ function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieI
     }
   }, [quizDataReady, showLoadingBtn])
 
-  const getTextClass = (isAnimating) => {
+  const getTextClass = (isAnimating, variant = 'title') => {
     if (skipAnimations && isAnimating) return 'show-immediate'
-    if (!skipAnimations && isAnimating) return 'welcome-screen__header-title--animate'
+    if (!skipAnimations && isAnimating) {
+      return variant === 'tagline' ? 'welcome-screen__header-tagline--animate' : 'welcome-screen__header-title--animate'
+    }
     return ''
   }
 
   return (
     <div className="welcome-screen">
-      <div className="welcome-screen__top-container"></div>
       <div className={`welcome-screen__content ${isExiting ? 'exiting' : ''}`}>
         <div className="welcome-screen__header">
           {animationData && (
@@ -104,7 +105,7 @@ function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieI
           <h1 className={`welcome-screen__header-title ${getTextClass(animateTitle)}`}>
             Daily Bible Quiz
           </h1>
-          <p className={`welcome-screen__header-tagline ${getTextClass(animateTagline)}`}>
+          <p className={`welcome-screen__header-tagline ${getTextClass(animateTagline, 'tagline')}`}>
             Test your knowledge of scripture.
           </p>
         </div>

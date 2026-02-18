@@ -1,10 +1,13 @@
 import './AuthModal.css'
-import StackedModal from './StackedModal'
 import { useAuth } from '../contexts/AuthContext'
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { Mail } from 'lucide-react'
 
-function AuthModal({ isOpen, onClose, onCloseStart }) {
+/**
+ * Auth content for use inside BaseSlideLeftModal (e.g. from GuestModal).
+ * Renders login/signup/email/Google UI only; parent owns the slide-out chrome and onClose.
+ */
+function AuthModal({ onClose }) {
   const { signInWithGoogle, signIn, signUp, checkEmailExists, error, setError } = useAuth()
   const [loadingAction, setLoadingAction] = useState(null) // 'email', 'google', 'login', 'signup'
   const [showLogin, setShowLogin] = useState(false)
@@ -12,27 +15,13 @@ function AuthModal({ isOpen, onClose, onCloseStart }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
-  const modalRef = useRef(null)
-
-  const resetForm = () => {
-    setShowLogin(false)
-    setShowSignup(false)
-    setEmail('')
-    setPassword('')
-    setDisplayName('')
-    setError(null)
-  }
-
-  const handleClose = () => {
-    modalRef.current?.close()
-  }
 
   const handleGoogleSignIn = async () => {
     try {
       setLoadingAction('google')
       setError(null)
       await signInWithGoogle()
-      handleClose()
+      onClose?.()
     } catch (error) {
       // Error is handled by auth context
     } finally {
@@ -79,7 +68,7 @@ function AuthModal({ isOpen, onClose, onCloseStart }) {
       setLoadingAction('login')
       setError(null)
       await signIn(email, password)
-      handleClose()
+      onClose?.()
     } catch (error) {
       // Error is handled by auth context
     } finally {
@@ -97,7 +86,7 @@ function AuthModal({ isOpen, onClose, onCloseStart }) {
       setLoadingAction('signup')
       setError(null)
       await signUp(email, password, displayName)
-      handleClose()
+      onClose?.()
     } catch (error) {
       // Error is handled by auth context
     } finally {
@@ -106,13 +95,7 @@ function AuthModal({ isOpen, onClose, onCloseStart }) {
   }
 
   return (
-    <StackedModal
-      ref={modalRef}
-      isOpen={isOpen}
-      onClose={() => { resetForm(); onClose() }}
-      onCloseStart={onCloseStart}
-    >
-      <div className="auth-modal__content">
+    <div className="auth-modal__content">
           <h2 className="auth-modal__title">Log in or create an account</h2>
           <p className="auth-modal__subtitle">
             By continuing, you agree to the{' '}
@@ -229,8 +212,7 @@ function AuthModal({ isOpen, onClose, onCloseStart }) {
               </div>
             </>
           )}
-      </div>
-    </StackedModal>
+    </div>
   )
 }
 

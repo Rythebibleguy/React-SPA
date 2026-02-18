@@ -2,8 +2,7 @@
   width: 100%;
   max-width: calc(100 * var(--app-width));
   height: 100dvh;
-  margin: 0 auto;;
-  padding-bottom: var(--bottom-nav-height); /* Space for bottom nav */
+  margin: 0 auto;
   text-align: center;
   position: relative;
   box-sizing: border-box;
