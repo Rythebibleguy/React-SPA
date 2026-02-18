@@ -26,3 +26,8 @@ dist-ssr
 # Firebase service account key (never commit)
 service-account.json
 tools/service-account.json
+
+# AI agent instructions
+.cursorrules
+AGENTS.md
+.cursor/rules/

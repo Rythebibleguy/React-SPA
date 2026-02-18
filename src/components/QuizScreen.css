@@ -9,6 +9,17 @@
   background: var(--bg-page);
 }
 
+@keyframes headerSlideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .quiz-screen__header {
   position: absolute;
   top: 0;
@@ -23,6 +34,7 @@
   padding: 0 var(--content-padding);
   background: var(--surface);
   box-shadow: 0 1px 3px var(--shadow-light);
+  animation: headerSlideDown 200ms ease-out forwards;
 }
 
 .quiz-screen__header-title {
