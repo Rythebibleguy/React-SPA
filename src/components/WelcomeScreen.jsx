@@ -36,7 +36,10 @@ function WelcomeScreen({ onStart, animationData, backgroundFetchesStarted, lotti
       setAnimateTitle(true)
       setAnimateTagline(true)
     }, 500)
-    const loadingBtnTimer = setTimeout(() => setShowLoadingBtn(true), 1000)
+    const loadingBtnTimer = setTimeout(() => {
+      window.__perfLog?.('loading button shown')
+      setShowLoadingBtn(true)
+    }, 1000)
     const pauseTimer = setTimeout(() => {
       if (lottieInstance && animationData) {
         const fps = animationData.fr || 30
