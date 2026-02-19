@@ -437,7 +437,6 @@ function QuizScreen({
   const hasQuestions = questions && questions.length > 0
 
   return (
-    <Suspense fallback={null}>
     <>
       <div className="quiz-screen">
         <header className="quiz-screen__header">
@@ -571,9 +570,10 @@ function QuizScreen({
         </div>
       </div>
 
-      {/* Results Modal */}
+      {/* Results Modal (lazy; own Suspense so quiz content doesn't disappear while loading) */}
       {showResultsModal && (
-        <ResultsModal 
+        <Suspense fallback={null}>
+          <ResultsModal 
           score={calculateScore()} 
           total={questions.length}
           questionResults={questions.map((q, i) => {
@@ -584,6 +584,7 @@ function QuizScreen({
           stats={stats}
           onClose={handleCloseResults}
         />
+        </Suspense>
       )}
 
       {/* Difficulty Dots */}
@@ -605,6 +606,7 @@ function QuizScreen({
         )}
       </div>
 
+      <Suspense fallback={null}>
       {headerModal === 'stats' && (
         currentUser ? (
           <StatsModal
@@ -655,8 +657,8 @@ function QuizScreen({
           />
         )
       )}
+      </Suspense>
     </>
-    </Suspense>
   )
 }
 
