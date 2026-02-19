@@ -37,6 +37,23 @@ function QuizScreen({
     return () => clearTimeout(t)
   }, [])
 
+  // Preload modal chunks after critical UI is up (same paths as lazy() so chunks are cached before first open)
+  useEffect(() => {
+    const preload = () => {
+      import('./StatsModal')
+      import('./GuestModal')
+      import('./ProfileModal')
+      import('./SettingsModal')
+      import('./ResultsModal')
+    }
+    if (typeof requestIdleCallback !== 'undefined') {
+      const id = requestIdleCallback(preload, { timeout: 2000 })
+      return () => cancelIdleCallback(id)
+    }
+    const t = setTimeout(preload, 500)
+    return () => clearTimeout(t)
+  }, [])
+
   const closeHeaderModal = () => setHeaderModal(null)
 
   
