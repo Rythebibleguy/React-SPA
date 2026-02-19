@@ -1,0 +1,11 @@
+# SPA fallback: serve index.html for paths that don't match a real file.
+# Upload this file to your server as public_html/quiz/.htaccess
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /quiz/
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /quiz/index.html [L]
+</IfModule>
+DirectoryIndex index.html
