@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { getTodayString } from '../utils/csvParser'
 import { getCachedQuestions, getQuestionsPromise } from '../utils/dataPreloader'
+import { BASE_DATA_URL } from '../config'
 
 /**
  * Custom hook to fetch and manage quiz questions from static JSON
@@ -49,7 +50,7 @@ export function useQuizData() {
       setLoading(true)
       
       try {
-        const response = await fetch('/data/questions.json')
+        const response = await fetch(`${BASE_DATA_URL}/data/questions.json`)
         if (!response.ok) throw new Error('Failed to fetch questions')
         
         const allQuestions = await response.json()

@@ -34,6 +34,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null)
   const [userProfile, setUserProfile] = useState(null)
+  const [profileLoaded, setProfileLoaded] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const abortControllerRef = useRef(null)
@@ -302,12 +303,14 @@ export function AuthProvider({ children }) {
       } else {
         setUserProfile(null)
       }
+      setProfileLoaded(true)
     } catch (error) {
       // Ignore AbortError - this is expected when requests are cancelled
       if (error.name === 'AbortError' || error.message.includes('aborted')) {
         return
       }
       setError('Failed to load user profile: ' + error.message)
+      setProfileLoaded(true)
     }
   }
 
@@ -507,6 +510,7 @@ export function AuthProvider({ children }) {
       
       if (user) {
         setCurrentUser(user)
+        setProfileLoaded(false)
         setLoading(false) // Set loading false immediately after auth state is determined
         
         // Create new AbortController for this request
@@ -516,6 +520,7 @@ export function AuthProvider({ children }) {
       } else {
         setCurrentUser(null)
         setUserProfile(null)
+        setProfileLoaded(true) // No user = "profile" ready (guest)
         setLoading(false)
       }
     })
@@ -532,6 +537,7 @@ export function AuthProvider({ children }) {
   const value = {
     currentUser,
     userProfile,
+    profileLoaded,
     loading,
     error,
     signUp,

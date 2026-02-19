@@ -5,25 +5,21 @@ import QuizScreen from './components/QuizScreen'
 import { useViewportUnits } from './hooks/useViewportUnits'
 import { useAuth } from './contexts/AuthContext'
 import { BASE_DATA_URL } from './config'
+import { preloadQuizData } from './utils/dataPreloader'
 
 // Clear quiz state on page load (before any components mount)
 sessionStorage.removeItem('quizState')
-sessionStorage.removeItem('welcomeAnimated')
 
 function App() {
   useViewportUnits()
   const { currentUser } = useAuth()
   const [showWelcome, setShowWelcome] = useState(true)
   const [welcomeExiting, setWelcomeExiting] = useState(false)
-  const [welcomeAnimated, setWelcomeAnimated] = useState(() => sessionStorage.getItem('welcomeAnimated') === 'true')
-  const [welcomeAnimationComplete, setWelcomeAnimationComplete] = useState(false)
   const [animationData, setAnimationData] = useState(null)
   const [statisticsAnimationData, setStatisticsAnimationData] = useState(null)
   const [lottieInstance, setLottieInstance] = useState(null)
 
   const handleWelcomeStart = () => {
-    sessionStorage.setItem('welcomeAnimated', 'true')
-    setWelcomeAnimated(true)
     setWelcomeExiting(true)
     setTimeout(() => {
       setShowWelcome(false)
@@ -31,7 +27,12 @@ function App() {
     }, 250)
   }
 
-  // Load Lottie animations once on app mount
+  // Start preloading quiz questions + stats as soon as app mounts (so they're ready when user hits Play)
+  useEffect(() => {
+    preloadQuizData()
+  }, [])
+
+  // Load Lottie animations once on app mount (non-critical, after first paint)
   useEffect(() => {
     // Load Bible animation
     fetch(`${BASE_DATA_URL}/assets/animations/Book with bookmark.json`)
@@ -72,12 +73,9 @@ function App() {
       {showWelcome ? (
         <WelcomeScreen
           onStart={handleWelcomeStart}
-          skipAnimations={welcomeAnimated}
           animationData={animationData}
           lottieInstance={lottieInstance}
           setLottieInstance={setLottieInstance}
-          animationComplete={welcomeAnimationComplete}
-          setAnimationComplete={setWelcomeAnimationComplete}
           isExiting={welcomeExiting}
         />
       ) : (

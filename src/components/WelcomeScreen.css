@@ -194,12 +194,6 @@
 }
 
 /* Show immediately without animation */
-.show-immediate {
-  opacity: 1 !important;
-  transform: translateY(0) scale(1) !important;
-  animation: none !important;
-}
-
 /* Animations */
 @keyframes fadeInUp {
   from {

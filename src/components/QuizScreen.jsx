@@ -1,17 +1,18 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, lazy, Suspense } from 'react'
 import { Lock, Book, ChevronLeft, List, ChevronRight, BarChart2, UserCircle, Settings } from 'lucide-react'
 import { ref, runTransaction } from 'firebase/database'
 import { db } from '../config/firebase'
 import './QuizScreen.css'
-import StatsModal from './StatsModal'
-import GuestModal from './GuestModal'
-import ProfileModal from './ProfileModal'
-import SettingsModal from './SettingsModal'
 import { useQuizData } from '../hooks/useQuizData'
 import { useQuizStats } from '../hooks/useQuizStats'
 import { useAuth } from '../contexts/AuthContext'
 import { getTodayString } from '../utils/csvParser'
-import ResultsModal from './ResultsModal'
+
+const StatsModal = lazy(() => import('./StatsModal'))
+const GuestModal = lazy(() => import('./GuestModal'))
+const ProfileModal = lazy(() => import('./ProfileModal'))
+const SettingsModal = lazy(() => import('./SettingsModal'))
+const ResultsModal = lazy(() => import('./ResultsModal'))
 
 const difficultyLabels = {
   easy: 'Easy',
@@ -436,6 +437,7 @@ function QuizScreen({
   const hasQuestions = questions && questions.length > 0
 
   return (
+    <Suspense fallback={null}>
     <>
       <div className="quiz-screen">
         <header className="quiz-screen__header">
@@ -654,6 +656,7 @@ function QuizScreen({
         )
       )}
     </>
+    </Suspense>
   )
 }
 

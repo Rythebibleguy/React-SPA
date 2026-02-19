@@ -1,52 +1,32 @@
 import { useState, useEffect, useRef } from 'react'
 import Lottie from 'lottie-react'
 import { preloadQuizData } from '../utils/dataPreloader'
+import { useAuth } from '../contexts/AuthContext'
 import './WelcomeScreen.css'
 
-function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieInstance, setLottieInstance, animationComplete, setAnimationComplete, isExiting = false }) {
+function WelcomeScreen({ onStart, animationData, lottieInstance, setLottieInstance, isExiting = false }) {
+  const { currentUser, profileLoaded } = useAuth()
   const [showLoadingBtn, setShowLoadingBtn] = useState(false)
-  const [showReadyBtn, setShowReadyBtn] = useState(skipAnimations)
-  const [showQuizNumber, setShowQuizNumber] = useState(skipAnimations)
-  const [animateTitle, setAnimateTitle] = useState(skipAnimations)
-  const [animateTagline, setAnimateTagline] = useState(skipAnimations)
-  const [showCredit, setShowCredit] = useState(skipAnimations)
+  const [showReadyBtn, setShowReadyBtn] = useState(false)
+  const [showQuizNumber, setShowQuizNumber] = useState(false)
+  const [animateTitle, setAnimateTitle] = useState(false)
+  const [animateTagline, setAnimateTagline] = useState(false)
+  const [showCredit, setShowCredit] = useState(false)
   const [quizDataReady, setQuizDataReady] = useState(false)
   const lottieRef = useRef(null)
 
   // Preload quiz data on mount
   useEffect(() => {
     const { questionsPromise, statsPromise } = preloadQuizData()
-    
     Promise.all([questionsPromise, statsPromise])
-      .then(() => {
-        setQuizDataReady(true)
-      })
-      .catch(err => {
-        setQuizDataReady(true)
-      })
+      .then(() => setQuizDataReady(true))
+      .catch(() => setQuizDataReady(true))
   }, [])
 
-  // Handle Lottie animation state
+  // Run Lottie and sequence when Lottie is ready
   useEffect(() => {
-    if (!lottieInstance || !animationData) return
-
-    if (skipAnimations || animationComplete) {
-      // Convert 2667ms to frames: 2667ms / 1000 * fps
-      const fps = animationData.fr || 30
-      const pauseFrame = Math.floor((2667 / 1000) * fps)
-      lottieInstance.goToAndStop(pauseFrame, true)
-    }
-  }, [skipAnimations, animationData, lottieInstance, animationComplete])
-
-  // Run animations only if not skipping, and only once Lottie DOM is ready
-  useEffect(() => {
-    if (skipAnimations) return
     if (!lottieInstance) return
-
-    // Start Lottie playback now that the DOM is ready
     lottieInstance.play()
-
-    // Run animation sequence
     const creditTimer = setTimeout(() => setShowCredit(true), 500)
     const titleTimer = setTimeout(() => {
       setAnimateTitle(true)
@@ -54,34 +34,33 @@ function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieI
     }, 500)
     const loadingBtnTimer = setTimeout(() => setShowLoadingBtn(true), 1000)
     const pauseTimer = setTimeout(() => {
-      if (lottieInstance) {
-        lottieInstance.pause()
-        setAnimationComplete(true)
+      if (lottieInstance && animationData) {
+        const fps = animationData.fr || 30
+        const pauseFrame = Math.floor((2667 / 1000) * fps)
+        lottieInstance.goToAndStop(pauseFrame, true)
       }
     }, 2667)
-
     return () => {
       clearTimeout(creditTimer)
       clearTimeout(titleTimer)
       clearTimeout(loadingBtnTimer)
       clearTimeout(pauseTimer)
     }
-  }, [skipAnimations, lottieInstance, setAnimationComplete])
+  }, [lottieInstance, animationData])
+
+  // Switch to clickable Play when preload is done, loading button has been shown, and (guest or profile loaded)
+  const authReady = !currentUser || profileLoaded
   useEffect(() => {
-    // Switch to ready button when data is ready and timer has passed
-    if (quizDataReady && showLoadingBtn) {
+    if (quizDataReady && showLoadingBtn && authReady) {
       setShowLoadingBtn(false)
       setShowReadyBtn(true)
       setShowQuizNumber(true)
     }
-  }, [quizDataReady, showLoadingBtn])
+  }, [quizDataReady, showLoadingBtn, authReady])
 
   const getTextClass = (isAnimating, variant = 'title') => {
-    if (skipAnimations && isAnimating) return 'show-immediate'
-    if (!skipAnimations && isAnimating) {
-      return variant === 'tagline' ? 'welcome-screen__header-tagline--animate' : 'welcome-screen__header-title--animate'
-    }
-    return ''
+    if (!isAnimating) return ''
+    return variant === 'tagline' ? 'welcome-screen__header-tagline--animate' : 'welcome-screen__header-title--animate'
   }
 
   return (
@@ -120,14 +99,11 @@ function WelcomeScreen({ onStart, skipAnimations = false, animationData, lottieI
           
           {showReadyBtn && (
             <>
-              <button 
-                className={`welcome-screen__ready-btn ${skipAnimations ? 'show-immediate' : ''}`}
-                onClick={onStart}
-              >
+              <button className="welcome-screen__ready-btn" onClick={onStart}>
                 Play
               </button>
               {showQuizNumber && (
-                <span className={`welcome-screen__ready-date ${skipAnimations ? 'show-immediate' : ''}`}>
+                <span className="welcome-screen__ready-date">
                   {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
                 </span>
               )}
