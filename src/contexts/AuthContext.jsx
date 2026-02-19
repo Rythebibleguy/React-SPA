@@ -514,7 +514,7 @@ export function AuthProvider({ children }) {
         setCurrentUser(user)
         setProfileLoaded(false)
         setLoading(false) // Set loading false immediately after auth state is determined
-        window.__perfLog?.('auth fetch finished')
+        window.__perfLog?.('auth fetch finished (user)')
         // Create new AbortController for this request
         abortControllerRef.current = new AbortController()
         // Load profile in background - don't block app rendering
@@ -524,7 +524,7 @@ export function AuthProvider({ children }) {
         setUserProfile(null)
         setProfileLoaded(true) // No user = "profile" ready (guest)
         setLoading(false)
-        window.__perfLog?.('auth fetch finished')
+        window.__perfLog?.('auth fetch finished (guest)')
       }
     })
 
