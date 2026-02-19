@@ -1,4 +1,4 @@
-// Last updated: February 12, 2026
+// Last updated: February 19, 2026
 // Firestore Security Rules for Daily Bible Quiz
 rules_version = '2';
 service cloud.firestore {
@@ -57,7 +57,7 @@ service cloud.firestore {
     
     // PRIVATE USER DATA COLLECTION
     // Contains sensitive information: email, googlePhotoURL, googleName, preferences
-    match /userPrivate/{userId} {
+    match /usersPrivate/{userId} {
       // READ/WRITE PERMISSION
       // Who: Only the user themselves
       // What: Can read/write their own private data only

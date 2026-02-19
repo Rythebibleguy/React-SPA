@@ -169,7 +169,7 @@ export function AuthProvider({ children }) {
    *   - {id: string, unlockedOn: string (YYYY-MM-DD)}
    * @property {Array<string>} friends - Array of friend user IDs
    * 
-   * @typedef {Object} UserPrivateData (Private Data - userPrivate/{uid})
+   * @typedef {Object} UserPrivateData (Private Data - usersPrivate/{uid})
    * @property {string|null} email - User's email address from authentication
    * @property {string|null} googlePhotoURL - User's profile photo URL from Google
    * @property {string|null} googleName - User's original name from Google profile (not used as display name)
@@ -185,7 +185,7 @@ export function AuthProvider({ children }) {
     }
     
     const userRef = doc(firestore, 'users', user.uid)
-    const userPrivateRef = doc(firestore, 'userPrivate', user.uid)
+    const usersPrivateRef = doc(firestore, 'usersPrivate', user.uid)
     
     try {
       const userSnap = await getDoc(userRef)
@@ -205,7 +205,7 @@ export function AuthProvider({ children }) {
         const rawName = isGoogleSignup ? await generateRandomDisplayName() : (additionalData.displayName || displayName || 'Anonymous')
         const publicDisplayName = rawName.trim().toLowerCase()
         
-        // Public profile data (readable by friends)
+        // Public profile data (readable by friends) — only public fields; do not spread additionalData (signUpMethod etc. go to usersPrivate only)
         const profileData = {
           displayName: publicDisplayName,
           avatarColor: additionalData.avatarColor || defaultColor,
@@ -223,8 +223,7 @@ export function AuthProvider({ children }) {
             }
           ],
           friends: [],
-          shares: 0,
-          ...additionalData
+          shares: 0
         }
         
         // Private data (only readable by owner)
@@ -243,7 +242,7 @@ export function AuthProvider({ children }) {
         // Create both documents
         await Promise.all([
           setDoc(userRef, profileData),
-          setDoc(userPrivateRef, privateData)
+          setDoc(usersPrivateRef, privateData)
         ])
         
         setUserProfile(profileData)
@@ -262,7 +261,7 @@ export function AuthProvider({ children }) {
     if (!uid) return null
     
     try {
-      const privateRef = doc(firestore, 'userPrivate', uid)
+      const privateRef = doc(firestore, 'usersPrivate', uid)
       const privateSnap = await getDoc(privateRef)
       return privateSnap.exists() ? privateSnap.data() : null
     } catch (error) {
@@ -275,7 +274,7 @@ export function AuthProvider({ children }) {
     if (!currentUser) return
     
     try {
-      const privateRef = doc(firestore, 'userPrivate', currentUser.uid)
+      const privateRef = doc(firestore, 'usersPrivate', currentUser.uid)
       await updateDoc(privateRef, updates)
     } catch (error) {
       throw error
