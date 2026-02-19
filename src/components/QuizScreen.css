@@ -351,6 +351,7 @@
   overflow: hidden;
   transition: all 0.2s;
   font-size: calc(3.6 * var(--element-width));
+  font-weight: bold;
   color: var(--text-secondary);
 }
 
