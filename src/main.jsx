@@ -3,14 +3,30 @@ import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { perf } from './config/firebase'
+import { trace } from 'firebase/performance'
 
-// Critical-path perf logging: each part logs as it happens with [xxxxms]
+// Critical-path perf logging: console + Firebase Performance (for real-user monitoring)
 if (typeof performance !== 'undefined') {
   window.__perfStart = performance.timeOrigin
   console.log('[0ms] page navigated to')
+
+  const welcomeTrace = trace(perf, 'welcome_flow')
+  welcomeTrace.start()
+  window.__perfTrace = welcomeTrace
+
   window.__perfLog = (label) => {
     const ms = Math.round(performance.now())
     console.log(`[${ms}ms] ${label}`)
+    if (window.__perfTrace) {
+      const metricName = label.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '')
+      if (metricName) {
+        window.__perfTrace.putMetric(metricName, ms)
+      }
+      if (label === 'play button shown') {
+        window.__perfTrace.stop()
+      }
+    }
   }
 }
 
