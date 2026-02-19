@@ -4,6 +4,16 @@ import App from './App.jsx'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 
+// Critical-path perf logging: each part logs as it happens with [xxxxms]
+if (typeof performance !== 'undefined') {
+  window.__perfStart = performance.timeOrigin
+  console.log('[0ms] page navigated to')
+  window.__perfLog = (label) => {
+    const ms = Math.round(performance.now())
+    console.log(`[${ms}ms] ${label}`)
+  }
+}
+
 // Suppress Firebase AbortError warnings in development
 if (import.meta.env.DEV) {
   const originalError = console.error

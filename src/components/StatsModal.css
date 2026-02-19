@@ -231,7 +231,7 @@ span.stats-modal__avatar-icon {
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .stats-modal__section {
@@ -454,7 +454,7 @@ span.stats-modal__avatar-icon {
 .stats-modal__modal-progress-percent {
   font-size: calc(3 * var(--element-width));
   color: var(--success);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .stats-modal__modal-actions {
@@ -468,7 +468,7 @@ span.stats-modal__avatar-icon {
   border: none;
   border-radius: calc(2 * var(--element-width));
   font-size: calc(3.6 * var(--element-width));
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: transform 0.1s ease;
 }

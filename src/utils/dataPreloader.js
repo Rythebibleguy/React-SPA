@@ -35,6 +35,7 @@ export function preloadQuizData() {
         }));
         
         cache.questions = shuffledQuestions;
+        window.__perfLog?.('questions fetch finished')
         return shuffledQuestions;
       })
       .catch(error => {
@@ -85,9 +86,14 @@ export function preloadQuizData() {
           return {};
         }
       })
+      .then(data => {
+        window.__perfLog?.('stats fetch finished')
+        return data;
+      })
       .catch(error => {
         cache.stats = {};
         cache.statsPromise = null; // Reset on error so it can retry
+        window.__perfLog?.('stats fetch finished')
         return {};
       });
   }

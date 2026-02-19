@@ -93,7 +93,7 @@
   border: none;
   border-radius: calc(12.5 * var(--element-width));
   font-size: calc(4.2 * var(--element-width));
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: filter 0.2s ease, transform 0.1s ease;
 }

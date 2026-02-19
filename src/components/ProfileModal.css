@@ -50,7 +50,7 @@
 
 .profile-modal__label {
   font-size: calc(3.4 * var(--element-width));
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-muted);
 }
 
@@ -173,7 +173,7 @@
   border: none;
   border-radius: calc(1.4 * var(--element-width));
   font-size: calc(3.4 * var(--element-width));
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -204,7 +204,7 @@
   border: none;
   border-radius: calc(1.4 * var(--element-width));
   font-size: calc(3.4 * var(--element-width));
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: filter 0.2s ease, transform 0.2s ease;
   background: var(--flip);

@@ -109,7 +109,7 @@
   border: none;
   border-radius: calc(6 * var(--element-width));
   font-size: calc(3.8 * var(--element-width));
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   font-family: inherit;
   transition: filter 0.2s ease, transform 0.2s ease;
@@ -244,7 +244,7 @@
   font-size: calc(5.2 * var(--element-width));
   line-height: 1.4;
   color: var(--text-primary);
-  font-weight: 600;
+  font-weight: 700;
   text-align: left;
 }
 

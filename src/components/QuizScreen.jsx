@@ -7,6 +7,7 @@ import { useQuizData } from '../hooks/useQuizData'
 import { useQuizStats } from '../hooks/useQuizStats'
 import { useAuth } from '../contexts/AuthContext'
 import { getTodayString } from '../utils/csvParser'
+import { BASE_DATA_URL } from '../config'
 
 const StatsModal = lazy(() => import('./StatsModal'))
 const GuestModal = lazy(() => import('./GuestModal'))
@@ -21,15 +22,14 @@ const difficultyLabels = {
   impossible: 'Impossible'
 }
 
-function QuizScreen({
-  statisticsAnimationData
-}) {
+function QuizScreen() {
   const { questions, loading, error } = useQuizData()
   const { stats, loading: statsLoading } = useQuizStats()
   const { currentUser, completeQuiz, userProfile, updateUserProfile } = useAuth()
 
   const [quizEntering, setQuizEntering] = useState(false)
   const [headerModal, setHeaderModal] = useState(null)
+  const [statisticsAnimationData, setStatisticsAnimationData] = useState(null)
 
   useEffect(() => {
     setQuizEntering(true)
@@ -37,7 +37,7 @@ function QuizScreen({
     return () => clearTimeout(t)
   }, [])
 
-  // Preload modal chunks after critical UI is up (same paths as lazy() so chunks are cached before first open)
+  // Prepare non-critical quiz components: modal chunks + Statistics Lottie for GuestModal (runs when idle after mount)
   useEffect(() => {
     const preload = () => {
       import('./StatsModal')
@@ -45,6 +45,10 @@ function QuizScreen({
       import('./ProfileModal')
       import('./SettingsModal')
       import('./ResultsModal')
+      fetch(`${BASE_DATA_URL}/assets/animations/Statistics.json`)
+        .then(res => res.json())
+        .then(data => setStatisticsAnimationData(data))
+        .catch(() => {})
     }
     if (typeof requestIdleCallback !== 'undefined') {
       const id = requestIdleCallback(preload, { timeout: 2000 })
@@ -57,31 +61,21 @@ function QuizScreen({
   const closeHeaderModal = () => setHeaderModal(null)
 
   
-  // Load saved state from sessionStorage or user's history
+  // Load saved state from user's history if they completed today's quiz (logged-in only)
   const loadSavedState = () => {
     try {
-      // First check sessionStorage
-      const saved = sessionStorage.getItem('quizState')
-      if (saved) {
-        return JSON.parse(saved)
-      }
-      
-      // If not in sessionStorage, check if user completed today's quiz
       if (userProfile?.history) {
         const todayString = getTodayString()
         const todayEntry = userProfile.history.find(entry => entry.date === todayString)
-        
-        if (todayEntry && todayEntry.answers) {
-          // User already completed today's quiz - load their answers
+        if (todayEntry?.answers) {
           return {
             currentIndex: 0,
             selectedAnswers: todayEntry.answers,
-            answerPercentages: {}, // Will be populated by useEffect
+            answerPercentages: {},
             hasSubmitted: true
           }
         }
       }
-      
       return null
     } catch (e) {
       return null
@@ -106,21 +100,6 @@ function QuizScreen({
       quizStartTimeRef.current = Date.now()
     }
   }, [])
-
-  // Save state to sessionStorage whenever it changes
-  useEffect(() => {
-    try {
-      const stateToSave = {
-        currentIndex,
-        selectedAnswers,
-        answerPercentages,
-        hasSubmitted: hasSubmittedRef.current
-      }
-      sessionStorage.setItem('quizState', JSON.stringify(stateToSave))
-    } catch (e) {
-      // Ignore storage errors
-    }
-  }, [currentIndex, selectedAnswers, answerPercentages])
 
   // Auto-open results modal when navigating back to quiz after completion
   useEffect(() => {
@@ -355,18 +334,6 @@ function QuizScreen({
       hasSubmittedRef.current = true
       
       // Save updated hasSubmitted status
-      try {
-        const stateToSave = {
-          currentIndex,
-          selectedAnswers,
-          answerPercentages,
-          hasSubmitted: true
-        }
-        sessionStorage.setItem('quizState', JSON.stringify(stateToSave))
-      } catch (e) {
-        // Ignore storage errors
-      }
-      
       // Submit results to Firebase first
       submitQuizResults().then(() => {
         // Track quiz completion

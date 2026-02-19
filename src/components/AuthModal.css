@@ -50,7 +50,7 @@
 .auth-modal__label {
   display: block;
   font-size: calc(3.4 * var(--element-width));
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   text-align: left;
   margin-bottom: calc(1.4 * var(--element-width));
@@ -93,7 +93,7 @@
   height: calc(12 * var(--element-width));
   padding: calc(3.4 * var(--element-width)) calc(3.8 * var(--element-width));
   font-size: calc(3.8 * var(--element-width));
-  font-weight: 600;
+  font-weight: 700;
   border: none;
   border-radius: calc(2 * var(--element-width));
   cursor: pointer;
@@ -182,7 +182,7 @@
 
 .auth-modal__divider span {
   font-size: calc(3.4 * var(--element-width));
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-muted);
 }
 

@@ -79,7 +79,7 @@
 
 .friends-modal__date-text {
   font-size: calc(3.4 * var(--element-width));
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
@@ -106,7 +106,7 @@
 .friends-modal__score-rank {
   width: calc(3 * var(--element-width));
   font-size: calc(4 * var(--element-width));
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   text-align: center;
   flex-shrink: 0;
@@ -198,7 +198,7 @@
   height: calc(12 * var(--element-width));
   padding: calc(3.4 * var(--element-width)) calc(3.8 * var(--element-width));
   font-size: calc(3.8 * var(--element-width));
-  font-weight: 600;
+  font-weight: 700;
   border: none;
   border-radius: calc(2 * var(--element-width));
   cursor: pointer;

@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import Lottie from 'lottie-react'
-import { preloadQuizData } from '../utils/dataPreloader'
+import { getQuestionsPromise, getStatsPromise } from '../utils/dataPreloader'
 import { useAuth } from '../contexts/AuthContext'
 import './WelcomeScreen.css'
 
-function WelcomeScreen({ onStart, animationData, lottieInstance, setLottieInstance, isExiting = false }) {
+function WelcomeScreen({ onStart, animationData, backgroundFetchesStarted, lottieInstance, setLottieInstance, isExiting = false }) {
   const { currentUser, profileLoaded } = useAuth()
   const [showLoadingBtn, setShowLoadingBtn] = useState(false)
   const [showReadyBtn, setShowReadyBtn] = useState(false)
@@ -15,17 +15,21 @@ function WelcomeScreen({ onStart, animationData, lottieInstance, setLottieInstan
   const [quizDataReady, setQuizDataReady] = useState(false)
   const lottieRef = useRef(null)
 
-  // Preload quiz data on mount
+  // Wait for quiz data (App starts preload only after Lottie finishes; promises exist once background fetches have started)
   useEffect(() => {
-    const { questionsPromise, statsPromise } = preloadQuizData()
+    if (!animationData && !backgroundFetchesStarted) return
+    const questionsPromise = getQuestionsPromise()
+    const statsPromise = getStatsPromise()
+    if (!questionsPromise || !statsPromise) return
     Promise.all([questionsPromise, statsPromise])
       .then(() => setQuizDataReady(true))
       .catch(() => setQuizDataReady(true))
-  }, [])
+  }, [animationData, backgroundFetchesStarted])
 
   // Run Lottie and sequence when Lottie is ready
   useEffect(() => {
     if (!lottieInstance) return
+    window.__perfLog?.('lottie animation begins')
     lottieInstance.play()
     const creditTimer = setTimeout(() => setShowCredit(true), 500)
     const titleTimer = setTimeout(() => {
@@ -52,6 +56,7 @@ function WelcomeScreen({ onStart, animationData, lottieInstance, setLottieInstan
   const authReady = !currentUser || profileLoaded
   useEffect(() => {
     if (quizDataReady && showLoadingBtn && authReady) {
+      window.__perfLog?.('play button shown')
       setShowLoadingBtn(false)
       setShowReadyBtn(true)
       setShowQuizNumber(true)

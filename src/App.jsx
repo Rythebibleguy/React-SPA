@@ -7,17 +7,14 @@ import { useAuth } from './contexts/AuthContext'
 import { BASE_DATA_URL } from './config'
 import { preloadQuizData } from './utils/dataPreloader'
 
-// Clear quiz state on page load (before any components mount)
-sessionStorage.removeItem('quizState')
-
 function App() {
   useViewportUnits()
   const { currentUser } = useAuth()
   const [showWelcome, setShowWelcome] = useState(true)
   const [welcomeExiting, setWelcomeExiting] = useState(false)
   const [animationData, setAnimationData] = useState(null)
-  const [statisticsAnimationData, setStatisticsAnimationData] = useState(null)
   const [lottieInstance, setLottieInstance] = useState(null)
+  const [backgroundFetchesStarted, setBackgroundFetchesStarted] = useState(false)
 
   const handleWelcomeStart = () => {
     setWelcomeExiting(true)
@@ -27,24 +24,23 @@ function App() {
     }, 250)
   }
 
-  // Start preloading quiz questions + stats as soon as app mounts (so they're ready when user hits Play)
+  // Load Bible Lottie first (critical for visual chain); only then start other fetches so Lottie gets full network
   useEffect(() => {
-    preloadQuizData()
-  }, [])
-
-  // Load Lottie animations once on app mount (non-critical, after first paint)
-  useEffect(() => {
-    // Load Bible animation
+    window.__perfLog?.('lottie fetch starts')
     fetch(`${BASE_DATA_URL}/assets/animations/Book with bookmark.json`)
       .then(res => res.json())
-      .then(data => setAnimationData(data))
-      .catch(err => {/* Failed to load animation */})
-    
-    // Load Statistics animation for Stats modal guest content
-    fetch(`${BASE_DATA_URL}/assets/animations/Statistics.json`)
-      .then(res => res.json())
-      .then(data => setStatisticsAnimationData(data))
-      .catch(err => {/* Failed to load animation */})
+      .then(data => {
+        window.__perfLog?.('lottie fetch complete')
+        setAnimationData(data)
+        window.__perfLog?.('background fetches start')
+        setBackgroundFetchesStarted(true)
+        preloadQuizData()
+      })
+      .catch(() => {
+        window.__perfLog?.('background fetches start')
+        setBackgroundFetchesStarted(true)
+        preloadQuizData()
+      })
   }, [])
 
   // Prevent pinch zoom on mobile
@@ -74,15 +70,14 @@ function App() {
         <WelcomeScreen
           onStart={handleWelcomeStart}
           animationData={animationData}
+          backgroundFetchesStarted={backgroundFetchesStarted}
           lottieInstance={lottieInstance}
           setLottieInstance={setLottieInstance}
           isExiting={welcomeExiting}
         />
       ) : (
         <>
-          <QuizScreen
-            statisticsAnimationData={statisticsAnimationData}
-          />
+          <QuizScreen />
         </>
       )}
     </>
