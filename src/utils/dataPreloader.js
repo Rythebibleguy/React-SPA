@@ -1,7 +1,7 @@
 import { ref, get } from 'firebase/database';
 import { db } from '../config/firebase';
 import { getTodayString } from './csvParser';
-import { BASE_DATA_URL } from '../config';
+import { BASE_DATA_URL, STATS_API_URL } from '../config';
 
 // Cache to store preloaded data
 const cache = {
@@ -10,6 +10,32 @@ const cache = {
   questionsPromise: null,
   statsPromise: null
 };
+
+/** Normalize RTDB stats (same shape from Worker or RTDB) */
+function normalizeStatsData(data) {
+  if (!data || typeof data !== 'object') return {};
+  const normalizedData = {};
+  Object.keys(data).forEach(questionKey => {
+    if (questionKey === 'scores') {
+      normalizedData[questionKey] = data[questionKey];
+      return;
+    }
+    const questionStats = data[questionKey];
+    if (!questionStats || typeof questionStats !== 'object') return;
+    const normalizedQuestionStats = {};
+    Object.keys(questionStats).forEach(answerKey => {
+      const match = answerKey.match(/_a(\d+)$/);
+      if (match) {
+        const answerId = match[1];
+        normalizedQuestionStats[answerId] = (normalizedQuestionStats[answerId] || 0) + questionStats[answerKey];
+      } else {
+        normalizedQuestionStats[answerKey] = (normalizedQuestionStats[answerKey] || 0) + questionStats[answerKey];
+      }
+    });
+    normalizedData[questionKey] = normalizedQuestionStats;
+  });
+  return normalizedData;
+}
 
 /**
  * Preload both questions and stats - starts fetching immediately
@@ -45,59 +71,47 @@ export function preloadQuizData() {
   }
 
   if (!cache.statsPromise) {
-    const testLog = (label) => console.log(`[testing][${Math.round(performance.now())}ms] ${label}`)
-    testLog('stats: ref created, get() starting')
-    const statsRef = ref(db, `quiz_stats/${todayString}`)
+    const finishStats = (data, source) => {
+      window.__perfLog?.(`stats fetch finished (${source})`);
+      return data;
+    };
 
-    cache.statsPromise = get(statsRef)
-      .then(snapshot => {
-        testLog('stats: get() resolved, snapshot received')
-        if (snapshot.exists()) {
-          testLog('stats: snapshot.exists() true, calling val()')
-          const data = snapshot.val()
-          const payloadStr = JSON.stringify(data)
-          testLog(`stats: val() returned, payload ~${(payloadStr.length / 1024).toFixed(2)} KB (${payloadStr.length} chars), ${Object.keys(data).length} top-level keys - normalizing`)
-          // Normalize old format keys (2026-02-11_q0_a0) to new format (0)
-          const normalizedData = {}
-          Object.keys(data).forEach(questionKey => {
-            if (questionKey === 'scores') {
-              normalizedData[questionKey] = data[questionKey]
-              return
-            }
-            const questionStats = data[questionKey]
-            const normalizedQuestionStats = {}
-            Object.keys(questionStats).forEach(answerKey => {
-              const match = answerKey.match(/_a(\d+)$/)
-              if (match) {
-                const answerId = match[1]
-                normalizedQuestionStats[answerId] = (normalizedQuestionStats[answerId] || 0) + questionStats[answerKey]
-              } else {
-                normalizedQuestionStats[answerKey] = (normalizedQuestionStats[answerKey] || 0) + questionStats[answerKey]
-              }
-            })
-            normalizedData[questionKey] = normalizedQuestionStats
-          })
-          testLog('stats: normalization done, writing cache')
-          cache.stats = normalizedData
-          return normalizedData
-        } else {
-          testLog('stats: snapshot.exists() false, empty cache')
-          cache.stats = {}
-          return {}
-        }
-      })
-      .then(data => {
-        testLog('stats: promise chain done')
-        window.__perfLog?.('stats fetch finished')
-        return data
-      })
-      .catch(error => {
-        testLog(`stats: get() failed - ${error?.message || error}`)
-        cache.stats = {}
-        cache.statsPromise = null
-        window.__perfLog?.('stats fetch finished')
-        return {}
-      })
+    const tryWorker = () => {
+      if (!STATS_API_URL) return Promise.reject(new Error('no stats API'));
+      const url = `${STATS_API_URL}?date=${encodeURIComponent(todayString)}`;
+      return fetch(url)
+        .then(res => {
+          if (!res.ok) throw new Error(`Worker ${res.status}`);
+          return res.json();
+        })
+        .then(data => {
+          const normalized = normalizeStatsData(data);
+          cache.stats = normalized;
+          return normalized;
+        })
+        .then(data => finishStats(data, 'Cloudflare Worker'));
+    };
+
+    const tryRTDB = () => {
+      const statsRef = ref(db, `quiz_stats/${todayString}`);
+      return get(statsRef)
+        .then(snapshot => {
+          const data = snapshot.exists() ? snapshot.val() : null;
+          const normalized = normalizeStatsData(data || {});
+          cache.stats = normalized;
+          return normalized;
+        })
+        .then(data => finishStats(data, 'RTDB'));
+    };
+
+    cache.statsPromise = tryWorker()
+      .catch(() => tryRTDB())
+      .catch(() => {
+        cache.stats = {};
+        cache.statsPromise = null;
+        window.__perfLog?.('stats fetch finished (failed)');
+        return {};
+      });
   }
 
   return {

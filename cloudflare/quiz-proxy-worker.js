@@ -1,8 +1,9 @@
 /**
  * Cloudflare Worker for rythebibleguy.com/quiz
- * Updated for Relative Pathing & Same-Origin Assets
+ * - /quiz/api/* is delegated to the quiz-answerstats worker (requires Service binding "QUIZ_ANSWERSTATS").
+ * - /quiz and /quiz/* are proxied to Pages (SPA + assets).
  *
- * Deploy: Copy this file into the Cloudflare Workers dashboard (pasted, not pulled from repo).
+ * Deploy: Paste this file into the Cloudflare Workers dashboard.
  */
 
 export default {
@@ -10,6 +11,11 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
     const pagesHost = 'react-spa-57t.pages.dev';
+
+    // 0. Delegate /quiz/api/* to the answer-stats worker (so stats API returns JSON, not the SPA)
+    if (path.startsWith('/quiz/api/') && env.QUIZ_ANSWERSTATS) {
+      return env.QUIZ_ANSWERSTATS.fetch(request);
+    }
 
     // 1. Force the trailing slash for the root /quiz path
     if (path === '/quiz') {
