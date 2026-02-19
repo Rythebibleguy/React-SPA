@@ -45,57 +45,59 @@ export function preloadQuizData() {
   }
 
   if (!cache.statsPromise) {
-    const statsRef = ref(db, `quiz_stats/${todayString}`);
-    
+    const testLog = (label) => console.log(`[testing][${Math.round(performance.now())}ms] ${label}`)
+    testLog('stats: ref created, get() starting')
+    const statsRef = ref(db, `quiz_stats/${todayString}`)
+
     cache.statsPromise = get(statsRef)
       .then(snapshot => {
+        testLog('stats: get() resolved, snapshot received')
         if (snapshot.exists()) {
-          const data = snapshot.val();
-          
+          testLog('stats: snapshot.exists() true, calling val()')
+          const data = snapshot.val()
+          const payloadStr = JSON.stringify(data)
+          testLog(`stats: val() returned, payload ~${(payloadStr.length / 1024).toFixed(2)} KB (${payloadStr.length} chars), ${Object.keys(data).length} top-level keys - normalizing`)
           // Normalize old format keys (2026-02-11_q0_a0) to new format (0)
-          const normalizedData = {};
+          const normalizedData = {}
           Object.keys(data).forEach(questionKey => {
             if (questionKey === 'scores') {
-              normalizedData[questionKey] = data[questionKey];
-              return;
+              normalizedData[questionKey] = data[questionKey]
+              return
             }
-            
-            const questionStats = data[questionKey];
-            const normalizedQuestionStats = {};
-            
+            const questionStats = data[questionKey]
+            const normalizedQuestionStats = {}
             Object.keys(questionStats).forEach(answerKey => {
-              // Check if it's old format: YYYY-MM-DD_qN_aN
-              const match = answerKey.match(/_a(\d+)$/);
+              const match = answerKey.match(/_a(\d+)$/)
               if (match) {
-                // Old format - extract just the answer ID
-                const answerId = match[1];
-                normalizedQuestionStats[answerId] = (normalizedQuestionStats[answerId] || 0) + questionStats[answerKey];
+                const answerId = match[1]
+                normalizedQuestionStats[answerId] = (normalizedQuestionStats[answerId] || 0) + questionStats[answerKey]
               } else {
-                // New format - use as is
-                normalizedQuestionStats[answerKey] = (normalizedQuestionStats[answerKey] || 0) + questionStats[answerKey];
+                normalizedQuestionStats[answerKey] = (normalizedQuestionStats[answerKey] || 0) + questionStats[answerKey]
               }
-            });
-            
-            normalizedData[questionKey] = normalizedQuestionStats;
-          });
-          
-          cache.stats = normalizedData;
-          return normalizedData;
+            })
+            normalizedData[questionKey] = normalizedQuestionStats
+          })
+          testLog('stats: normalization done, writing cache')
+          cache.stats = normalizedData
+          return normalizedData
         } else {
-          cache.stats = {};
-          return {};
+          testLog('stats: snapshot.exists() false, empty cache')
+          cache.stats = {}
+          return {}
         }
       })
       .then(data => {
+        testLog('stats: promise chain done')
         window.__perfLog?.('stats fetch finished')
-        return data;
+        return data
       })
       .catch(error => {
-        cache.stats = {};
-        cache.statsPromise = null; // Reset on error so it can retry
+        testLog(`stats: get() failed - ${error?.message || error}`)
+        cache.stats = {}
+        cache.statsPromise = null
         window.__perfLog?.('stats fetch finished')
-        return {};
-      });
+        return {}
+      })
   }
 
   return {
