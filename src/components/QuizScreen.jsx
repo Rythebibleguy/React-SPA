@@ -25,7 +25,7 @@ const difficultyLabels = {
 function QuizScreen() {
   const { questions, loading, error } = useQuizData()
   const { stats, loading: statsLoading } = useQuizStats()
-  const { currentUser, completeQuiz, userProfile, updateUserProfile } = useAuth()
+  const { currentUser, completeQuiz, userProfile, updateUserProfile, loadUserPrivateData } = useAuth()
 
   const [quizEntering, setQuizEntering] = useState(false)
   const [headerModal, setHeaderModal] = useState(null)
@@ -49,6 +49,9 @@ function QuizScreen() {
         .then(res => res.json())
         .then(data => setStatisticsAnimationData(data))
         .catch(() => {})
+      if (currentUser) {
+        loadUserPrivateData().catch(() => {})
+      }
     }
     if (typeof requestIdleCallback !== 'undefined') {
       const id = requestIdleCallback(preload, { timeout: 2000 })
@@ -56,7 +59,7 @@ function QuizScreen() {
     }
     const t = setTimeout(preload, 500)
     return () => clearTimeout(t)
-  }, [])
+  }, [currentUser, loadUserPrivateData])
 
   const closeHeaderModal = () => setHeaderModal(null)
 

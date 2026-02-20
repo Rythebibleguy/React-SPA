@@ -74,6 +74,14 @@
   position: relative;
 }
 
+/* Prevent mobile browsers from styling/clicking auto-detected email as mailto link */
+.profile-modal__value a {
+  color: inherit;
+  text-decoration: none;
+  pointer-events: none;
+  cursor: default;
+}
+
 .profile-modal__edit-btn {
   position: absolute;
   right: calc(2.8 * var(--element-width));

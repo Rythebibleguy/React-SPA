@@ -43,17 +43,14 @@ function ProfileModal({ isOpen, onClose, onCloseStart, userProfile, currentUser,
   const [isEditing, setIsEditing] = useState(false)
   const [editedName, setEditedName] = useState('')
   const [nameError, setNameError] = useState('')
-  const [userEmail, setUserEmail] = useState('')
-  const { isDisplayNameExists, getUserPrivateData, logout } = useAuth()
+  const { isDisplayNameExists, userPrivateData, loadUserPrivateData, logout } = useAuth()
 
+  // If modal opens and private data isn't loaded yet (e.g. opened before preload), fetch it
   useEffect(() => {
-    if (isOpen && currentUser) {
-      getUserPrivateData().then(privateData => {
-        const email = privateData?.email || currentUser.email || ''
-        setUserEmail(email)
-      }).catch(() => setUserEmail(currentUser.email || ''))
+    if (isOpen && currentUser && userPrivateData === null) {
+      loadUserPrivateData().catch(() => {})
     }
-  }, [isOpen, currentUser, getUserPrivateData])
+  }, [isOpen, currentUser, userPrivateData, loadUserPrivateData])
 
   const handleCloseProfile = () => {
     modalRef.current?.close()
@@ -222,7 +219,7 @@ function ProfileModal({ isOpen, onClose, onCloseStart, userProfile, currentUser,
           <div className="profile-modal__field">
             <label className="profile-modal__label">Email</label>
             <div className="profile-modal__value">
-              {userEmail || 'No email'}
+              {userPrivateData?.email || currentUser?.email || 'No email'}
             </div>
           </div>
       </div>

@@ -34,6 +34,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null)
   const [userProfile, setUserProfile] = useState(null)
+  const [userPrivateData, setUserPrivateData] = useState(null)
   const [profileLoaded, setProfileLoaded] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -98,6 +99,7 @@ export function AuthProvider({ children }) {
     try {
       setError(null)
       setUserProfile(null)
+      setUserPrivateData(null)
       const result = await signOut(auth)
       return result
     } catch (error) {
@@ -265,6 +267,18 @@ export function AuthProvider({ children }) {
       const privateRef = doc(firestore, 'usersPrivate', uid)
       const privateSnap = await getDoc(privateRef)
       return privateSnap.exists() ? privateSnap.data() : null
+    } catch (error) {
+      return null
+    }
+  }
+
+  // Load and store user's private data in context (for profile modal, etc.)
+  async function loadUserPrivateData() {
+    if (!currentUser?.uid) return null
+    try {
+      const data = await getUserPrivateData(currentUser.uid)
+      setUserPrivateData(data)
+      return data
     } catch (error) {
       return null
     }
@@ -522,6 +536,7 @@ export function AuthProvider({ children }) {
       } else {
         setCurrentUser(null)
         setUserProfile(null)
+        setUserPrivateData(null)
         setProfileLoaded(true) // No user = "profile" ready (guest)
         setLoading(false)
         window.__perfLog?.('auth fetch finished (guest)')
@@ -540,6 +555,7 @@ export function AuthProvider({ children }) {
   const value = {
     currentUser,
     userProfile,
+    userPrivateData,
     profileLoaded,
     loading,
     error,
@@ -553,6 +569,7 @@ export function AuthProvider({ children }) {
     removeFriend,
     completeQuiz,
     getUserPrivateData,
+    loadUserPrivateData,
     updateUserPrivateData,
     setError,
     isDisplayNameExists
