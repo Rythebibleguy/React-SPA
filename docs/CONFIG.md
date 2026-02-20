@@ -47,6 +47,20 @@ Also: KV namespace binding `QUIZ_STATS_KV`.
 - **RTDB secret (server):** Used only in the Cloudflare Worker as `FIREBASE_RTDB_SECRET`. Create in Firebase Console → Realtime Database → (gear) → Generate secret.
 - **Service account:** If you use Admin SDK in Node scripts, put the JSON key in `service-account.json` or `tools/service-account.json` (both gitignored). Do not commit.
 
+### API key restrictions (Browser key)
+
+When creating or editing the Firebase/Google Cloud API key used by this app, restrict it to **only** these APIs:
+
+| API | Purpose |
+|-----|---------|
+| Cloud Firestore API | Firestore (profiles, etc.) |
+| Identity Toolkit API | Firebase Auth |
+| Token Service API | Auth (Google sign-in, etc.) |
+| Firebase Installations API | Used by the Firebase JS SDK |
+| Firebase Realtime Database API | Client access to Realtime Database (quiz/stats) |
+
+Do **not** enable extra APIs (e.g. Cloud Storage, FCM, Hosting, ML). Use **HTTP referrers** to allow only your site and `localhost` (see same doc or earlier in this file).
+
 ---
 
 ## 5. Other config (non-secret, in repo)
