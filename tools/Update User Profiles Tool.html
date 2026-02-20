@@ -141,21 +141,20 @@ service cloud.firestore {
         <div class="log" id="log"></div>
     </div>
 
+    <!-- Load Firebase config from local file (gitignored). Copy firebase-config.local.example.js to firebase-config.local.js -->
+    <script src="firebase-config.local.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, getDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // ========== STATIC: Firebase init + helpers (do not edit) ==========
-        const firebaseConfig = {
-            apiKey: "AIzaSyB7nwzw6917n2ro0mP-E5wNI8GqeZb0FVk",
-            authDomain: "rythebibleguy-app.firebaseapp.com",
-            databaseURL: "https://rythebibleguy-app-default-rtdb.firebaseio.com",
-            projectId: "rythebibleguy-app",
-            storageBucket: "rythebibleguy-app.firebasestorage.app",
-            messagingSenderId: "1093957559131",
-            appId: "1:1093957559131:web:5fa9bc7847738f4219f07e",
-            measurementId: "G-46ZN87VGZR"
-        };
+        if (!window.__FIREBASE_CONFIG__) {
+            document.getElementById('status').textContent = 'Missing config: copy tools/firebase-config.local.example.js to firebase-config.local.js and add your Firebase credentials (never commit that file).';
+            document.getElementById('status').className = 'status error';
+            document.getElementById('scanBtn').disabled = true;
+            throw new Error('Firebase config missing. Create firebase-config.local.js from firebase-config.local.example.js.');
+        }
+        const firebaseConfig = window.__FIREBASE_CONFIG__;
         const app = initializeApp(firebaseConfig);
         const firestore = getFirestore(app);
 

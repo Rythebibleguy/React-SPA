@@ -5,14 +5,14 @@ import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, collection, q
 import { getPerformance } from 'firebase/performance';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyB7nwzw6917n2ro0mP-E5wNI8GqeZb0FVk",
-    authDomain: "rythebibleguy-app.firebaseapp.com",
-    databaseURL: "https://rythebibleguy-app-default-rtdb.firebaseio.com",
-    projectId: "rythebibleguy-app",
-    storageBucket: "rythebibleguy-app.firebasestorage.app",
-    messagingSenderId: "1093957559131",
-    appId: "1:1093957559131:web:5fa9bc7847738f4219f07e",
-    measurementId: "G-46ZN87VGZR"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);

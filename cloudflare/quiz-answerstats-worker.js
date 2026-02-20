@@ -5,9 +5,10 @@
  *
  * Deploy: Paste this file into the Cloudflare Dashboard (Workers & Pages → Create/edit worker).
  * Add KV binding "QUIZ_STATS_KV", secret "FIREBASE_RTDB_SECRET", cron "0 * * * *", and route for /quiz/api/quiz-stats.
+ * Optional env var: FIREBASE_RTDB_BASE (defaults to rythebibleguy-app RTDB URL).
  */
 
-const RTDB_BASE = 'https://rythebibleguy-app-default-rtdb.firebaseio.com';
+const DEFAULT_RTDB_BASE = 'https://rythebibleguy-app-default-rtdb.firebaseio.com';
 
 function dateKey(dateStr) {
   return `stats:${dateStr}`;
@@ -20,8 +21,8 @@ function toYYYYMMDD(d) {
   return `${y}-${m}-${day}`;
 }
 
-async function fetchFromRTDB(dateStr, secret) {
-  const url = `${RTDB_BASE}/quiz_stats/${dateStr}.json?auth=${secret}`;
+async function fetchFromRTDB(rtdbBase, dateStr, secret) {
+  const url = `${rtdbBase}/quiz_stats/${dateStr}.json?auth=${secret}`;
   const res = await fetch(url);
   if (!res.ok) return null;
   const text = await res.text();
@@ -64,6 +65,7 @@ export default {
   async scheduled(controller, env, ctx) {
     const secret = env.FIREBASE_RTDB_SECRET;
     if (!secret) return;
+    const rtdbBase = env.FIREBASE_RTDB_BASE || DEFAULT_RTDB_BASE;
     const now = new Date();
     const dates = [
       toYYYYMMDD(now),
@@ -71,7 +73,7 @@ export default {
       toYYYYMMDD(new Date(now.getTime() + 86400000)),
     ];
     for (const dateStr of dates) {
-      const data = await fetchFromRTDB(dateStr, secret);
+      const data = await fetchFromRTDB(rtdbBase, dateStr, secret);
       const key = dateKey(dateStr);
       await env.QUIZ_STATS_KV.put(key, JSON.stringify(data ?? {}));
     }
