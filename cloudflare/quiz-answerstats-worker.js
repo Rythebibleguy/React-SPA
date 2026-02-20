@@ -4,8 +4,11 @@
  * - Cron (hourly): fetch today's stats from Firebase RTDB, write to KV.
  *
  * Deploy: Paste this file into the Cloudflare Dashboard (Workers & Pages → Create/edit worker).
- * Add KV binding "QUIZ_STATS_KV", secret "FIREBASE_RTDB_SECRET", cron "0 * * * *", and route for /quiz/api/quiz-stats.
- * Optional env var: FIREBASE_RTDB_BASE (defaults to rythebibleguy-app RTDB URL).
+ * - Add KV namespace binding: name "QUIZ_STATS_KV".
+ * - Add secret: FIREBASE_RTDB_SECRET (Firebase RTDB auth token).
+ * - Add trigger: Cron "0 * * * *" (hourly).
+ * - Use the worker’s default .workers.dev URL, or add a custom route (e.g. yourdomain.com/quiz/api/quiz-stats) if desired.
+ * Optional env: FIREBASE_RTDB_BASE (defaults to rythebibleguy-app RTDB URL).
  */
 
 const DEFAULT_RTDB_BASE = 'https://rythebibleguy-app-default-rtdb.firebaseio.com';

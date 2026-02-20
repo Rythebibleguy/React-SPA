@@ -105,7 +105,12 @@ export function preloadQuizData() {
     };
 
     cache.statsPromise = tryStatsApi()
-      .catch(() => tryRTDB())
+      .catch((err) => {
+        if (window.__perfLog) {
+          window.__perfLog(`stats Stats API failed, falling back to RTDB: ${err?.message || err}`);
+        }
+        return tryRTDB();
+      })
       .catch(() => {
         cache.stats = {};
         cache.statsPromise = null;
