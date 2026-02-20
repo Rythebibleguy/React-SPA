@@ -153,7 +153,7 @@ function StatsModal({
               </div>
             </div>
             <h2 className="stats-modal__name">
-              {(userProfile?.displayName || currentUser?.displayName || 'User').toLowerCase()}
+              {userProfile?.displayName || currentUser?.displayName || 'User'}
             </h2>
           </div>
           {showSettingsButton && (

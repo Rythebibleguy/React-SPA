@@ -118,14 +118,19 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Check if displayName already exists (comparison is case-insensitive; we store lowercase)
+  // Check if displayName already exists (case-insensitive: "ryan" and "ryAn" are the same)
   async function isDisplayNameExists(displayName) {
     try {
       const normalized = (displayName || '').trim().toLowerCase()
+      if (!normalized) return false
       const usersRef = collection(firestore, 'users')
-      const q = query(usersRef, where('displayName', '==', normalized))
-      const querySnapshot = await getDocs(q)
-      return !querySnapshot.empty
+      const q = query(usersRef, where('displayNameLower', '==', normalized))
+      const snapshot = await getDocs(q)
+      if (!snapshot.empty) return true
+      // Legacy: users created before displayNameLower may only have displayName; check that too
+      const qLegacy = query(usersRef, where('displayName', '==', normalized))
+      const snapshotLegacy = await getDocs(qLegacy)
+      return !snapshotLegacy.empty
     } catch (error) {
       return false // If error, assume displayName doesn't exist
     }
@@ -157,7 +162,8 @@ export function AuthProvider({ children }) {
    * FIREBASE USER PROFILE SCHEMA
    * 
    * @typedef {Object} UserProfile (Public Profile - users/{uid})
-   * @property {string} displayName - Random username (user12345) for Google signups, custom name for others
+   * @property {string} displayName - Display name as entered by user (any casing)
+   * @property {string} displayNameLower - Lowercase copy for case-insensitive uniqueness checks
    * @property {string} avatarColor - Generated color for avatar (e.g. "#74b9ff")
    * @property {string} createdOn - Account creation date as string (YYYY-MM-DD)
    * @property {number} quizzesTaken - Total unique quizzes completed
@@ -203,14 +209,15 @@ export function AuthProvider({ children }) {
         // Default avatar color (Sky Blue)
         const defaultColor = '#64B5F6'
         
-        // Generate random displayName for Google signups, use provided name for others (stored lowercase)
+        // Generate random displayName for Google signups, use provided name for others (stored as entered; displayNameLower for case-insensitive uniqueness)
         const isGoogleSignup = additionalData.signUpMethod === 'google' || !additionalData.signUpMethod
         const rawName = isGoogleSignup ? await generateRandomDisplayName() : (additionalData.displayName || displayName || 'Anonymous')
-        const publicDisplayName = rawName.trim().toLowerCase()
+        const publicDisplayName = rawName.trim()
         
         // Public profile data (readable by friends) — only public fields; do not spread additionalData (signUpMethod etc. go to usersPrivate only)
         const profileData = {
           displayName: publicDisplayName,
+          displayNameLower: publicDisplayName.toLowerCase(),
           avatarColor: additionalData.avatarColor || defaultColor,
           avatarBadge: 'letter', // Badge ID to display in avatar ('letter' = show initial)
           createdOn: createdOnDate,
@@ -454,19 +461,27 @@ export function AuthProvider({ children }) {
   // Update user profile data (for other updates like sharing)
   async function updateUserProfile(updates) {
     if (!currentUser) return
-    
+
+    // When displayName is updated, also set displayNameLower so case-insensitive uniqueness checks work
+    const applied = { ...updates }
+    if (Object.prototype.hasOwnProperty.call(applied, 'displayName')) {
+      const trimmed = (applied.displayName ?? '').trim()
+      applied.displayName = trimmed
+      applied.displayNameLower = trimmed.toLowerCase()
+    }
+
     // Update local state immediately for instant feedback
-    setUserProfile(prev => ({ ...prev, ...updates }))
-    
+    setUserProfile(prev => ({ ...prev, ...applied }))
+
     // Then update Firebase in background
     try {
       const userRef = doc(firestore, 'users', currentUser.uid)
-      await updateDoc(userRef, updates)
+      await updateDoc(userRef, applied)
     } catch (error) {
       // Revert local state on error
       setUserProfile(prev => {
         const reverted = { ...prev }
-        Object.keys(updates).forEach(key => delete reverted[key])
+        Object.keys(applied).forEach(key => delete reverted[key])
         return reverted
       })
       throw error

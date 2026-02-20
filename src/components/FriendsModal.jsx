@@ -273,7 +273,7 @@ function FriendsModal({
                       </div>
                       <div className="friends-modal__score-name-wrap">
                         <span className="friends-modal__score-name">
-                          {row.isCurrentUser ? 'Me' : (row.displayName || '').toLowerCase()}
+                          {row.isCurrentUser ? 'Me' : (row.displayName || '')}
                         </span>
                       </div>
                       <div className="friends-modal__score-right">
