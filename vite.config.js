@@ -5,8 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
-    // Use /quiz/ as base path so all assets are served through rythebibleguy.com
-    // The Cloudflare Worker proxies these requests to Pages behind the scenes
+    // Production: app is served at /quiz/ on the origin (Siteground/WordPress)
     base: mode === 'production' 
       ? '/quiz/' 
       : '/',

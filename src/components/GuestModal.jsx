@@ -47,7 +47,7 @@ function GuestModal({
         )}
         {variant === 'friends' && (
           <div className="guest-modal__graphic">
-            <img src="/assets/images/friends-graphic.png" alt="" className="guest-modal__graphic-img" />
+            <img src={`${import.meta.env.BASE_URL}assets/images/friends-graphic.png`} alt="" className="guest-modal__graphic-img" />
           </div>
         )}
 

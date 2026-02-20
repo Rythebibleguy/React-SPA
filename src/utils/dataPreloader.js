@@ -11,7 +11,7 @@ const cache = {
   statsPromise: null
 };
 
-/** Normalize RTDB stats (same shape from Worker or RTDB) */
+/** Normalize stats (same shape from Stats API or RTDB) */
 function normalizeStatsData(data) {
   if (!data || typeof data !== 'object') return {};
   const normalizedData = {};
@@ -76,12 +76,12 @@ export function preloadQuizData() {
       return data;
     };
 
-    const tryWorker = () => {
+    const tryStatsApi = () => {
       if (!STATS_API_URL) return Promise.reject(new Error('no stats API'));
       const url = `${STATS_API_URL}?date=${encodeURIComponent(todayString)}`;
       return fetch(url)
         .then(res => {
-          if (!res.ok) throw new Error(`Worker ${res.status}`);
+          if (!res.ok) throw new Error(`Stats API ${res.status}`);
           return res.json();
         })
         .then(data => {
@@ -89,7 +89,7 @@ export function preloadQuizData() {
           cache.stats = normalized;
           return normalized;
         })
-        .then(data => finishStats(data, 'Cloudflare Worker'));
+        .then(data => finishStats(data, 'Stats API'));
     };
 
     const tryRTDB = () => {
@@ -104,7 +104,7 @@ export function preloadQuizData() {
         .then(data => finishStats(data, 'RTDB'));
     };
 
-    cache.statsPromise = tryWorker()
+    cache.statsPromise = tryStatsApi()
       .catch(() => tryRTDB())
       .catch(() => {
         cache.stats = {};
