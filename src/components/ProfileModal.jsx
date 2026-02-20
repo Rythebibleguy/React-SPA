@@ -218,8 +218,13 @@ function ProfileModal({ isOpen, onClose, onCloseStart, userProfile, currentUser,
 
           <div className="profile-modal__field">
             <label className="profile-modal__label">Email</label>
-            <div className="profile-modal__value">
-              {userPrivateData?.email || currentUser?.email || 'No email'}
+            <div className="profile-modal__value profile-modal__value--email">
+              {(() => {
+                const email = userPrivateData?.email || currentUser?.email || ''
+                if (!email) return 'No email'
+                // Zero-width space before @ prevents mobile browsers from auto-linking as mailto
+                return email.replace('@', '\u200B@')
+              })()}
             </div>
           </div>
       </div>

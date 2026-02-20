@@ -74,12 +74,19 @@
   position: relative;
 }
 
-/* Prevent mobile browsers from styling/clicking auto-detected email as mailto link */
-.profile-modal__value a {
-  color: inherit;
-  text-decoration: none;
+/* Email is display-only: no link, no copy */
+.profile-modal__value--email a,
+.profile-modal__value--email a:hover,
+.profile-modal__value--email a:visited {
+  color: inherit !important;
+  text-decoration: none !important;
   pointer-events: none;
   cursor: default;
+}
+.profile-modal__value--email {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .profile-modal__edit-btn {
