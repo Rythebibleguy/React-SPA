@@ -222,8 +222,9 @@ function ProfileModal({ isOpen, onClose, onCloseStart, userProfile, currentUser,
               {(() => {
                 const email = userPrivateData?.email || currentUser?.email || ''
                 if (!email) return 'No email'
-                // Zero-width space before @ prevents mobile browsers from auto-linking as mailto
-                return email.replace('@', '\u200B@')
+                const [local, domain] = email.split('@')
+                if (!domain) return email
+                return <><span>{local}</span><span>@</span><span>{domain}</span></>
               })()}
             </div>
           </div>
