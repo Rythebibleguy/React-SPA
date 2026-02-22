@@ -104,6 +104,20 @@
             margin: 0;
             border: 1px solid #ddd;
         }
+        .drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .drop-zone.dragover {
+            border-color: #000;
+            background: #f0f0f0;
+        }
     </style>
 </head>
 <body>
@@ -111,9 +125,9 @@
         <!-- ========== STATIC: Shared layout (before-running box, status, buttons, log) ========== -->
 
         <!-- ========== DYNAMIC: Edit this section for each tool change ========== -->
-        <h1>Copy userPrivate → usersPrivate</h1>
-        <p><strong>Purpose:</strong> Copy all documents from the <code>userPrivate</code> collection into a new collection <code>usersPrivate</code> (same document IDs and data). Does not delete or modify <code>userPrivate</code>.</p>
-        <p style="font-size: 12px; color: #666; font-style: italic;">Use Scan to preview docs to copy, Test to copy your profile only, then Run to copy all.</p>
+        <h1>Update usersPrivate (remove timezone & preferences)</h1>
+        <p><strong>Purpose:</strong> For each document in <code>usersPrivate</code>, <strong>removes</strong> the <code>timezone</code> and <code>preferences</code> fields (in-place).</p>
+        <p style="font-size: 12px; color: #666; font-style: italic;">Use Scan to preview, Test on your profile first, then Run on all.</p>
         <!-- ========== END DYNAMIC (HTML) ========== -->
 
         <div class="warning-box">
@@ -133,77 +147,87 @@ service cloud.firestore {
         </div>
         <div id="status" class="status pending">Ready</div>
         <div class="progress" id="progress"></div>
-        <div class="actions">
-            <button id="scanBtn" onclick="runScan()">Scan / Preview</button>
+        <div class="drop-zone" id="dropZone">or drop your <strong>.env</strong> file here</div>
+        <div class="actions" id="actions">
+            <button id="loadEnvBtn" type="button">Load config from .env file</button>
+            <input type="file" id="envFileInput" accept=".env" style="display: none;">
+            <button id="scanBtn" onclick="runScan()" disabled>Scan / Preview</button>
             <button id="testBtn" onclick="runTest()" disabled>Test on My Profile First</button>
             <button id="migrateBtn" onclick="runMigration()" disabled>Run (Remove from All)</button>
         </div>
         <div class="log" id="log"></div>
     </div>
 
-    <!-- Load Firebase config from local file (gitignored). Copy firebase-config.local.example.js to firebase-config.local.js -->
-    <script src="firebase-config.local.js"></script>
+    <!-- Firebase config: use "Load config from .env file" button below -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, getDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // ========== STATIC: Firebase init + helpers (do not edit) ==========
-        if (!window.__FIREBASE_CONFIG__) {
-            document.getElementById('status').textContent = 'Missing config: copy tools/firebase-config.local.example.js to firebase-config.local.js and add your Firebase credentials (never commit that file).';
-            document.getElementById('status').className = 'status error';
-            document.getElementById('scanBtn').disabled = true;
-            throw new Error('Firebase config missing. Create firebase-config.local.js from firebase-config.local.example.js.');
-        }
-        const firebaseConfig = window.__FIREBASE_CONFIG__;
-        const app = initializeApp(firebaseConfig);
-        const firestore = getFirestore(app);
+        const ENV_KEYS = ['VITE_FIREBASE_API_KEY', 'VITE_FIREBASE_AUTH_DOMAIN', 'VITE_FIREBASE_DATABASE_URL', 'VITE_FIREBASE_PROJECT_ID', 'VITE_FIREBASE_STORAGE_BUCKET', 'VITE_FIREBASE_MESSAGING_SENDER_ID', 'VITE_FIREBASE_APP_ID', 'VITE_FIREBASE_MEASUREMENT_ID'];
+        const CONFIG_KEYS = ['apiKey', 'authDomain', 'databaseURL', 'projectId', 'storageBucket', 'messagingSenderId', 'appId', 'measurementId'];
 
-        function logMessage(message, isError = false) {
-            const logDiv = document.getElementById('log');
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.style.color = isError ? '#721c24' : '#333';
-            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            logDiv.appendChild(entry);
-            logDiv.scrollTop = logDiv.scrollHeight;
+        function parseEnvToConfig(envText) {
+            const env = {};
+            for (const line of envText.split(/\r?\n/)) {
+                const idx = line.indexOf('=');
+                if (idx === -1) continue;
+                const key = line.slice(0, idx).trim();
+                const value = line.slice(idx + 1).trim().replace(/^["']|["']$/g, '');
+                if (key.startsWith('VITE_FIREBASE_')) env[key] = value;
+            }
+            const config = {};
+            for (let i = 0; i < ENV_KEYS.length; i++) config[CONFIG_KEYS[i]] = env[ENV_KEYS[i]] || '';
+            return config;
         }
-        function updateStatus(message, type) {
-            const statusDiv = document.getElementById('status');
-            statusDiv.textContent = message;
-            statusDiv.className = `status ${type}`;
-        }
-        function updateProgress(current, total) {
-            document.getElementById('progress').textContent = `Processing: ${current} / ${total} users`;
-        }
-        function clearLog() {
-            document.getElementById('log').innerHTML = '';
-        }
-        // ========== END STATIC ==========
 
+        function initWithConfig(firebaseConfig) {
+            const app = initializeApp(firebaseConfig);
+            const firestore = getFirestore(app);
 
-        // ========== DYNAMIC: Tool config + handlers (edit for each tool) ==========
-        const SOURCE_COLLECTION = 'userPrivate';
-        const TARGET_COLLECTION = 'usersPrivate';
-        const TEST_USER_DISPLAY_NAME = 'rythebibleguy';
+            function logMessage(message, isError = false) {
+                const logDiv = document.getElementById('log');
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.style.color = isError ? '#721c24' : '#333';
+                entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                logDiv.appendChild(entry);
+                logDiv.scrollTop = logDiv.scrollHeight;
+            }
+            function updateStatus(message, type) {
+                const statusDiv = document.getElementById('status');
+                statusDiv.textContent = message;
+                statusDiv.className = `status ${type}`;
+            }
+            function updateProgress(current, total) {
+                document.getElementById('progress').textContent = `Processing: ${current} / ${total} users`;
+            }
+            function clearLog() {
+                document.getElementById('log').innerHTML = '';
+            }
 
-        window.runScan = async function() {
+            const COLLECTION = 'usersPrivate';
+            const TEST_USER_DISPLAY_NAME = 'rythebibleguy';
+
+            window.runScan = async function() {
             const scanBtn = document.getElementById('scanBtn');
             scanBtn.disabled = true;
             clearLog();
             try {
-                updateStatus('Scanning userPrivate...', 'running');
-                logMessage(`Listing all docs in ${SOURCE_COLLECTION} (read-only)...`);
-                const sourceRef = collection(firestore, SOURCE_COLLECTION);
-                const snapshot = await getDocs(sourceRef);
+                const projectId = firestore.app?.options?.projectId || '(unknown)';
+                logMessage(`Using Firebase project: ${projectId}`);
+                updateStatus(`Scanning ${COLLECTION}...`, 'running');
+                logMessage(`Listing all docs in ${COLLECTION} (read-only)...`);
+                const collRef = collection(firestore, COLLECTION);
+                const snapshot = await getDocs(collRef);
                 const total = snapshot.size;
                 logMessage(`Found ${total} documents.`);
                 logMessage('---');
                 for (const d of snapshot.docs) {
-                    logMessage(`${d.id} (${Object.keys(d.data()).join(', ')}) — would copy to ${TARGET_COLLECTION}`);
+                    logMessage(`${d.id} (${Object.keys(d.data()).join(', ')}) — would remove timezone & preferences`);
                 }
                 logMessage('---');
-                logMessage(`Would copy ${total} documents to ${TARGET_COLLECTION}.`);
-                updateStatus(`Scan complete. ${total} docs in ${SOURCE_COLLECTION} would be copied.`, 'success');
+                logMessage(`Would update ${total} documents in ${COLLECTION}.`);
+                updateStatus(`Scan complete. ${total} docs in ${COLLECTION} would be updated.`, 'success');
                 document.getElementById('testBtn').disabled = false;
             } catch (error) {
                 updateStatus(`Scan failed: ${error.message}`, 'error');
@@ -218,13 +242,13 @@ service cloud.firestore {
             testBtn.disabled = true;
             clearLog();
             try {
-                updateStatus(`Testing: copy your profile (${TEST_USER_DISPLAY_NAME})...`, 'running');
+                updateStatus(`Testing: update your profile (${TEST_USER_DISPLAY_NAME})...`, 'running');
                 logMessage(`Finding uid for displayName "${TEST_USER_DISPLAY_NAME}" in users/...`);
                 const usersRef = collection(firestore, 'users');
                 const usersSnap = await getDocs(usersRef);
                 let testUid = null;
                 for (const userDoc of usersSnap.docs) {
-                    if (userDoc.data().displayName === TEST_USER_DISPLAY_NAME) {
+                    if (userDoc.data().displayName?.toLowerCase() === TEST_USER_DISPLAY_NAME.toLowerCase()) {
                         testUid = userDoc.id;
                         break;
                     }
@@ -235,19 +259,19 @@ service cloud.firestore {
                     testBtn.disabled = false;
                     return;
                 }
-                const sourceRef = doc(firestore, SOURCE_COLLECTION, testUid);
-                const sourceSnap = await getDoc(sourceRef);
-                if (!sourceSnap.exists()) {
-                    updateStatus(`Test: no ${SOURCE_COLLECTION} doc for ${testUid}`, 'success');
-                    logMessage(`No document in ${SOURCE_COLLECTION} for this user — nothing to copy.`);
+                const docRef = doc(firestore, COLLECTION, testUid);
+                const docSnap = await getDoc(docRef);
+                if (!docSnap.exists()) {
+                    updateStatus(`Test: no ${COLLECTION} doc for ${testUid}`, 'success');
+                    logMessage(`No document in ${COLLECTION} for this user — nothing to update.`);
                     migrateBtn.disabled = false;
                     testBtn.disabled = false;
                     return;
                 }
-                const targetRef = doc(firestore, TARGET_COLLECTION, testUid);
-                await setDoc(targetRef, sourceSnap.data());
-                updateStatus(`Test complete: copied ${SOURCE_COLLECTION} → ${TARGET_COLLECTION} for ${testUid}`, 'success');
-                logMessage(`Copied. Run full migration to copy all.`);
+                const { timezone, preferences, ...dataToWrite } = docSnap.data();
+                await setDoc(docRef, dataToWrite);
+                updateStatus(`Test complete: updated ${COLLECTION} for ${testUid}`, 'success');
+                logMessage(`Updated. Run to update all.`);
                 migrateBtn.disabled = false;
             } catch (error) {
                 updateStatus(`Test failed: ${error.message}`, 'error');
@@ -261,21 +285,22 @@ service cloud.firestore {
             btn.disabled = true;
             clearLog();
             try {
-                updateStatus(`Copying ${SOURCE_COLLECTION} → ${TARGET_COLLECTION}...`, 'running');
-                logMessage(`Reading ${SOURCE_COLLECTION}, writing to ${TARGET_COLLECTION}.`);
-                const sourceRef = collection(firestore, SOURCE_COLLECTION);
-                const snapshot = await getDocs(sourceRef);
+                updateStatus(`Updating ${COLLECTION} (removing timezone & preferences)...`, 'running');
+                logMessage(`Reading ${COLLECTION}, writing back without timezone & preferences.`);
+                const collRef = collection(firestore, COLLECTION);
+                const snapshot = await getDocs(collRef);
                 const totalUsers = snapshot.size;
                 logMessage(`Found ${totalUsers} documents`);
-                let processed = 0, copied = 0, errors = 0;
-                for (const sourceDoc of snapshot.docs) {
-                    const uid = sourceDoc.id;
-                    const data = sourceDoc.data();
+                let processed = 0, updated = 0, errors = 0;
+                for (const docSnap of snapshot.docs) {
+                    const uid = docSnap.id;
+                    const data = docSnap.data();
+                    const { timezone, preferences, ...dataToWrite } = data;
                     try {
-                        const targetRef = doc(firestore, TARGET_COLLECTION, uid);
-                        await setDoc(targetRef, data);
-                        copied++;
-                        logMessage(`✅ ${uid.slice(0, 8)}…: copied`);
+                        const docRef = doc(firestore, COLLECTION, uid);
+                        await setDoc(docRef, dataToWrite);
+                        updated++;
+                        logMessage(`✅ ${uid.slice(0, 8)}…: updated`);
                     } catch (error) {
                         errors++;
                         logMessage(`❌ ${uid}: ${error.message}`, true);
@@ -283,9 +308,9 @@ service cloud.firestore {
                     processed++;
                     updateProgress(processed, totalUsers);
                 }
-                updateStatus(`Done. Copied: ${copied}, Errors: ${errors}`, 'success');
+                updateStatus(`Done. Updated: ${updated}, Errors: ${errors}`, 'success');
                 logMessage('=== FINISHED ===');
-                logMessage(`Copied: ${copied}, Errors: ${errors}`);
+                logMessage(`Updated: ${updated}, Errors: ${errors}`);
                 if (errors === 0) {
                     logMessage('Remember to restore secure Firebase rules.');
                 }
@@ -295,7 +320,51 @@ service cloud.firestore {
                 btn.disabled = false;
             }
         };
-        // ========== END DYNAMIC (JS) ==========
+
+            document.getElementById('envFileInput').value = '';
+            document.getElementById('scanBtn').disabled = false;
+            updateStatus('Ready', 'pending');
+        }
+
+        function processEnvFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                const config = parseEnvToConfig(reader.result);
+                const missing = CONFIG_KEYS.filter(k => !config[k]);
+                if (missing.length) {
+                    document.getElementById('status').textContent = 'Missing in .env: ' + missing.join(', ');
+                    document.getElementById('status').className = 'status error';
+                    return;
+                }
+                initWithConfig(config);
+            };
+            reader.readAsText(file);
+        }
+
+        function onEnvFileChosen(e) {
+            processEnvFile(e.target.files[0]);
+        }
+
+        document.getElementById('loadEnvBtn').onclick = () => document.getElementById('envFileInput').click();
+        document.getElementById('envFileInput').onchange = onEnvFileChosen;
+
+        const dropZone = document.getElementById('dropZone');
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) processEnvFile(file);
+        });
+
+        if (window.__FIREBASE_CONFIG__) {
+            initWithConfig(window.__FIREBASE_CONFIG__);
+        } else {
+            document.getElementById('status').textContent = 'Missing config: click "Load config from .env file" and choose your project .env.';
+            document.getElementById('status').className = 'status error';
+        }
     </script>
 </body>
 </html>
