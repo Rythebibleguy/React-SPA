@@ -1,6 +1,13 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script>
+      (function(){
+        if (typeof console === 'undefined' || !console.log) return;
+        var t = typeof performance !== 'undefined' ? Math.round(performance.now()) : 0;
+        console.log('[' + t + 'ms] === CRITICAL PATH STARTED ===');
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="format-detection" content="telephone=no, email=no" />
@@ -14,14 +21,7 @@
     </script>
     <title>Daily Bible Quiz - Test Your Bible Knowledge | Rythebibleguy</title>
     
-    <!-- Google Analytics (ID injected from VITE_GA_MEASUREMENT_ID at build) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=__VITE_GA_MEASUREMENT_ID__"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '__VITE_GA_MEASUREMENT_ID__');
-    </script>
+    <!-- GA, PostHog, Clarity load after Play is ready (see analyticsLoader.js) -->
     
     <!-- SEO Meta Tags -->
     <meta name="description" content="Test your knowledge with our Daily Bible Quiz! New trivia from the Old & New Testament every day. Track scores, challenge friends, and grow in your faith.">
@@ -92,15 +92,13 @@
     <link rel="preconnect" href="https://www.gstatic.com">
     <link rel="preconnect" href="https://rythebibleguy-app-default-rtdb.firebaseio.com">
     
-    <!-- Microsoft Clarity is loaded after first paint (see end of body) -->
+    <!-- Clarity stub (real script loads after Play is ready) -->
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
     <script type="text/javascript">
       (function(){ window.clarity=window.clarity||function(){ (window.clarity.q=window.clarity.q||[]).push(arguments); }; })();
-      function loadClarity(){ var s=document.createElement('script'); s.async=1; s.src='https://www.clarity.ms/tag/__VITE_CLARITY_PROJECT_ID__'; var f=document.getElementsByTagName('script')[0]; f.parentNode.insertBefore(s,f); }
-      if (requestIdleCallback) requestIdleCallback(loadClarity, { timeout: 2000 }); else setTimeout(loadClarity, 500);
     </script>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

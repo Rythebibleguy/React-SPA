@@ -1,21 +1,15 @@
 import { createRoot } from 'react-dom/client'
+import { useState, useCallback } from 'react'
 import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
-import { perf } from './config/firebase'
-import { trace } from 'firebase/performance'
-import posthog from 'posthog-js'
 import { PostHogProvider } from 'posthog-js/react'
 
-// Critical-path perf: track timings, send one PostHog event when welcome flow is ready + Firebase Performance trace
+// Track timings for PostHog welcome_flow_ready event (no Firebase Performance)
 if (typeof performance !== 'undefined') {
   window.__perfStart = performance.timeOrigin
   window.__perfTimings = { page_navigated_to: 0 }
-
-  const welcomeTrace = trace(perf, 'welcome_flow')
-  welcomeTrace.start()
-  window.__perfTrace = welcomeTrace
 
   const labelToKey = (label) => label.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '')
 
@@ -23,27 +17,28 @@ if (typeof performance !== 'undefined') {
     const ms = Math.round(performance.now())
     const key = labelToKey(label)
     if (key && window.__perfTimings) window.__perfTimings[key] = ms
-    if (window.__perfTrace) {
-      if (key) window.__perfTrace.putMetric(key, ms)
-      if (label === 'play button shown') {
-        window.__perfTrace.stop()
-        const t = window.__perfTimings
-        const authMs = t?.auth_completed_guest ?? t?.auth_completed_user
-        const answersMs = t?.answers_data_fetch_Cloudflare ?? t?.answers_data_fetch_Firebase
-        const steps = []
-        if (authMs != null) steps.push({ ms: authMs, props: { auth_completed_ms: authMs, auth_type: t?.auth_type } })
-        if (t?.lottie_animation_started != null) steps.push({ ms: t.lottie_animation_started, props: { time_to_lottie_ms: t.lottie_animation_started } })
-        if (answersMs != null) steps.push({ ms: answersMs, props: { answers_data_fetch_ms: answersMs, answers_data_source: t?.answers_data_source } })
-        if (t?.loading_button_shown != null) steps.push({ ms: t.loading_button_shown, props: { time_to_loading_button_ms: t.loading_button_shown } })
-        if (t?.profile_fetch_finished != null) steps.push({ ms: t.profile_fetch_finished, props: { profile_fetch_ms: t.profile_fetch_finished } })
-        if (t?.play_button_shown != null) steps.push({ ms: t.play_button_shown, props: { time_to_play_button_ms: t.play_button_shown } })
-        steps.sort((a, b) => a.ms - b.ms)
-        const payload = {}
-        steps.forEach((s, i) => {
-          const prefix = `step_${i + 1}_`
-          Object.entries(s.props).forEach(([k, v]) => { if (v != null) payload[prefix + k] = v })
-        })
-        posthog?.capture('welcome_flow_ready', payload)
+    if (label === 'play button shown') {
+      const t = window.__perfTimings
+      const authMs = t?.auth_completed_guest ?? t?.auth_completed_user
+      const answersMs = t?.answers_data_fetch_Cloudflare ?? t?.answers_data_fetch_Firebase
+      const steps = []
+      if (authMs != null) steps.push({ ms: authMs, props: { auth_completed_ms: authMs, auth_type: t?.auth_type } })
+      if (t?.lottie_animation_started != null) steps.push({ ms: t.lottie_animation_started, props: { time_to_lottie_ms: t.lottie_animation_started } })
+      if (answersMs != null) steps.push({ ms: answersMs, props: { answers_data_fetch_ms: answersMs, answers_data_source: t?.answers_data_source } })
+      if (t?.loading_button_shown != null) steps.push({ ms: t.loading_button_shown, props: { time_to_loading_button_ms: t.loading_button_shown } })
+      if (t?.profile_fetch_finished != null) steps.push({ ms: t.profile_fetch_finished, props: { profile_fetch_ms: t.profile_fetch_finished } })
+      if (t?.play_button_shown != null) steps.push({ ms: t.play_button_shown, props: { time_to_play_button_ms: t.play_button_shown } })
+      steps.sort((a, b) => a.ms - b.ms)
+      const payload = {}
+      steps.forEach((s, i) => {
+        const prefix = `step_${i + 1}_`
+        Object.entries(s.props).forEach(([k, v]) => { if (v != null) payload[prefix + k] = v })
+      })
+      if (window.__posthog) {
+        if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] welcome_flow_ready sent`)
+        window.__posthog.capture('welcome_flow_ready', payload)
+      } else {
+        window.__pendingWelcomeFlowPayload = payload
       }
     }
   }
@@ -78,33 +73,45 @@ if (import.meta.env.DEV) {
   })
 }
 
-// Track page load (Clarity stub is in index.html head and queues events)
+// Clarity stub queues events until real script loads (after Play is ready)
 if (window.clarity) {
-  window.clarity("event", "page_loaded")
+  window.clarity('event', 'page_loaded')
 }
 
-// PostHog (only when key is set)
-const posthogKey = (import.meta.env.VITE_POSTHOG_KEY || '').toString().trim()
-if (posthogKey) {
-  posthog.init(posthogKey, {
-    api_host: import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com',
-    person_profiles: 'always',
-    capture_pageview: true,
-  })
+// No-op PostHog client so PostHogProvider never receives null (avoids "no apiKey/client" and "init without token" warnings until loadAnalytics runs).
+const posthogNoop = {
+  capture: () => {},
+  identify: () => {},
+  reset: () => {},
+  group: () => {},
+  getFeatureFlag: () => undefined,
+  getFeatureFlagPayload: () => undefined,
+  isFeatureEnabled: () => false,
+  reloadFeatureFlags: () => Promise.resolve(),
+}
+
+// Analytics (GA, PostHog, Clarity) load after Play is ready via loadAnalytics(setPosthogClient)
+function Root() {
+  const [posthogClient, setPosthogClient] = useState(null)
+  const onPlayReady = useCallback(() => {
+    const analyticsDone = import('./analyticsLoader').then((m) => {
+      m.loadAnalytics(setPosthogClient)
+    })
+    const statsDone = import('./utils/dataPreloader').then((d) => d.getStatsPromise() || Promise.resolve())
+    Promise.all([analyticsDone, statsDone]).then(() => {
+      if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] === DEFERRED PATH FINISHED ===`)
+    })
+  }, [])
+  return (
+    <AuthProvider>
+      <ThemeProvider>
+        <PostHogProvider client={posthogClient ?? posthogNoop}>
+          <App onPlayReady={onPlayReady} />
+        </PostHogProvider>
+      </ThemeProvider>
+    </AuthProvider>
+  )
 }
 
 const root = createRoot(document.getElementById('root'))
-const app = (
-  <AuthProvider>
-    <ThemeProvider>
-      <App />
-    </ThemeProvider>
-  </AuthProvider>
-)
-root.render(
-  posthogKey ? (
-    <PostHogProvider client={posthog}>{app}</PostHogProvider>
-  ) : (
-    app
-  )
-)
+root.render(<Root />)

@@ -8,7 +8,7 @@ import { BASE_DATA_URL } from './config'
 import { preloadQuizData } from './utils/dataPreloader'
 import { usePostHog } from 'posthog-js/react'
 
-function App() {
+function App({ onPlayReady }) {
   useViewportUnits()
   const { currentUser } = useAuth()
   const posthog = usePostHog()
@@ -29,11 +29,13 @@ function App() {
 
   // Load Bible Lottie first (critical for visual chain); only then start other fetches so Lottie gets full network
   useEffect(() => {
+    if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Lottie loading`)
     fetch(`${BASE_DATA_URL}/assets/animations/Book with bookmark.json`)
       .then(res => res.json())
       .then(data => {
         setAnimationData(data)
         setBackgroundFetchesStarted(true)
+        if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Lottie ready`)
         preloadQuizData()
       })
       .catch(() => {
@@ -68,6 +70,7 @@ function App() {
       {showWelcome ? (
         <WelcomeScreen
           onStart={handleWelcomeStart}
+          onPlayReady={onPlayReady}
           animationData={animationData}
           backgroundFetchesStarted={backgroundFetchesStarted}
           lottieInstance={lottieInstance}

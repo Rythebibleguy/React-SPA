@@ -41,6 +41,10 @@ export default defineConfig(({ mode }) => {
     base: mode === 'production' 
       ? '/quiz/' 
       : '/',
+    // Target modern browsers only so we don't ship legacy polyfills (e.g. Math.trunc)
+    build: {
+      target: ['es2022', 'chrome93', 'safari15.4', 'firefox91', 'edge93'],
+    },
     server: {
       host: '0.0.0.0',
       port: 5173

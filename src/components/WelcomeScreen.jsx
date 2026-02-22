@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import Lottie from 'lottie-react'
-import { getQuestionsPromise, getStatsPromise } from '../utils/dataPreloader'
+import { getQuestionsPromise, preloadStats } from '../utils/dataPreloader'
+import { getTodayCompletion } from '../utils/quizCompletionStorage'
 import { useAuth } from '../contexts/AuthContext'
 import './WelcomeScreen.css'
 
-function WelcomeScreen({ onStart, animationData, backgroundFetchesStarted, lottieInstance, setLottieInstance, isExiting = false }) {
-  const { currentUser, profileLoaded } = useAuth()
+function WelcomeScreen({ onStart, onPlayReady, animationData, backgroundFetchesStarted, lottieInstance, setLottieInstance, isExiting = false }) {
+  const { initAuth } = useAuth()
   const [showLoadingBtn, setShowLoadingBtn] = useState(false)
   const [showReadyBtn, setShowReadyBtn] = useState(false)
   const [showQuizNumber, setShowQuizNumber] = useState(false)
@@ -15,14 +16,17 @@ function WelcomeScreen({ onStart, animationData, backgroundFetchesStarted, lotti
   const [quizDataReady, setQuizDataReady] = useState(false)
   const lottieRef = useRef(null)
 
-  // Wait for quiz data (App starts preload only after Lottie finishes; promises exist once background fetches have started)
+  // Wait for questions only (stats load after Play, in QuizScreen)
   useEffect(() => {
     if (!animationData && !backgroundFetchesStarted) return
     const questionsPromise = getQuestionsPromise()
-    const statsPromise = getStatsPromise()
-    if (!questionsPromise || !statsPromise) return
-    Promise.all([questionsPromise, statsPromise])
-      .then(() => setQuizDataReady(true))
+    if (!questionsPromise) return
+    questionsPromise
+      .then(() => {
+        if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] questions ready`)
+        setQuizDataReady(true)
+        getTodayCompletion() // after questions loaded
+      })
       .catch(() => setQuizDataReady(true))
   }, [animationData, backgroundFetchesStarted])
 
@@ -55,16 +59,22 @@ function WelcomeScreen({ onStart, animationData, backgroundFetchesStarted, lotti
     }
   }, [lottieInstance, animationData])
 
-  // Switch to clickable Play when preload is done, loading button has been shown, and (guest or profile loaded)
-  const authReady = !currentUser || profileLoaded
+  // Switch to clickable Play when questions ready and loading button shown (Auth loads after Play ready)
   useEffect(() => {
-    if (quizDataReady && showLoadingBtn && authReady) {
+    if (quizDataReady && showLoadingBtn) {
+      if (import.meta.env.DEV) {
+        console.log(`[${Math.round(performance.now())}ms] === CRITICAL PATH FINISHED ===`)
+        console.log(`[${Math.round(performance.now())}ms] === DEFERRED PATH STARTED ===`)
+      }
+      preloadStats()
+      initAuth?.()
+      onPlayReady?.()
       window.__perfLog?.('play button shown')
       setShowLoadingBtn(false)
       setShowReadyBtn(true)
       setShowQuizNumber(true)
     }
-  }, [quizDataReady, showLoadingBtn, authReady])
+  }, [quizDataReady, showLoadingBtn, initAuth, onPlayReady])
 
   const getTextClass = (isAnimating, variant = 'title') => {
     if (!isAnimating) return ''

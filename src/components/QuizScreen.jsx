@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, lazy, Suspense } from 'react'
+import { useState, useRef, useEffect, useMemo, lazy, Suspense } from 'react'
 import { Lock, Book, ChevronLeft, List, ChevronRight, BarChart2, UserCircle, Settings } from 'lucide-react'
 import { ref, runTransaction } from 'firebase/database'
 import { db } from '../config/firebase'
@@ -7,6 +7,7 @@ import { useQuizData } from '../hooks/useQuizData'
 import { useQuizStats } from '../hooks/useQuizStats'
 import { useAuth } from '../contexts/AuthContext'
 import { getTodayString } from '../utils/csvParser'
+import { getTodayCompletion, setTodayCompletion } from '../utils/quizCompletionStorage'
 import { BASE_DATA_URL } from '../config'
 import { usePostHog } from 'posthog-js/react'
 
@@ -66,13 +67,24 @@ function QuizScreen() {
   const closeHeaderModal = () => setHeaderModal(null)
 
   
-  // Load saved state from user's history if they completed today's quiz (logged-in only)
-  const loadSavedState = () => {
+  // Load saved state once (localStorage first, then profile). Used only for initial state so we don't re-run on every re-render.
+  const savedState = useMemo(() => {
     try {
+      const fromStorage = getTodayCompletion()
+      if (fromStorage?.answers) {
+        if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Quiz: restored from localStorage (already completed today)`)
+        return {
+          currentIndex: 0,
+          selectedAnswers: fromStorage.answers,
+          answerPercentages: {},
+          hasSubmitted: true
+        }
+      }
       if (userProfile?.history) {
         const todayString = getTodayString()
         const todayEntry = userProfile.history.find(entry => entry.date === todayString)
         if (todayEntry?.answers) {
+          if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Quiz: restored from profile history`)
           return {
             currentIndex: 0,
             selectedAnswers: todayEntry.answers,
@@ -85,10 +97,8 @@ function QuizScreen() {
     } catch (e) {
       return null
     }
-  }
-  
-  const savedState = loadSavedState()
-  
+  }, [userProfile?.history])
+
   const [currentIndex, setCurrentIndex] = useState(savedState?.currentIndex ?? 0)
   const [selectedAnswers, setSelectedAnswers] = useState(savedState?.selectedAnswers ?? [])
   const [answerPercentages, setAnswerPercentages] = useState(savedState?.answerPercentages ?? {})
@@ -294,15 +304,18 @@ function QuizScreen() {
     }
   }, [currentIndex, questions.length])
 
-  // Submit all answers and score to Firebase when quiz is complete
+  // Submit all answers and score when quiz is complete (localStorage for everyone; Firebase for auth + RTDB stats)
   const submitQuizResults = async () => {
     const todayString = getTodayString()
     const score = calculateScore()
     const quizEndTime = Date.now()
     const duration = quizStartTimeRef.current ? Math.floor((quizEndTime - quizStartTimeRef.current) / 1000) : null
 
+    setTodayCompletion({ score, totalQuestions: 4, duration, selectedAnswers })
+    if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Quiz complete: localStorage written, submitting RTDB…`)
+
     try {
-      // Submit global quiz stats first (existing logic)
+      // Submit global quiz stats (RTDB)
       const promises = selectedAnswers.map((answerId, qIndex) => {
         const answerRef = ref(db, `quiz_stats/${todayString}/q${qIndex}/${answerId}`)
         return runTransaction(answerRef, (currentCount) => {
@@ -319,9 +332,11 @@ function QuizScreen() {
       )
 
       await Promise.all(promises)
+      if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Quiz complete: RTDB updated`)
       
       // Complete quiz profile update if user is logged in
       if (currentUser) {
+        if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Quiz complete: syncing profile (Firestore)`)
         const result = await completeQuiz(score, 4, duration, selectedAnswers)
         if (!result.success) {
           // Handle error silently, local state already updated

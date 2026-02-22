@@ -41,6 +41,8 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const abortControllerRef = useRef(null)
+  const authInitiatedRef = useRef(false)
+  const unsubscribeAuthRef = useRef(null)
 
   // Sign up with email and password
   async function signUp(email, password, displayName) {
@@ -331,6 +333,7 @@ export function AuthProvider({ children }) {
         setUserProfile(null)
       }
       setProfileLoaded(true)
+      if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Auth: profile loaded`)
       if (window.__perfLog) window.__perfLog('profile fetch finished')
     } catch (error) {
       // Ignore AbortError - this is expected when requests are cancelled
@@ -339,6 +342,7 @@ export function AuthProvider({ children }) {
       }
       setError('Failed to load user profile: ' + error.message)
       setProfileLoaded(true)
+      if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Auth: profile load failed`, error.message)
       if (window.__perfLog) window.__perfLog('profile fetch finished')
     }
   }
@@ -538,30 +542,33 @@ export function AuthProvider({ children }) {
     }
   }
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      // Cancel any pending requests
+  // Deferred: init Auth only when Play is ready (called from WelcomeScreen). Keeps Auth off critical path.
+  function initAuth() {
+    if (authInitiatedRef.current) return
+    authInitiatedRef.current = true
+    if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Auth loading`)
+
+    unsubscribeAuthRef.current = onAuthStateChanged(auth, async (user) => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort()
       }
-      
       if (user) {
+        if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Auth finished (user)`)
         setCurrentUser(user)
         setProfileLoaded(false)
-        setLoading(false) // Set loading false immediately after auth state is determined
+        setLoading(false)
         if (window.__perfLog) {
           window.__perfLog('auth completed (user)')
           if (window.__perfTimings) window.__perfTimings.auth_type = 'user'
         }
-        // Create new AbortController for this request
         abortControllerRef.current = new AbortController()
-        // Load profile in background - don't block app rendering
         loadUserProfile(user, abortControllerRef.current)
       } else {
+        if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Auth finished (guest)`)
         setCurrentUser(null)
         setUserProfile(null)
         setUserPrivateData(null)
-        setProfileLoaded(true) // No user = "profile" ready (guest)
+        setProfileLoaded(true)
         setLoading(false)
         if (window.__perfLog) {
           window.__perfLog('auth completed (guest)')
@@ -569,14 +576,11 @@ export function AuthProvider({ children }) {
         }
       }
     })
+  }
 
-    return () => {
-      // Cancel any pending requests on cleanup
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
-      unsubscribe()
-    }
+  useEffect(() => () => {
+    if (abortControllerRef.current) abortControllerRef.current.abort()
+    if (unsubscribeAuthRef.current) unsubscribeAuthRef.current()
   }, [])
 
   const value = {
@@ -586,6 +590,7 @@ export function AuthProvider({ children }) {
     profileLoaded,
     loading,
     error,
+    initAuth,
     signUp,
     signIn,
     signInWithGoogle,

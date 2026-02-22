@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { getCachedStats, getStatsPromise } from '../utils/dataPreloader';
+import { getCachedStats, getStatsPromise, preloadStats } from '../utils/dataPreloader';
 
 /**
- * Hook to fetch all quiz statistics for today
- * Uses preloaded data if available, otherwise fetches on demand
- * Returns stats object structured as: { q0: { answerId: count }, q1: { answerId: count }, ... }
+ * Hook to fetch all quiz statistics for today. Starts stats fetch when first needed (after Play).
  */
 export function useQuizStats() {
   const [stats, setStats] = useState(null);
@@ -15,30 +13,21 @@ export function useQuizStats() {
     if (hasLoadedRef.current) return;
     hasLoadedRef.current = true;
 
-    // Check if data is already cached
-    const cachedStats = getCachedStats();
-    if (cachedStats !== null) {
-      setStats(cachedStats);
+    const cached = getCachedStats();
+    if (cached !== null) {
+      setStats(cached);
       setLoading(false);
       return;
     }
 
-    // Check if preload is in progress
+    preloadStats();
     const statsPromise = getStatsPromise();
     if (statsPromise) {
-      statsPromise
-        .then(stats => {
-          setStats(stats);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-      return;
+      statsPromise.then(setStats).finally(() => setLoading(false));
+    } else {
+      setStats({});
+      setLoading(false);
     }
-
-    // Fallback: this shouldn't happen if preload was called, but handle it
-    setStats({});
-    setLoading(false);
   }, []);
 
   return { stats, loading };

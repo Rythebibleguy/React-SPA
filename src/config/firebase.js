@@ -2,7 +2,6 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, fetchSignInMethodsForEmail } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, collection, query, where, getDocs } from 'firebase/firestore';
-import { getPerformance } from 'firebase/performance';
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -18,7 +17,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
-const perf = getPerformance(app);
 const firestore = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('email');
@@ -33,7 +31,6 @@ export {
     db,
     auth,
     firestore,
-    perf, 
     googleProvider,
     signInWithPopup, 
     signInWithEmailAndPassword, 

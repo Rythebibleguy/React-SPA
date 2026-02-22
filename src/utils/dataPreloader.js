@@ -38,14 +38,13 @@ function normalizeStatsData(data) {
 }
 
 /**
- * Preload both questions and stats - starts fetching immediately
- * Returns promises that resolve when data is ready
+ * Preload questions only (critical path). Stats load after Play is ready (see preloadStats).
  */
 export function preloadQuizData() {
   const todayString = getTodayString();
 
-  // Only start fetch if not already loading/loaded
   if (!cache.questionsPromise) {
+    if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Questions loading`)
     cache.questionsPromise = fetch(`${BASE_DATA_URL}/data/questions.json`)
       .then(response => {
         if (!response.ok) throw new Error('Failed to fetch questions');
@@ -53,80 +52,74 @@ export function preloadQuizData() {
       })
       .then(allQuestions => {
         const todaysQuestions = allQuestions[todayString] || [];
-        
-        // Shuffle answers for each question
         const shuffledQuestions = todaysQuestions.map(q => ({
           ...q,
           answers: [...q.answers].sort(() => Math.random() - 0.5)
         }));
-        
         cache.questions = shuffledQuestions;
         return shuffledQuestions;
       })
       .catch(error => {
-        cache.questionsPromise = null; // Reset on error so it can retry
+        cache.questionsPromise = null;
         throw error;
       });
   }
 
-  if (!cache.statsPromise) {
-    const recordAnswersDataTiming = (source) => {
-      if (typeof performance !== 'undefined' && window.__perfTimings) {
-        const ms = Math.round(performance.now());
-        window.__perfTimings['answers_data_fetch_' + source.replace(/\s+/g, '_')] = ms;
-        window.__perfTimings.answers_data_source = source;
-      }
-    };
+  return { questionsPromise: cache.questionsPromise };
+}
 
-    const finishStats = (data) => data;
+/**
+ * Start stats fetch (Cloudflare then RTDB fallback). Call after Play is ready (e.g. from QuizScreen).
+ */
+export function preloadStats() {
+  if (cache.statsPromise) return cache.statsPromise;
 
-    const tryStatsApi = () => {
-      if (!STATS_API_URL) return Promise.reject(new Error('no stats API'));
-      const url = `${STATS_API_URL}?date=${encodeURIComponent(todayString)}`;
-      return fetch(url)
-        .then(res => {
-          if (!res.ok) throw new Error(`Stats API ${res.status}`);
-          return res.json();
-        })
-        .then(data => {
-          const normalized = normalizeStatsData(data);
-          cache.stats = normalized;
-          return normalized;
-        })
-        .then(data => {
-          recordAnswersDataTiming('Cloudflare');
-          return finishStats(data);
-        });
-    };
-
-    const tryRTDB = () => {
-      const statsRef = ref(db, `quiz_stats/${todayString}`);
-      return get(statsRef)
-        .then(snapshot => {
-          const data = snapshot.exists() ? snapshot.val() : null;
-          const normalized = normalizeStatsData(data || {});
-          cache.stats = normalized;
-          return normalized;
-        })
-        .then(data => {
-          recordAnswersDataTiming('Firebase');
-          return finishStats(data);
-        });
-    };
-
-    cache.statsPromise = tryStatsApi()
-      .catch(() => tryRTDB())
-      .catch(() => {
-        cache.stats = {};
-        cache.statsPromise = null;
-        return {};
-      });
-  }
-
-  return {
-    questionsPromise: cache.questionsPromise,
-    statsPromise: cache.statsPromise
+  const todayString = getTodayString();
+  const recordAnswersDataTiming = (source) => {
+    if (typeof performance !== 'undefined' && window.__perfTimings) {
+      window.__perfTimings['answers_data_fetch_' + source.replace(/\s+/g, '_')] = Math.round(performance.now());
+      window.__perfTimings.answers_data_source = source;
+    }
   };
+
+  const tryStatsApi = () => {
+    if (!STATS_API_URL) return Promise.reject(new Error('no stats API'));
+    return fetch(`${STATS_API_URL}?date=${encodeURIComponent(todayString)}`)
+      .then(res => { if (!res.ok) throw new Error(`Stats API ${res.status}`); return res.json(); })
+      .then(data => {
+        const normalized = normalizeStatsData(data);
+        cache.stats = normalized;
+        recordAnswersDataTiming('Cloudflare');
+        return normalized;
+      });
+  };
+
+  const tryRTDB = () => {
+    const statsRef = ref(db, `quiz_stats/${todayString}`);
+    return get(statsRef)
+      .then(snapshot => {
+        const data = snapshot.exists() ? snapshot.val() : null;
+        const normalized = normalizeStatsData(data || {});
+        cache.stats = normalized;
+        recordAnswersDataTiming('Firebase');
+        return normalized;
+      });
+  };
+
+  if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Stats loading`)
+  cache.statsPromise = tryStatsApi()
+    .catch(() => tryRTDB())
+    .catch(() => {
+      cache.stats = {};
+      cache.statsPromise = null;
+      return {};
+    })
+    .then((result) => {
+      if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Stats finished`)
+      return result
+    })
+
+  return cache.statsPromise
 }
 
 /**
