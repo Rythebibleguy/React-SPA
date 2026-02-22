@@ -8,25 +8,39 @@ import { trace } from 'firebase/performance'
 import posthog from 'posthog-js'
 import { PostHogProvider } from 'posthog-js/react'
 
-// Critical-path perf logging: console + Firebase Performance (for real-user monitoring)
+// Critical-path perf: track timings, send one PostHog event when welcome flow is ready + Firebase Performance trace
 if (typeof performance !== 'undefined') {
   window.__perfStart = performance.timeOrigin
+  window.__perfTimings = { page_navigated_to: 0 }
   console.log('[0ms] page navigated to')
 
   const welcomeTrace = trace(perf, 'welcome_flow')
   welcomeTrace.start()
   window.__perfTrace = welcomeTrace
 
+  const labelToKey = (label) => label.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '')
+
   window.__perfLog = (label) => {
     const ms = Math.round(performance.now())
-    console.log(`[${ms}ms] ${label}`)
+    const key = labelToKey(label)
+    if (key && window.__perfTimings) window.__perfTimings[key] = ms
     if (window.__perfTrace) {
-      const metricName = label.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '')
-      if (metricName) {
-        window.__perfTrace.putMetric(metricName, ms)
-      }
+      if (key) window.__perfTrace.putMetric(key, ms)
       if (label === 'play button shown') {
         window.__perfTrace.stop()
+        const t = window.__perfTimings
+        const authMs = t?.auth_completed_guest ?? t?.auth_completed_user
+        const payload = {
+          step_1_time_to_lottie_ms: t?.lottie_animation_started,
+          step_2_time_to_loading_button_ms: t?.loading_button_shown,
+          step_3_time_to_play_button_ms: t?.play_button_shown,
+          step_4_auth_completed_ms: authMs,
+          step_4_auth_type: t?.auth_type,
+          step_5_profile_fetch_ms: t?.profile_fetch_finished,
+          step_6_answers_data_fetch_ms: t?.answers_data_fetch_Cloudflare ?? t?.answers_data_fetch_Firebase,
+          step_6_answers_data_source: t?.answers_data_source,
+        }
+        posthog?.capture('welcome_flow_ready', payload)
       }
     }
   }

@@ -70,6 +70,14 @@ export function preloadQuizData() {
   }
 
   if (!cache.statsPromise) {
+    const recordAnswersDataTiming = (source) => {
+      if (typeof performance !== 'undefined' && window.__perfTimings) {
+        const ms = Math.round(performance.now());
+        window.__perfTimings['answers_data_fetch_' + source.replace(/\s+/g, '_')] = ms;
+        window.__perfTimings.answers_data_source = source;
+      }
+    };
+
     const finishStats = (data) => data;
 
     const tryStatsApi = () => {
@@ -85,7 +93,10 @@ export function preloadQuizData() {
           cache.stats = normalized;
           return normalized;
         })
-        .then(data => finishStats(data));
+        .then(data => {
+          recordAnswersDataTiming('Cloudflare');
+          return finishStats(data);
+        });
     };
 
     const tryRTDB = () => {
@@ -97,7 +108,10 @@ export function preloadQuizData() {
           cache.stats = normalized;
           return normalized;
         })
-        .then(data => finishStats(data));
+        .then(data => {
+          recordAnswersDataTiming('Firebase');
+          return finishStats(data);
+        });
     };
 
     cache.statsPromise = tryStatsApi()

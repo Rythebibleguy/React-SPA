@@ -331,6 +331,7 @@ export function AuthProvider({ children }) {
         setUserProfile(null)
       }
       setProfileLoaded(true)
+      if (window.__perfLog) window.__perfLog('profile fetch finished')
     } catch (error) {
       // Ignore AbortError - this is expected when requests are cancelled
       if (error.name === 'AbortError' || error.message.includes('aborted')) {
@@ -338,6 +339,7 @@ export function AuthProvider({ children }) {
       }
       setError('Failed to load user profile: ' + error.message)
       setProfileLoaded(true)
+      if (window.__perfLog) window.__perfLog('profile fetch finished')
     }
   }
 
@@ -547,6 +549,10 @@ export function AuthProvider({ children }) {
         setCurrentUser(user)
         setProfileLoaded(false)
         setLoading(false) // Set loading false immediately after auth state is determined
+        if (window.__perfLog) {
+          window.__perfLog('auth completed (user)')
+          if (window.__perfTimings) window.__perfTimings.auth_type = 'user'
+        }
         // Create new AbortController for this request
         abortControllerRef.current = new AbortController()
         // Load profile in background - don't block app rendering
@@ -557,6 +563,10 @@ export function AuthProvider({ children }) {
         setUserPrivateData(null)
         setProfileLoaded(true) // No user = "profile" ready (guest)
         setLoading(false)
+        if (window.__perfLog) {
+          window.__perfLog('auth completed (guest)')
+          if (window.__perfTimings) window.__perfTimings.auth_type = 'guest'
+        }
       }
     })
 
