@@ -6,10 +6,12 @@ import { useViewportUnits } from './hooks/useViewportUnits'
 import { useAuth } from './contexts/AuthContext'
 import { BASE_DATA_URL } from './config'
 import { preloadQuizData } from './utils/dataPreloader'
+import { usePostHog } from 'posthog-js/react'
 
 function App() {
   useViewportUnits()
   const { currentUser } = useAuth()
+  const posthog = usePostHog()
   const [showWelcome, setShowWelcome] = useState(true)
   const [welcomeExiting, setWelcomeExiting] = useState(false)
   const [animationData, setAnimationData] = useState(null)
@@ -18,6 +20,7 @@ function App() {
 
   const handleWelcomeStart = () => {
     setWelcomeExiting(true)
+    posthog?.capture('quiz_started')
     setTimeout(() => {
       setShowWelcome(false)
       if (window.clarity) window.clarity('event', 'quiz_started')
@@ -26,18 +29,14 @@ function App() {
 
   // Load Bible Lottie first (critical for visual chain); only then start other fetches so Lottie gets full network
   useEffect(() => {
-    window.__perfLog?.('lottie fetch starts')
     fetch(`${BASE_DATA_URL}/assets/animations/Book with bookmark.json`)
       .then(res => res.json())
       .then(data => {
-        window.__perfLog?.('lottie fetch complete')
         setAnimationData(data)
-        window.__perfLog?.('background fetches start')
         setBackgroundFetchesStarted(true)
         preloadQuizData()
       })
       .catch(() => {
-        window.__perfLog?.('background fetches start')
         setBackgroundFetchesStarted(true)
         preloadQuizData()
       })

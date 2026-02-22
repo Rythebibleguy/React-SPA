@@ -16,6 +16,8 @@ All environment-dependent and secret values are listed here. **Never commit real
 | `VITE_BASE_SHARE_URL` | `src/config.js` | Base URL for share links without trailing slash. |
 | `VITE_GA_MEASUREMENT_ID` | `index.html` (injected at build) | Google Analytics 4 measurement ID (e.g. `G-XXXXXXXXXX`). |
 | `VITE_CLARITY_PROJECT_ID` | `index.html` (injected at build) | Microsoft Clarity project ID (from Clarity script URL). |
+| `VITE_POSTHOG_KEY` | `src/main.jsx` | PostHog project API key (Project Settings → Project API Key). When set, PostHog is initialized and pageviews/events are sent. |
+| `VITE_POSTHOG_HOST` | `src/main.jsx` | Optional. PostHog API host; default `https://us.i.posthog.com`. Use `https://eu.i.posthog.com` for EU. |
 
 ---
 

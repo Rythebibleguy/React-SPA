@@ -8,6 +8,7 @@ import { useQuizStats } from '../hooks/useQuizStats'
 import { useAuth } from '../contexts/AuthContext'
 import { getTodayString } from '../utils/csvParser'
 import { BASE_DATA_URL } from '../config'
+import { usePostHog } from 'posthog-js/react'
 
 const StatsModal = lazy(() => import('./StatsModal'))
 const GuestModal = lazy(() => import('./GuestModal'))
@@ -26,6 +27,7 @@ function QuizScreen() {
   const { questions, loading, error } = useQuizData()
   const { stats, loading: statsLoading } = useQuizStats()
   const { currentUser, completeQuiz, userProfile, updateUserProfile, loadUserPrivateData } = useAuth()
+  const posthog = usePostHog()
 
   const [quizEntering, setQuizEntering] = useState(false)
   const [headerModal, setHeaderModal] = useState(null)
@@ -343,17 +345,15 @@ function QuizScreen() {
         if (window.clarity) {
           window.clarity("event", "quiz_completed")
         }
-        
-        // Small delay for better UX
-        setTimeout(() => {
-          setShowResultsModal(true)
-        }, 800)
+        setShowResultsModal(true)
       })
     }
   }, [selectedAnswers, questions.length])
 
   const handleAnswerSelect = (questionIndex, answerId) => {
     if (selectedAnswers[questionIndex] !== undefined) return
+
+    posthog?.capture(`question_${questionIndex + 1}_answered`)
 
     const newSelectedAnswers = [...selectedAnswers]
     newSelectedAnswers[questionIndex] = answerId

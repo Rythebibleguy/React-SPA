@@ -1,15 +1,17 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Check, X, Share2 } from 'lucide-react'
 import { BASE_SHARE_URL } from '../config'
+import { usePostHog } from 'posthog-js/react'
 import './ResultsModal.css'
 
 function ResultsModal({ score, total, questionResults, stats, onClose }) {
+  const posthog = usePostHog()
   const [showCopied, setShowCopied] = useState(false)
   const [showShareFailed, setShowShareFailed] = useState(false)
   const [showShareLoading, setShowShareLoading] = useState(false)
 
   const handleShareChallenge = async () => {
-    // Track share button click
+    posthog?.capture('results_share_clicked')
     if (window.clarity) {
       window.clarity("event", "share_clicked")
     }
@@ -18,7 +20,8 @@ function ResultsModal({ score, total, questionResults, stats, onClose }) {
     const squares = Array.isArray(questionResults) && questionResults.length > 0
       ? questionResults.map(correct => correct ? '✅' : '❌').join('')
       : '✅'.repeat(score) + '❌'.repeat(total - score)
-    const shareText = `I got ${score}/${total} on Daily Bible Quiz\n${squares}\n\nGo try\n${BASE_SHARE_URL}`
+    const shareUrlDisplay = BASE_SHARE_URL.replace(/^https?:\/\//, '')
+    const shareText = `I got ${score}/${total} on Daily Bible Quiz\n${squares}\n\nGo try\n${shareUrlDisplay}`
     
     // Try Web Share API first (mobile/modern browsers)
     if (navigator.share) {

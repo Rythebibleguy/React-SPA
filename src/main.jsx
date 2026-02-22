@@ -5,6 +5,8 @@ import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { perf } from './config/firebase'
 import { trace } from 'firebase/performance'
+import posthog from 'posthog-js'
+import { PostHogProvider } from 'posthog-js/react'
 
 // Critical-path perf logging: console + Firebase Performance (for real-user monitoring)
 if (typeof performance !== 'undefined') {
@@ -64,10 +66,33 @@ if (window.clarity) {
   window.clarity("event", "page_loaded")
 }
 
-createRoot(document.getElementById('root')).render(
+// PostHog (only when key is set)
+const posthogKey = (import.meta.env.VITE_POSTHOG_KEY || '').toString().trim()
+if (posthogKey) {
+  posthog.init(posthogKey, {
+    api_host: import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com',
+    person_profiles: 'always',
+    capture_pageview: true,
+  })
+  if (import.meta.env.DEV) {
+    console.log('[PostHog] initialized, requests go to', import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com')
+  }
+} else if (import.meta.env.DEV) {
+  console.warn('[PostHog] not loaded: VITE_POSTHOG_KEY is missing or empty in .env')
+}
+
+const root = createRoot(document.getElementById('root'))
+const app = (
   <AuthProvider>
     <ThemeProvider>
       <App />
     </ThemeProvider>
   </AuthProvider>
+)
+root.render(
+  posthogKey ? (
+    <PostHogProvider client={posthog}>{app}</PostHogProvider>
+  ) : (
+    app
+  )
 )

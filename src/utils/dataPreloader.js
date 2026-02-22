@@ -61,7 +61,6 @@ export function preloadQuizData() {
         }));
         
         cache.questions = shuffledQuestions;
-        window.__perfLog?.('questions fetch finished')
         return shuffledQuestions;
       })
       .catch(error => {
@@ -71,10 +70,7 @@ export function preloadQuizData() {
   }
 
   if (!cache.statsPromise) {
-    const finishStats = (data, source) => {
-      window.__perfLog?.(`stats fetch finished (${source})`);
-      return data;
-    };
+    const finishStats = (data) => data;
 
     const tryStatsApi = () => {
       if (!STATS_API_URL) return Promise.reject(new Error('no stats API'));
@@ -89,7 +85,7 @@ export function preloadQuizData() {
           cache.stats = normalized;
           return normalized;
         })
-        .then(data => finishStats(data, 'Stats API'));
+        .then(data => finishStats(data));
     };
 
     const tryRTDB = () => {
@@ -101,20 +97,14 @@ export function preloadQuizData() {
           cache.stats = normalized;
           return normalized;
         })
-        .then(data => finishStats(data, 'RTDB'));
+        .then(data => finishStats(data));
     };
 
     cache.statsPromise = tryStatsApi()
-      .catch((err) => {
-        if (window.__perfLog) {
-          window.__perfLog(`stats Stats API failed, falling back to RTDB: ${err?.message || err}`);
-        }
-        return tryRTDB();
-      })
+      .catch(() => tryRTDB())
       .catch(() => {
         cache.stats = {};
         cache.statsPromise = null;
-        window.__perfLog?.('stats fetch finished (failed)');
         return {};
       });
   }

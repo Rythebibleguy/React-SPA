@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, useRef } from 'react'
+import { usePostHog } from 'posthog-js/react'
 import { 
   auth, 
   firestore, 
@@ -32,6 +33,7 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
+  const posthog = usePostHog()
   const [currentUser, setCurrentUser] = useState(null)
   const [userProfile, setUserProfile] = useState(null)
   const [userPrivateData, setUserPrivateData] = useState(null)
@@ -49,7 +51,7 @@ export function AuthProvider({ children }) {
       // Create user profile in Firestore
       await createUserProfile(result.user, { displayName, signUpMethod: 'email' })
       
-      // Track email signup
+      posthog?.capture('email_signup_completed')
       if (window.clarity) {
         window.clarity("event", "signup_email")
       }
@@ -79,10 +81,11 @@ export function AuthProvider({ children }) {
       setError(null)
       const result = await signInWithPopup(auth, googleProvider)
       
-      // Create user profile if needed
-      await createUserProfile(result.user)
-      
-      // Track Google signup (new users only, but tracking all for simplicity)
+      // Create user profile if needed; returns true if new user was created
+      const isNewUser = await createUserProfile(result.user)
+      if (isNewUser) {
+        posthog?.capture('google_signup_completed')
+      }
       if (window.clarity) {
         window.clarity("event", "signup_google")
       }
@@ -187,10 +190,10 @@ export function AuthProvider({ children }) {
    * @property {Object} preferences - User preferences and private settings
    */
   
-  // Create or update user profile in Firestore (public + private data)
+  // Create or update user profile in Firestore (public + private data). Returns true if a new profile was created.
   async function createUserProfile(user, additionalData = {}) {
     if (!user) {
-      return
+      return false
     }
     
     const userRef = doc(firestore, 'users', user.uid)
@@ -198,6 +201,7 @@ export function AuthProvider({ children }) {
     
     try {
       const userSnap = await getDoc(userRef)
+      const isNewUser = !userSnap.exists()
       
       if (!userSnap.exists()) {
         // Try to get email from multiple sources
@@ -260,8 +264,10 @@ export function AuthProvider({ children }) {
         const rawData = userSnap.data()
         setUserProfile(rawData)
       }
+      return isNewUser
     } catch (error) {
       setError('Failed to load user profile: ' + error.message)
+      return false
     }
   }
 
@@ -325,7 +331,6 @@ export function AuthProvider({ children }) {
         setUserProfile(null)
       }
       setProfileLoaded(true)
-      window.__perfLog?.('profile fetch finished')
     } catch (error) {
       // Ignore AbortError - this is expected when requests are cancelled
       if (error.name === 'AbortError' || error.message.includes('aborted')) {
@@ -333,7 +338,6 @@ export function AuthProvider({ children }) {
       }
       setError('Failed to load user profile: ' + error.message)
       setProfileLoaded(true)
-      window.__perfLog?.('profile fetch finished')
     }
   }
 
@@ -543,7 +547,6 @@ export function AuthProvider({ children }) {
         setCurrentUser(user)
         setProfileLoaded(false)
         setLoading(false) // Set loading false immediately after auth state is determined
-        window.__perfLog?.('auth fetch finished (user)')
         // Create new AbortController for this request
         abortControllerRef.current = new AbortController()
         // Load profile in background - don't block app rendering
@@ -554,7 +557,6 @@ export function AuthProvider({ children }) {
         setUserPrivateData(null)
         setProfileLoaded(true) // No user = "profile" ready (guest)
         setLoading(false)
-        window.__perfLog?.('auth fetch finished (guest)')
       }
     })
 

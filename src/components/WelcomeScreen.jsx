@@ -29,8 +29,8 @@ function WelcomeScreen({ onStart, animationData, backgroundFetchesStarted, lotti
   // Run Lottie and sequence when Lottie is ready
   useEffect(() => {
     if (!lottieInstance) return
-    window.__perfLog?.('lottie animation begins')
     lottieInstance.play()
+    window.__perfLog?.('lottie animation started')
     const creditTimer = setTimeout(() => setShowCredit(true), 500)
     const titleTimer = setTimeout(() => {
       setAnimateTitle(true)
