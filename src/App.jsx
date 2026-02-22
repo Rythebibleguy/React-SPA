@@ -64,7 +64,7 @@ function App() {
   }, [])
 
   return (
-    <>
+    <main>
       {showWelcome ? (
         <WelcomeScreen
           onStart={handleWelcomeStart}
@@ -79,7 +79,7 @@ function App() {
           <QuizScreen />
         </>
       )}
-    </>
+    </main>
   )
 }
 
