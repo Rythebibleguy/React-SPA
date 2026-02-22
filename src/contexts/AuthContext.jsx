@@ -43,6 +43,7 @@ export function AuthProvider({ children }) {
   const abortControllerRef = useRef(null)
   const authInitiatedRef = useRef(false)
   const unsubscribeAuthRef = useRef(null)
+  const deferredAuthResolveRef = useRef(null)
 
   // Sign up with email and password
   async function signUp(email, password, displayName) {
@@ -316,7 +317,7 @@ export function AuthProvider({ children }) {
     if (!user) {
       return
     }
-    
+    if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Profile loading`)
     try {
       const userRef = doc(firestore, 'users', user.uid)
       const userSnap = await getDoc(userRef)
@@ -333,7 +334,8 @@ export function AuthProvider({ children }) {
         setUserProfile(null)
       }
       setProfileLoaded(true)
-      if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Auth: profile loaded`)
+      resolveDeferredAuthOnce()
+      if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Profile finished`)
       if (window.__perfLog) window.__perfLog('profile fetch finished')
     } catch (error) {
       // Ignore AbortError - this is expected when requests are cancelled
@@ -342,6 +344,7 @@ export function AuthProvider({ children }) {
       }
       setError('Failed to load user profile: ' + error.message)
       setProfileLoaded(true)
+      resolveDeferredAuthOnce()
       if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Auth: profile load failed`, error.message)
       if (window.__perfLog) window.__perfLog('profile fetch finished')
     }
@@ -547,6 +550,11 @@ export function AuthProvider({ children }) {
     if (authInitiatedRef.current) return
     authInitiatedRef.current = true
     if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Auth loading`)
+    if (!window.__deferredAuthReady) {
+      window.__deferredAuthReady = new Promise((resolve) => {
+        deferredAuthResolveRef.current = resolve
+      })
+    }
 
     unsubscribeAuthRef.current = onAuthStateChanged(auth, async (user) => {
       if (abortControllerRef.current) {
@@ -570,12 +578,23 @@ export function AuthProvider({ children }) {
         setUserPrivateData(null)
         setProfileLoaded(true)
         setLoading(false)
+        if (deferredAuthResolveRef.current) {
+          deferredAuthResolveRef.current()
+          deferredAuthResolveRef.current = null
+        }
         if (window.__perfLog) {
           window.__perfLog('auth completed (guest)')
           if (window.__perfTimings) window.__perfTimings.auth_type = 'guest'
         }
       }
     })
+  }
+
+  function resolveDeferredAuthOnce() {
+    if (deferredAuthResolveRef.current) {
+      deferredAuthResolveRef.current()
+      deferredAuthResolveRef.current = null
+    }
   }
 
   useEffect(() => () => {

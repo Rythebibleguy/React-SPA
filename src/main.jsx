@@ -98,7 +98,8 @@ function Root() {
       m.loadAnalytics(setPosthogClient)
     })
     const statsDone = import('./utils/dataPreloader').then((d) => d.getStatsPromise() || Promise.resolve())
-    Promise.all([analyticsDone, statsDone]).then(() => {
+    const authDone = window.__deferredAuthReady || Promise.resolve()
+    Promise.all([analyticsDone, statsDone, authDone]).then(() => {
       if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] === DEFERRED PATH FINISHED ===`)
     })
   }, [])

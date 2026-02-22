@@ -109,6 +109,17 @@ function QuizScreen() {
   const hasSubmittedRef = useRef(savedState?.hasSubmitted ?? false)
   const quizStartTimeRef = useRef(null)
 
+  // When savedState arrives later (e.g. profile loaded after mount), apply it so answers and results show
+  useEffect(() => {
+    if (!savedState?.selectedAnswers?.length || savedState.selectedAnswers.length !== 4) return
+    if (hasSubmittedRef.current) return // already applied or user already submitted
+    setCurrentIndex(savedState.currentIndex ?? 0)
+    setSelectedAnswers(savedState.selectedAnswers)
+    setAnswerPercentages(savedState.answerPercentages ?? {})
+    hasSubmittedRef.current = savedState.hasSubmitted ?? true
+    setShowResultsModal(true)
+  }, [savedState])
+
   // Start timing when component first mounts (quiz becomes visible)
   useEffect(() => {
     if (!quizStartTimeRef.current) {
@@ -127,40 +138,94 @@ function QuizScreen() {
     }
   }, [questions.length, selectedAnswers])
 
-  // Calculate answer percentages for pre-loaded answers (when user views completed quiz)
+  // Filler percentages (Option A: one clear leader). Leading % always on the correct answer; rest get remaining values.
+  const FILLER_LEADING = 42
+  const FILLER_REST = [28, 18, 12] // for 4 answers; sum with leading = 100
+  const getFillerPercentages = (count) => {
+    if (count <= 0) return []
+    const base = Math.floor(100 / count)
+    const remainder = 100 - base * count
+    const arr = Array(count).fill(base)
+    for (let i = 0; i < remainder; i++) arr[i] += 1
+    return arr
+  }
+  const getFillerPercentagesForQuestion = (question) => {
+    const answers = question?.answers || []
+    const n = answers.length
+    if (n === 0) return {}
+    const correctIndex = answers.findIndex((a) => a?.isCorrect)
+    const percentages = {}
+    if (n === 4 && correctIndex >= 0) {
+      const rest = [...FILLER_REST]
+      answers.forEach((answer, i) => {
+        percentages[answer.id] = i === correctIndex ? FILLER_LEADING : (rest.shift() ?? 0)
+      })
+    } else {
+      const filler = getFillerPercentages(n)
+      answers.forEach((answer, i) => {
+        percentages[answer.id] = filler[i] ?? 0
+      })
+    }
+    return percentages
+  }
+
+  // True if stats has at least one question with votes (so we can show real %)
+  const hasStatsData = (s) => {
+    if (!s || typeof s !== 'object') return false
+    for (let i = 0; i < 4; i++) {
+      const q = s[`q${i}`]
+      if (q && typeof q === 'object') {
+        const total = Object.values(q).reduce((sum, n) => sum + Number(n), 0)
+        if (total > 0) return true
+      }
+    }
+    return false
+  }
+
+  // When stats are loading or empty and quiz is completed, show filler percentages so we don't show 0% everywhere
   useEffect(() => {
-    // Only run if we loaded from history (hasSubmitted but no percentages yet)
     if (!hasSubmittedRef.current) return
-    if (!stats || statsLoading) return
-    if (!questions.length || !selectedAnswers.length) return
-    if (Object.keys(answerPercentages).length > 0) return // Already have percentages
-    
-    // Calculate percentages for each answered question
+    if (stats && !statsLoading && hasStatsData(stats)) return // Real stats with data will be set below
+    if (!questions.length || selectedAnswers.length !== 4) return
+    if (Object.keys(answerPercentages).length > 0) return
+
     const newPercentages = {}
-    
+    questions.forEach((question, qIndex) => {
+      newPercentages[qIndex] = getFillerPercentagesForQuestion(question)
+    })
+    if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Percentages: setting FILLER`, { statsLoading, hasStatsData: stats ? hasStatsData(stats) : false, newPercentages })
+    setAnswerPercentages(newPercentages)
+  }, [statsLoading, stats, questions, selectedAnswers.length])
+
+  // Set answer percentages: use real stats when totalVotes > 0 per question, otherwise filler so we never show 0% for all
+  useEffect(() => {
+    if (!hasSubmittedRef.current) return
+    if (!questions.length || !selectedAnswers.length) return
+    if (statsLoading && !stats) return
+
+    const newPercentages = {}
     selectedAnswers.forEach((answerId, qIndex) => {
       if (answerId === undefined) return
-      
       const question = questions[qIndex]
       if (!question) return
-      
-      const questionStats = stats[`q${qIndex}`] || {}
-      
-      // Calculate total votes for this question
+      const questionStats = (stats && stats[`q${qIndex}`]) || {}
       let totalVotes = 0
       Object.values(questionStats).forEach(count => totalVotes += count)
-      
-      // Calculate percentages for all answers in this question
       const percentages = {}
-      question.answers.forEach(answer => {
-        const count = questionStats[answer.id] || 0
-        const percentage = totalVotes === 0 ? 0 : Math.round((count / totalVotes) * 100)
-        percentages[answer.id] = percentage
-      })
-      
+      if (totalVotes === 0) {
+        const fillerMap = getFillerPercentagesForQuestion(question)
+        question.answers.forEach((answer) => {
+          percentages[answer.id] = fillerMap[answer.id] ?? 0
+        })
+      } else {
+        question.answers.forEach(answer => {
+          const count = questionStats[answer.id] || 0
+          percentages[answer.id] = Math.round((count / totalVotes) * 100)
+        })
+      }
       newPercentages[qIndex] = percentages
     })
-    
+    if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Percentages: setting ${stats && hasStatsData(stats) ? 'REAL' : 'FILLER'} from stats`, { newPercentages })
     setAnswerPercentages(newPercentages)
   }, [stats, statsLoading, questions, selectedAnswers, hasSubmittedRef.current])
 
@@ -381,15 +446,31 @@ function QuizScreen() {
     let totalVotes = 0
     Object.values(questionStats).forEach(count => totalVotes += count)
 
-    // Calculate percentages for all answers (using answer IDs)
+    // Use filler when no vote data (0 for all); otherwise real percentages. Filler gives 42% to correct answer.
     const question = questions[questionIndex]
     const percentages = {}
-    
-    question.answers.forEach(answer => {
-      const count = questionStats[answer.id] || 0
-      const percentage = totalVotes === 0 ? 0 : Math.round((count / totalVotes) * 100)
-      percentages[answer.id] = percentage
-    })
+    if (totalVotes === 0) {
+      const fillerMap = getFillerPercentagesForQuestion(question)
+      question.answers.forEach((answer) => {
+        percentages[answer.id] = fillerMap[answer.id] ?? 0
+      })
+    } else {
+      question.answers.forEach(answer => {
+        const count = questionStats[answer.id] || 0
+        percentages[answer.id] = Math.round((count / totalVotes) * 100)
+      })
+    }
+
+    if (import.meta.env.DEV) {
+      console.log(`[${Math.round(performance.now())}ms] Answer Q${questionIndex}:`, {
+        questionStats,
+        totalVotes,
+        percentages,
+        statsLoading,
+        hasStatsData: stats ? hasStatsData(stats) : false,
+        currentAnswerPercentages: answerPercentages,
+      })
+    }
 
     setAnswerPercentages(prev => ({
       ...prev,

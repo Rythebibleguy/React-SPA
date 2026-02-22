@@ -9,20 +9,35 @@ let _loggedCheck = false
  * @returns {{ date: string, answers: number[], score: number, totalQuestions: number, timestamp?: string, duration?: number } | null}
  */
 export function getTodayCompletion() {
-  if (import.meta.env.DEV && !_loggedCheck) {
-    _loggedCheck = true
-    console.log(`[${Math.round(performance.now())}ms] localStorage check`)
-  }
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
+    if (!raw) {
+      if (import.meta.env.DEV && !_loggedCheck) {
+        _loggedCheck = true
+        console.log(`[${Math.round(performance.now())}ms] localStorage check (not found)`)
+      }
+      return null
+    }
     const data = JSON.parse(raw)
     const today = getTodayString()
-    if (data?.date !== today) return null
-    if (!Array.isArray(data.answers) || data.answers.length !== 4) return null
+    if (data?.date !== today || !Array.isArray(data.answers) || data.answers.length !== 4) {
+      if (import.meta.env.DEV && !_loggedCheck) {
+        _loggedCheck = true
+        console.log(`[${Math.round(performance.now())}ms] localStorage check (not found)`)
+      }
+      return null
+    }
+    if (import.meta.env.DEV && !_loggedCheck) {
+      _loggedCheck = true
+      console.log(`[${Math.round(performance.now())}ms] localStorage check (found)`)
+    }
     if (import.meta.env.DEV) console.log(`[${Math.round(performance.now())}ms] Today completion from localStorage`, data.date)
     return data
   } catch {
+    if (import.meta.env.DEV && !_loggedCheck) {
+      _loggedCheck = true
+      console.log(`[${Math.round(performance.now())}ms] localStorage check (not found)`)
+    }
     return null
   }
 }
