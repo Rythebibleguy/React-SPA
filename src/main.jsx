@@ -30,16 +30,21 @@ if (typeof performance !== 'undefined') {
         window.__perfTrace.stop()
         const t = window.__perfTimings
         const authMs = t?.auth_completed_guest ?? t?.auth_completed_user
-        const payload = {
-          step_1_time_to_lottie_ms: t?.lottie_animation_started,
-          step_2_time_to_loading_button_ms: t?.loading_button_shown,
-          step_3_time_to_play_button_ms: t?.play_button_shown,
-          step_4_auth_completed_ms: authMs,
-          step_4_auth_type: t?.auth_type,
-          step_5_profile_fetch_ms: t?.profile_fetch_finished,
-          step_6_answers_data_fetch_ms: t?.answers_data_fetch_Cloudflare ?? t?.answers_data_fetch_Firebase,
-          step_6_answers_data_source: t?.answers_data_source,
-        }
+        const answersMs = t?.answers_data_fetch_Cloudflare ?? t?.answers_data_fetch_Firebase
+        const steps = []
+        if (authMs != null) steps.push({ ms: authMs, label: `auth (${t?.auth_type ?? '?'})` })
+        if (t?.lottie_animation_started != null) steps.push({ ms: t.lottie_animation_started, label: 'lottie' })
+        if (answersMs != null) steps.push({ ms: answersMs, label: `answers (${t?.answers_data_source ?? '?'})` })
+        if (t?.loading_button_shown != null) steps.push({ ms: t.loading_button_shown, label: 'loading button' })
+        if (t?.profile_fetch_finished != null) steps.push({ ms: t.profile_fetch_finished, label: 'profile fetch' })
+        if (t?.play_button_shown != null) steps.push({ ms: t.play_button_shown, label: 'play button' })
+        steps.sort((a, b) => a.ms - b.ms)
+        const payload = {}
+        steps.forEach((s, i) => {
+          const n = i + 1
+          payload[`step_${n}_label`] = s.label
+          payload[`step_${n}_ms`] = s.ms
+        })
         posthog?.capture('welcome_flow_ready', payload)
       }
     }
