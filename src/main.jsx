@@ -12,7 +12,6 @@ import { PostHogProvider } from 'posthog-js/react'
 if (typeof performance !== 'undefined') {
   window.__perfStart = performance.timeOrigin
   window.__perfTimings = { page_navigated_to: 0 }
-  console.log('[0ms] page navigated to')
 
   const welcomeTrace = trace(perf, 'welcome_flow')
   welcomeTrace.start()
@@ -32,18 +31,17 @@ if (typeof performance !== 'undefined') {
         const authMs = t?.auth_completed_guest ?? t?.auth_completed_user
         const answersMs = t?.answers_data_fetch_Cloudflare ?? t?.answers_data_fetch_Firebase
         const steps = []
-        if (authMs != null) steps.push({ ms: authMs, label: `auth (${t?.auth_type ?? '?'})` })
-        if (t?.lottie_animation_started != null) steps.push({ ms: t.lottie_animation_started, label: 'lottie' })
-        if (answersMs != null) steps.push({ ms: answersMs, label: `answers (${t?.answers_data_source ?? '?'})` })
-        if (t?.loading_button_shown != null) steps.push({ ms: t.loading_button_shown, label: 'loading button' })
-        if (t?.profile_fetch_finished != null) steps.push({ ms: t.profile_fetch_finished, label: 'profile fetch' })
-        if (t?.play_button_shown != null) steps.push({ ms: t.play_button_shown, label: 'play button' })
+        if (authMs != null) steps.push({ ms: authMs, props: { auth_completed_ms: authMs, auth_type: t?.auth_type } })
+        if (t?.lottie_animation_started != null) steps.push({ ms: t.lottie_animation_started, props: { time_to_lottie_ms: t.lottie_animation_started } })
+        if (answersMs != null) steps.push({ ms: answersMs, props: { answers_data_fetch_ms: answersMs, answers_data_source: t?.answers_data_source } })
+        if (t?.loading_button_shown != null) steps.push({ ms: t.loading_button_shown, props: { time_to_loading_button_ms: t.loading_button_shown } })
+        if (t?.profile_fetch_finished != null) steps.push({ ms: t.profile_fetch_finished, props: { profile_fetch_ms: t.profile_fetch_finished } })
+        if (t?.play_button_shown != null) steps.push({ ms: t.play_button_shown, props: { time_to_play_button_ms: t.play_button_shown } })
         steps.sort((a, b) => a.ms - b.ms)
         const payload = {}
         steps.forEach((s, i) => {
-          const n = i + 1
-          payload[`step_${n}_label`] = s.label
-          payload[`step_${n}_ms`] = s.ms
+          const prefix = `step_${i + 1}_`
+          Object.entries(s.props).forEach(([k, v]) => { if (v != null) payload[prefix + k] = v })
         })
         posthog?.capture('welcome_flow_ready', payload)
       }
@@ -93,11 +91,6 @@ if (posthogKey) {
     person_profiles: 'always',
     capture_pageview: true,
   })
-  if (import.meta.env.DEV) {
-    console.log('[PostHog] initialized, requests go to', import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com')
-  }
-} else if (import.meta.env.DEV) {
-  console.warn('[PostHog] not loaded: VITE_POSTHOG_KEY is missing or empty in .env')
 }
 
 const root = createRoot(document.getElementById('root'))
